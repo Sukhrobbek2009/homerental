@@ -183,6 +183,27 @@
   .auth-terms{text-align:center;margin-top:18px;font-size:12px;color:var(--ink-faint);line-height:1.5;}
   .auth-terms a{text-decoration:underline;color:var(--ink-soft);}
 
+  /* ===== ROLE STEP ===== */
+  .role-card{max-width:600px;}
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13.5px;color:var(--ink-soft);transition:color .15s ease;margin-bottom:20px;}
+  .back-link svg{width:15px;height:15px;}
+  .back-link:hover{color:var(--ink);}
+  .role-options{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px;}
+  .role-option{
+    display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;
+    border:1.5px solid var(--line-strong);border-radius:var(--radius-lg);padding:30px 20px;
+    background:var(--panel);cursor:pointer;font-family:'Inter',sans-serif;
+    transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+  }
+  .role-option:hover{border-color:var(--accent);box-shadow:var(--shadow-lift);transform:translateY(-3px);}
+  .role-icon{width:56px;height:56px;border-radius:50%;background:var(--accent-pale);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+  .role-icon svg{width:26px;height:26px;color:var(--accent-deep);}
+  .role-option h3{font-size:16.5px;margin-bottom:6px;}
+  .role-option p{margin:0;font-size:13.5px;color:var(--ink-soft);line-height:1.55;}
+  @media (max-width:560px){
+    .role-options{grid-template-columns:1fr;}
+  }
+
   /* ===== SHARED ===== */
   .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease;}
   .reveal.in-view{opacity:1;transform:none;}
@@ -260,7 +281,7 @@
   </div>
 </header>
 
-<section class="auth-page">
+<section class="auth-page" id="authStep">
   <div class="auth-card reveal">
     <div class="auth-brand">
       <span class="brand-mark">
@@ -329,6 +350,38 @@
     </p>
 
     <p class="auth-terms">By continuing, you agree to Uzbek Rentals' <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+  </div>
+</section>
+
+<section class="auth-page" id="roleStep" style="display:none;">
+  <div class="auth-card role-card reveal">
+    <button type="button" class="back-link" id="roleBackBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+
+    <div class="auth-brand" style="margin-bottom:0;">
+      <h1>Are you here to rent or to list?</h1>
+      <p>You can always switch or add the other later from your account settings.</p>
+    </div>
+
+    <div class="role-options">
+      <button type="button" class="role-option" id="roleRent">
+        <span class="role-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </span>
+        <h3>Rent</h3>
+        <p>Browse verified homes and cars from hosts in the community and book your next stay or trip.</p>
+      </button>
+
+      <button type="button" class="role-option" id="roleList">
+        <span class="role-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M12 13v5M9.5 15.5h5"/></svg>
+        </span>
+        <h3>List a property or car</h3>
+        <p>Become a host or driver, list your home or vehicle, and start earning from the community.</p>
+      </button>
+    </div>
   </div>
 </section>
 
@@ -473,11 +526,30 @@
     togglePassword.querySelector('.icon-eye-off').style.display = showing ? 'none' : '';
   });
 
+  const authStep = document.getElementById('authStep');
+  const roleStep = document.getElementById('roleStep');
+
   document.getElementById('authForm').addEventListener('submit', (e) => {
     e.preventDefault();
+    if(mode === 'signup'){
+      authStep.style.display = 'none';
+      roleStep.style.display = 'flex';
+      roleStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   });
   document.getElementById('googleBtn').addEventListener('click', (e) => {
     e.preventDefault();
+  });
+
+  document.getElementById('roleBackBtn').addEventListener('click', () => {
+    roleStep.style.display = 'none';
+    authStep.style.display = 'flex';
+  });
+  document.getElementById('roleRent').addEventListener('click', () => {
+    window.location.href = 'listings.html';
+  });
+  document.getElementById('roleList').addEventListener('click', () => {
+    window.location.href = 'uzbek-rentals-landing-2.html#list';
   });
 
   const revealEls = document.querySelectorAll('.reveal');
