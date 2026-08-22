@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2022 Toyota Camry — Seattle, WA · Uzbek Rentals</title>
+<script>
+  (function(){
+    var saved = localStorage.getItem('ur-theme');
+    if(saved === 'light' || saved === 'dark'){
+      document.documentElement.setAttribute('data-theme', saved);
+    }
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --bg-alt:#F7F7F7;
+    --bg-alt-2:#F0F0F0;
+    --panel:#FFFFFF;
+    --ink:#222222;
+    --ink-soft:#6A6A6A;
+    --ink-faint:#9A9A9A;
+    --line:#EBEBEB;
+    --line-strong:#DDDDDD;
+    --accent:#0F9D8B;
+    --accent-deep:#0B7A6C;
+    --accent-pale:#E3F5F1;
+    --radius-xl:20px;
+    --radius-lg:16px;
+    --radius-md:12px;
+    --radius-full:999px;
+    --shadow-card:0 6px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.06);
+    --shadow-lift:0 14px 34px -8px rgba(0,0,0,0.18);
+    --nav-bg:rgba(255,255,255,0.92);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1115; --bg-alt:#15181D; --bg-alt-2:#1B1F25; --panel:#181B20;
+      --ink:#F2F2F2; --ink-soft:#9BA1A8; --ink-faint:#6E747B;
+      --line:#262B32; --line-strong:#333941;
+      --accent:#22C3AC; --accent-deep:#1AA894; --accent-pale:rgba(34,195,172,0.14);
+      --shadow-card:0 6px 20px rgba(0,0,0,0.5);
+      --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
+      --nav-bg:rgba(15,17,21,0.86);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1115; --bg-alt:#15181D; --bg-alt-2:#1B1F25; --panel:#181B20;
+    --ink:#F2F2F2; --ink-soft:#9BA1A8; --ink-faint:#6E747B;
+    --line:#262B32; --line-strong:#333941;
+    --accent:#22C3AC; --accent-deep:#1AA894; --accent-pale:rgba(34,195,172,0.14);
+    --shadow-card:0 6px 20px rgba(0,0,0,0.5);
+    --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
+    --nav-bg:rgba(15,17,21,0.86);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    transition:background .25s ease, color .25s ease;
+  }
+  h1,h2,h3{font-family:'Plus Jakarta Sans',Inter,sans-serif;font-weight:800;margin:0;color:var(--ink);letter-spacing:-0.02em;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;}
+  img,svg{display:block;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+
+  /* ===== NAV ===== */
+  header.navbar{
+    position:sticky;top:0;z-index:60;background:var(--nav-bg);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(0,0,0,.03);
+    transition:border-color .2s ease, box-shadow .2s ease, background .25s ease;
+  }
+  .navbar-inner{position:relative;display:flex;align-items:center;justify-content:space-between;height:80px;gap:16px;}
+  .brand{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+  .brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .brand-mark svg{width:19px;height:19px;color:#fff;}
+  .brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;color:var(--ink);white-space:nowrap;}
+  .nav-links{display:flex;align-items:center;gap:30px;font-weight:600;font-size:14.5px;color:var(--ink);}
+  .nav-links a{padding:8px 0;position:relative;}
+  .nav-links a::after{content:"";position:absolute;left:0;bottom:2px;width:0;height:2px;background:var(--ink);transition:width .2s ease;}
+  .nav-links a:hover::after{width:100%;}
+  .nav-links a.current::after{width:100%;}
+
+  .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .host-link{font-weight:600;font-size:14.5px;padding:10px 14px;border-radius:var(--radius-full);white-space:nowrap;}
+  .host-link:hover{background:var(--bg-alt);}
+  .theme-toggle{
+    display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;
+    border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;flex-shrink:0;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .theme-toggle:hover{background:var(--bg-alt);transform:translateY(-1px);}
+  .theme-toggle svg{width:16px;height:16px;}
+  .theme-toggle .icon-moon{display:none;}
+  :root[data-theme="dark"] .theme-toggle .icon-sun{display:none;}
+  :root[data-theme="dark"] .theme-toggle .icon-moon{display:block;}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .theme-toggle .icon-sun{display:none;}
+    :root:not([data-theme="light"]) .theme-toggle .icon-moon{display:block;}
+  }
+  .menu-pill{
+    display:flex;align-items:center;gap:10px;padding:7px 8px 7px 14px;
+    border:1px solid var(--line-strong);border-radius:var(--radius-full);background:var(--panel);cursor:pointer;
+    box-shadow:var(--shadow-card);transition:box-shadow .15s ease;
+  }
+  .menu-pill:hover{box-shadow:var(--shadow-lift);}
+  .menu-pill svg{width:15px;height:15px;color:var(--ink);}
+  .menu-pill .avatar{width:26px;height:26px;border-radius:50%;background:var(--ink-soft);color:#fff;display:flex;align-items:center;justify-content:center;}
+  .menu-pill .avatar svg{width:14px;height:14px;color:#fff;}
+  .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px;}
+  .nav-toggle span{display:block;width:22px;height:2px;background:var(--ink);margin:5px 0;border-radius:2px;}
+
+  /* ===== BREADCRUMB ===== */
+  .breadcrumb{padding:22px 0 0;}
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13.5px;color:var(--ink-soft);transition:color .15s ease;}
+  .back-link svg{width:15px;height:15px;}
+  .back-link:hover{color:var(--ink);}
+
+  /* ===== DETAIL HEAD ===== */
+  .detail-head{padding:14px 0 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .detail-head h1{font-size:clamp(24px,3vw,32px);margin-bottom:10px;}
+  .detail-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:14.5px;color:var(--ink-soft);}
+  .detail-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--ink-faint);margin:0 4px;}
+  .detail-meta .rating{display:flex;align-items:center;gap:5px;color:var(--ink);font-weight:700;}
+  .detail-meta .rating svg{width:13px;height:13px;color:var(--ink);}
+  .detail-meta .place{text-decoration:underline;}
+  .verified-tag{display:inline-flex;align-items:center;gap:3px;color:var(--accent-deep);font-weight:700;}
+  .verified-tag svg{width:11px;height:11px;}
+  .head-actions{display:flex;align-items:center;gap:8px;}
+  .icon-action{
+    display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:var(--radius-full);
+    border:1px solid var(--line-strong);background:var(--panel);font-weight:700;font-size:13.5px;cursor:pointer;
+    transition:background .15s ease;
+  }
+  .icon-action:hover{background:var(--bg-alt);}
+  .icon-action svg{width:15px;height:15px;}
+  .icon-action.saved svg{fill:var(--accent);stroke:var(--accent);}
+
+  /* ===== GALLERY ===== */
+  .gallery{
+    position:relative;display:grid;grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:1fr 1fr;
+    gap:8px;height:440px;border-radius:var(--radius-xl);overflow:hidden;
+  }
+  .gallery-main{grid-row:1/3;position:relative;cursor:pointer;background:linear-gradient(150deg,var(--a),var(--b));}
+  .gallery-thumb{position:relative;cursor:pointer;background:linear-gradient(150deg,var(--a),var(--b));}
+  .gallery-main img,.gallery-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .gallery-main::after,.gallery-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg, rgba(255,255,255,.1), transparent 55%);transition:background .15s ease;}
+  .gallery-main:hover::after,.gallery-thumb:hover::after{background:linear-gradient(200deg, rgba(255,255,255,.28), rgba(0,0,0,.06) 100%);}
+  .show-all-photos{
+    position:absolute;right:16px;bottom:16px;z-index:2;display:flex;align-items:center;gap:8px;
+    padding:10px 16px;border-radius:var(--radius-full);background:var(--panel);border:1px solid var(--line-strong);
+    font-weight:700;font-size:13.5px;cursor:pointer;box-shadow:var(--shadow-card);
+  }
+  .show-all-photos svg{width:15px;height:15px;}
+  .show-all-photos:hover{background:var(--bg-alt);}
+
+  /* ===== DETAIL BODY ===== */
+  .detail-body{padding:44px 0 96px;display:grid;grid-template-columns:1fr 380px;gap:64px;align-items:start;}
+  .detail-main section{padding:32px 0;border-bottom:1px solid var(--line);}
+  .detail-main section:first-child{padding-top:0;}
+  .host-row{display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .host-row h2{font-size:19px;margin-bottom:4px;}
+  .host-row p{margin:0;font-size:14px;color:var(--ink-soft);}
+  .host-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(150deg,#7BA7C2,#3E6B8C);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:19px;flex-shrink:0;}
+
+  .feature-list{display:flex;flex-direction:column;gap:20px;}
+  .feature-item{display:flex;gap:16px;align-items:flex-start;}
+  .feature-item svg{width:24px;height:24px;color:var(--ink);flex-shrink:0;margin-top:2px;}
+  .feature-item h4{font-family:'Inter',sans-serif;font-weight:700;font-size:14.5px;margin:0 0 3px;}
+  .feature-item p{margin:0;font-size:13.5px;color:var(--ink-soft);line-height:1.55;}
+
+  .desc-text{font-size:15px;line-height:1.75;color:var(--ink);margin:0;}
+  .desc-text + .desc-text{margin-top:14px;}
+  .show-more-btn{margin-top:16px;font-weight:700;font-size:14.5px;text-decoration:underline;cursor:pointer;background:none;border:none;color:var(--ink);padding:0;}
+
+  .amenities-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;}
+  .amenity{display:flex;align-items:center;gap:14px;font-size:14.5px;font-weight:600;}
+  .amenity svg{width:20px;height:20px;color:var(--ink);flex-shrink:0;}
+
+  .map-block{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--line);height:220px;position:relative;background:
+    radial-gradient(circle at 30% 40%, var(--accent-pale), transparent 55%),
+    var(--bg-alt-2);}
+  .map-pin{position:absolute;top:50%;left:38%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50% 50% 50% 0;background:var(--accent);transform-origin:bottom;box-shadow:var(--shadow-card);}
+  .map-pin::after{content:"";position:absolute;inset:0;margin:auto;width:14px;height:14px;border-radius:50%;background:#fff;transform:rotate(45deg) translate(0,0);top:8px;left:8px;}
+  .map-caption{margin-top:14px;font-size:13.5px;color:var(--ink-soft);}
+
+  .rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;font-size:14px;color:var(--ink-soft);}
+  .rules-grid strong{display:block;color:var(--ink);font-weight:700;margin-bottom:2px;font-size:14.5px;}
+
+  /* ===== BOOKING CARD ===== */
+  .booking-card{
+    position:sticky;top:100px;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-lift);
+  }
+  .booking-price{display:flex;align-items:baseline;gap:6px;margin-bottom:16px;}
+  .booking-price .amount{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:24px;}
+  .booking-price .unit{font-size:14.5px;color:var(--ink-soft);}
+  .booking-price .rating{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:13.5px;font-weight:700;}
+  .booking-price .rating svg{width:12.5px;height:12.5px;}
+
+  .booking-fields{border:1px solid var(--line-strong);border-radius:var(--radius-md);overflow:hidden;margin-bottom:14px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;}
+  .field{padding:10px 14px;border-right:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);}
+  .field:nth-child(2){border-right:none;}
+  .field label{display:block;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);margin-bottom:2px;}
+  .field .value{font-size:13.5px;color:var(--ink-soft);}
+  .field.guests{border-bottom:none;grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+  .field.guests svg{width:14px;height:14px;color:var(--ink-soft);}
+
+  .book-now-btn{
+    width:100%;padding:15px;border:none;border-radius:var(--radius-full);background:var(--accent);color:#fff;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15.5px;cursor:pointer;
+    transition:background .15s ease, transform .15s ease;box-shadow:0 8px 20px -6px rgba(15,157,139,.55);
+  }
+  .book-now-btn:hover{background:var(--accent-deep);transform:translateY(-1px);}
+  .booking-note{text-align:center;font-size:12.5px;color:var(--ink-soft);margin:12px 0 18px;}
+
+  .price-breakdown{display:flex;flex-direction:column;gap:12px;font-size:14px;}
+  .price-breakdown .row{display:flex;justify-content:space-between;color:var(--ink-soft);}
+  .price-breakdown .row span:last-child{color:var(--ink);font-weight:600;}
+  .price-breakdown .total{border-top:1px solid var(--line);margin-top:4px;padding-top:14px;font-weight:800;color:var(--ink);}
+  .price-breakdown .total span:last-child{font-weight:800;}
+
+  /* ===== MOBILE STICKY BOOK BAR ===== */
+  .mobile-book-bar{
+    display:none;position:fixed;left:0;right:0;bottom:0;z-index:70;
+    background:var(--nav-bg);backdrop-filter:blur(12px);border-top:1px solid var(--line);
+    padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+    align-items:center;justify-content:space-between;gap:16px;
+    box-shadow:0 -8px 20px -8px rgba(0,0,0,.14);
+  }
+  .mobile-book-bar .price{font-size:16px;}
+  .mobile-book-bar .price strong{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;}
+  .mobile-book-bar .price small{display:block;font-size:12px;color:var(--ink-soft);font-weight:600;text-decoration:underline;}
+  .mobile-book-bar .book-now-btn{width:auto;padding:13px 28px;flex-shrink:0;}
+
+  /* ===== SHARED ===== */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in-view{opacity:1;transform:none;}
+
+  /* ===== FOOTER ===== */
+  footer.site-footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:64px 0 0;margin-top:40px;}
+  .footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px;padding-bottom:48px;}
+  .footer-brand .brand{margin-bottom:14px;}
+  .footer-brand p{font-size:14px;line-height:1.65;color:var(--ink-soft);max-width:280px;margin:0 0 20px;}
+  .footer-social{display:flex;gap:10px;}
+  .footer-social a{width:36px;height:36px;border-radius:50%;border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;transition:background .15s ease, border-color .15s ease;}
+  .footer-social a:hover{background:var(--panel);border-color:var(--ink);}
+  .footer-social svg{width:15px;height:15px;color:var(--ink);}
+  .fcol h4{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);margin:0 0 18px;}
+  .fcol ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;}
+  .fcol ul li a{font-size:14.5px;color:var(--ink-soft);transition:color .15s ease;}
+  .fcol ul li a:hover{color:var(--ink);}
+  .footer-bottom{padding:24px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-soft);}
+  .footer-bottom .legal-links{display:flex;gap:20px;flex-wrap:wrap;}
+  .footer-bottom .legal-links a:hover{color:var(--ink);}
+  .lang-select{display:flex;align-items:center;gap:8px;border:1px solid var(--line-strong);border-radius:var(--radius-full);padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink);}
+  .lang-select svg{width:14px;height:14px;}
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width:1024px){
+    .detail-body{grid-template-columns:1fr;gap:40px;}
+    .booking-card{position:static;box-shadow:var(--shadow-card);}
+  }
+  @media (max-width:920px){
+    .footer-top{grid-template-columns:1fr 1fr;}
+    .footer-brand{grid-column:1/-1;}
+  }
+  @media (max-width:860px){
+    .nav-links{position:fixed;top:80px;left:0;right:0;background:var(--bg);flex-direction:column;align-items:flex-start;gap:0;border-bottom:1px solid var(--line);max-height:0;overflow:hidden;transition:max-height .25s ease;}
+    .nav-links.open{max-height:320px;}
+    .nav-links a{width:100%;padding:14px 32px;border-bottom:1px solid var(--line);}
+    .nav-toggle{display:block;}
+    .host-link{display:none;}
+    .gallery{height:auto;grid-template-columns:1fr;grid-template-rows:none;}
+    .gallery-thumb{display:none;}
+    .gallery-main{aspect-ratio:4/3;grid-row:auto;}
+    .booking-card{display:none;}
+    .mobile-book-bar{display:flex;}
+    .detail-body{padding-bottom:110px;}
+    .amenities-grid,.rules-grid{grid-template-columns:1fr;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{transition:none !important;animation:none !important;}
+  }
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+</style>
+<noscript><style>.reveal{opacity:1 !important;transform:none !important;}</style></noscript>
+</head>
+<body>
+
+<header class="navbar" id="navbar">
+  <div class="wrap navbar-inner">
+    <a href="uzbek-rentals-landing-2.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+      </span>
+      <span class="brand-name">Uzbek Rentals</span>
+    </a>
+
+    <nav id="navLinks" class="nav-links">
+      <a href="uzbek-rentals-landing-2.html#homes">Homes</a>
+      <a href="uzbek-rentals-landing-2.html#homes">Cars</a>
+      <a href="listings.html" class="current">Listings</a>
+      <a href="uzbek-rentals-landing-2.html#how">How it works</a>
+      <a href="uzbek-rentals-landing-2.html#pricing">Pricing</a>
+    </nav>
+
+    <div class="nav-right">
+      <a href="uzbek-rentals-landing-2.html#list" class="host-link">Become a host</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
+      </button>
+      <button class="menu-pill" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg></span>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="breadcrumb">
+    <a href="listings.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+      Back to listings
+    </a>
+  </div>
+
+  <div class="detail-head reveal">
+    <div>
+      <h1>2022 Toyota Camry</h1>
+      <div class="detail-meta">
+        <span class="rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.95</span>
+        <span>·</span>
+        <span>86 reviews</span>
+        <span class="dot"></span>
+        <span class="place">Seattle, WA</span>
+        <span class="dot"></span>
+        <span class="verified-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified driver</span>
+      </div>
+    </div>
+    <div class="head-actions">
+      <button class="icon-action" id="shareBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg>
+        Share
+      </button>
+      <button class="icon-action" id="saveBtn" type="button">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg>
+        Save
+      </button>
+    </div>
+  </div>
+
+  <div class="gallery reveal" id="gallery">
+    <div class="gallery-main" style="--a:#A9B4BD;--b:#6E7A85;">
+      <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=70" alt="2022 Toyota Camry parked, front three-quarter view" loading="lazy">
+    </div>
+    <div class="gallery-thumb" style="--a:#C3CBD1;--b:#8A96A0;">
+      <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&q=60" alt="Toyota Camry side exterior" loading="lazy">
+    </div>
+    <div class="gallery-thumb" style="--a:#B7BFC6;--b:#7C8790;">
+      <img src="https://images.unsplash.com/photo-1550355291-bbee04a92027?w=800&q=60" alt="Interior dashboard view" loading="lazy">
+    </div>
+    <div class="gallery-thumb" style="--a:#AEB7BF;--b:#75818B;">
+      <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&q=60" alt="Steering wheel and center console" loading="lazy">
+    </div>
+    <div class="gallery-thumb" style="--a:#9FA9B2;--b:#69747E;">
+      <img src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&q=60" alt="Trunk cargo space" loading="lazy">
+    </div>
+    <button class="show-all-photos" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Show all photos
+    </button>
+  </div>
+
+  <div class="detail-body">
+    <div class="detail-main">
+
+      <section class="reveal">
+        <div class="host-row">
+          <div>
+            <h2>Entire car listed by Elyor</h2>
+            <p>Sedan · Automatic · 5 seats · Gas</p>
+          </div>
+          <div class="host-avatar">E</div>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <div class="feature-list">
+          <div class="feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13l2-6a2 2 0 012-2h10a2 2 0 012 2l2 6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M3 13h18v4H3z"/></svg>
+            <div>
+              <h4>Entire car</h4>
+              <p>You'll have this Camry all to yourself for the length of your trip.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <div>
+              <h4>Verified driver</h4>
+              <p>Elyor's identity, license, and vehicle documents have been verified by Uzbek Rentals.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="7" rx="1.5"/><path d="M7 11V8a5 5 0 0110 0v3"/><circle cx="12" cy="14.5" r="1.5"/></svg>
+            <div>
+              <h4>Contactless pickup</h4>
+              <p>Unlock instructions are sent before pickup, so there's no need to meet in person.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <p class="desc-text">This 2022 Toyota Camry is clean, fuel-efficient, and comfortable for both city driving and longer road trips around the Pacific Northwest. It comes with Bluetooth, Apple CarPlay, a backup camera, and adaptive cruise control.</p>
+        <p class="desc-text">Pickup is easy from a well-lit spot near downtown Seattle, with SEA-TAC airport just 20 minutes away. Regularly serviced and always returned with a full tank.</p>
+        <button class="show-more-btn" type="button">Show more</button>
+      </section>
+
+      <section class="reveal">
+        <h2 style="font-size:19px;margin-bottom:20px;">What's included</h2>
+        <div class="amenities-grid">
+          <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3.5"/></svg>200 mi/day included</div>
+          <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>Insurance included</div>
+          <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5a11 11 0 0114 0M8 16a6.5 6.5 0 018 0M12 19.5v.01"/></svg>Bluetooth &amp; CarPlay</div>
+          <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="8" cy="15" r="1"/><path d="M7 6l1.5-3h7L17 6"/></svg>Backup camera</div>
+          <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="13" width="18" height="6" rx="1.5"/><path d="M5 13V8a2 2 0 012-2h10a2 2 0 012 2v5"/><path d="M2 19h2M20 19h2"/></svg>Free pickup in Seattle</div>
+          <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>24/7 roadside assistance</div>
+          <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v6M8 9a4 4 0 118 0c0 3-4 4-4 8"/><path d="M5 21h14"/></svg>Child seat on request</div>
+          <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 7h.01M12 7h.01"/></svg>Automatic transmission</div>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <h2 style="font-size:19px;margin-bottom:16px;">Where you'll pick it up</h2>
+        <div class="map-block"><div class="map-pin"></div></div>
+        <p class="map-caption">Seattle, WA — exact pickup location shared after booking.</p>
+      </section>
+
+      <section class="reveal" style="border-bottom:none;">
+        <h2 style="font-size:19px;margin-bottom:16px;">Things to know</h2>
+        <div class="rules-grid">
+          <div><strong>Pickup</strong>After 9:00 AM</div>
+          <div><strong>Return</strong>Before 8:00 PM</div>
+          <div><strong>Minimum age</strong>21+ with a valid license</div>
+          <div><strong>Free cancellation</strong>Up to 24 hours before pickup</div>
+        </div>
+      </section>
+
+    </div>
+
+    <aside class="booking-card reveal" id="bookingCard">
+      <div class="booking-price">
+        <span class="amount">$45</span>
+        <span class="unit">day</span>
+        <span class="rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.95</span>
+      </div>
+
+      <div class="booking-fields">
+        <div class="field-row">
+          <div class="field">
+            <label>Trip start</label>
+            <div class="value">Add date</div>
+          </div>
+          <div class="field">
+            <label>Trip end</label>
+            <div class="value">Add date</div>
+          </div>
+        </div>
+        <div class="field guests">
+          <div>
+            <label>Pickup location</label>
+            <div class="value">Seattle, WA</div>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <button class="book-now-btn" id="bookNowBtn" type="button">Book Now</button>
+      <p class="booking-note">You won't be charged yet</p>
+
+      <div class="price-breakdown">
+        <div class="row"><span>$45 x 5 days</span><span>$225</span></div>
+        <div class="row"><span>Insurance fee</span><span>$25</span></div>
+        <div class="row"><span>Service fee</span><span>$30</span></div>
+        <div class="row total"><span>Total before taxes</span><span>$280</span></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="fcol footer-brand">
+        <a href="uzbek-rentals-landing-2.html" class="brand">
+          <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>
+          <span class="brand-name">Uzbek Rentals</span>
+        </a>
+        <p>A homes & cars marketplace built by and for the Uzbek community across the USA. Verified hosts, honest prices, and support that speaks your language.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+          <a href="#" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4L3 11l6 2.5M21 4l-3.5 16-8-6.5M21 4l-11 9.5"/></svg></a>
+          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h-2a5 5 0 00-5 5v2H6v4h2v7h4v-7h3l1-4h-4V8a1 1 0 011-1h3z"/></svg></a>
+        </div>
+      </div>
+
+      <div class="fcol">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="listings.html">All listings</a></li>
+          <li><a href="uzbek-rentals-landing-2.html#homes">Homes</a></li>
+          <li><a href="uzbek-rentals-landing-2.html#homes">Cars</a></li>
+          <li><a href="uzbek-rentals-landing-2.html#how">How it works</a></li>
+          <li><a href="uzbek-rentals-landing-2.html#list">Become a host</a></li>
+        </ul>
+      </div>
+
+      <div class="fcol">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">24/7 support · +1 (888) 555-0199</a></li>
+          <li><a href="#">help@uzbekrentals.com</a></li>
+          <li><a href="#">Live chat, in-app</a></li>
+          <li><a href="#">Trust & safety</a></li>
+        </ul>
+      </div>
+
+      <div class="fcol">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Cancellation Policy</a></li>
+          <li><a href="#">Insurance & Guarantees</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 Uzbek Rentals, Inc. Built for the community, by the community.</span>
+      <div class="legal-links">
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+        <a href="#">Sitemap</a>
+      </div>
+      <div class="lang-select">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18 15 15 0 010-18z"/></svg>
+        English / O'zbek
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="mobile-book-bar" id="mobileBookBar">
+  <div class="price">
+    <strong>$45</strong> day
+    <small>4.95 · 86 reviews</small>
+  </div>
+  <button class="book-now-btn" type="button" id="mobileBookNowBtn">Book Now</button>
+</div>
+
+<script>
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+
+  const themeToggle = document.getElementById('themeToggle');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+  function currentTheme(){
+    const explicit = document.documentElement.getAttribute('data-theme');
+    if(explicit) return explicit;
+    return prefersDark.matches ? 'dark' : 'light';
+  }
+  themeToggle.setAttribute('aria-pressed', currentTheme() === 'dark');
+  themeToggle.addEventListener('click', () => {
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ur-theme', next);
+    themeToggle.setAttribute('aria-pressed', next === 'dark');
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', (e) => {
+    e.currentTarget.classList.toggle('saved');
+  });
+
+  function goToBooking(){
+    document.getElementById('bookingCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  document.getElementById('bookNowBtn').addEventListener('click', goToBooking);
+  document.getElementById('mobileBookNowBtn').addEventListener('click', goToBooking);
+
+  document.querySelectorAll('.gallery-main, .gallery-thumb').forEach(el => {
+    el.addEventListener('click', () => {
+      document.getElementById('gallery').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  const revealEls = document.querySelectorAll('.reveal');
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)){
+    revealEls.forEach(el => el.classList.add('in-view'));
+  } else {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => io.observe(el));
+  }
+</script>
+
+</body>
+</html>
