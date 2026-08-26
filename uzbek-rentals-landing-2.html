@@ -379,6 +379,7 @@
       <a href="#homes" onclick="setMode('homes')">Homes</a>
       <a href="#homes" onclick="setMode('cars')">Cars</a>
       <a href="listings.html">Listings</a>
+      <a href="renter-dashboard.html">Dashboard</a>
       <a href="#how">How it works</a>
       <a href="#pricing">Pricing</a>
     </nav>
@@ -394,10 +395,10 @@
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
       </button>
-      <button class="menu-pill" aria-label="Open menu">
+      <a href="profile.html" class="menu-pill" aria-label="Open profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg></span>
-      </button>
+      </a>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -465,7 +466,7 @@
     </div>
     <div class="listing-grid" id="listingGrid">
 
-      <article class="listing-card">
+      <article class="listing-card" data-type="home">
         <div class="card-media" style="--a:#7BA7C2;--b:#3E6B8C;">
           <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=60" alt="Sunlit loft near Prospect Park" loading="lazy">
           <span class="media-badge">Guest favorite</span>
@@ -482,7 +483,7 @@
         </div>
       </article>
 
-      <article class="listing-card">
+      <article class="listing-card" data-type="home">
         <div class="card-media" style="--a:#C9A66B;--b:#9C7B3E;">
           <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=60" alt="Family house with backyard" loading="lazy">
           <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
@@ -498,7 +499,7 @@
         </div>
       </article>
 
-      <article class="listing-card">
+      <article class="listing-card" data-type="car">
         <div class="card-media" style="--a:#A9B4BD;--b:#6E7A85;">
           <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=60" alt="2021 Toyota Camry" loading="lazy">
           <span class="media-badge">Guest favorite</span>
@@ -515,7 +516,7 @@
         </div>
       </article>
 
-      <article class="listing-card">
+      <article class="listing-card" data-type="home">
         <div class="card-media" style="--a:#E3B77D;--b:#C68F49;">
           <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=60" alt="Modern studio downtown" loading="lazy">
           <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
@@ -531,7 +532,7 @@
         </div>
       </article>
 
-      <article class="listing-card">
+      <article class="listing-card" data-type="car">
         <div class="card-media" style="--a:#8FA98C;--b:#5E7A5B;">
           <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=60" alt="Honda CR-V, AWD" loading="lazy">
           <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
@@ -547,7 +548,7 @@
         </div>
       </article>
 
-      <article class="listing-card">
+      <article class="listing-card" data-type="home">
         <div class="card-media" style="--a:#D98E73;--b:#B15F42;">
           <img src="https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&q=60" alt="Cozy 2BR near the park" loading="lazy">
           <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
@@ -563,7 +564,7 @@
         </div>
       </article>
 
-      <article class="listing-card">
+      <article class="listing-card" data-type="car">
         <div class="card-media" style="--a:#9BB0C9;--b:#5D7B99;">
           <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800&q=60" alt="Ford Explorer, 7-seat" loading="lazy">
           <span class="media-badge">Guest favorite</span>
@@ -580,7 +581,7 @@
         </div>
       </article>
 
-      <article class="listing-card">
+      <article class="listing-card" data-type="home">
         <div class="card-media" style="--a:#F0C987;--b:#D4A24E;">
           <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=60" alt="Sunny 1BR with balcony" loading="lazy">
           <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
@@ -636,7 +637,7 @@
         <span class="eyebrow-pill">For hosts & car owners</span>
         <h2>Turn your extra space — or car — into income.</h2>
         <p>List your home or vehicle on Uzbek Rentals and start earning from renters who already trust your community.</p>
-        <a href="#" class="btn-dark">Start hosting
+        <a href="host-dashboard.html" class="btn-dark">Start hosting
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
       </div>
@@ -858,6 +859,12 @@
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       btn.classList.toggle('saved');
+    });
+  });
+
+  document.querySelectorAll('.listing-card[data-type]').forEach(card => {
+    card.addEventListener('click', () => {
+      location.href = card.dataset.type === 'car' ? 'car-listing-detail.html' : 'listing-detail.html';
     });
   });
 

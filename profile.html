@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Log In or Sign Up — Uzbek Rentals</title>
+<title>My Profile — Uzbek Rentals</title>
 <script>
   (function(){
     var saved = localStorage.getItem('ur-theme');
@@ -70,6 +70,13 @@
   button{font:inherit;}
   img,svg{display:block;}
   .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+  .eyebrow-pill{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--accent-pale);color:var(--accent-deep);
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12.5px;
+    padding:8px 14px;border-radius:var(--radius-full);
+  }
+  .eyebrow-pill svg{width:14px;height:14px;}
 
   /* ===== NAV ===== */
   header.navbar{
@@ -105,31 +112,82 @@
     :root:not([data-theme="light"]) .theme-toggle .icon-sun{display:none;}
     :root:not([data-theme="light"]) .theme-toggle .icon-moon{display:block;}
   }
+  .menu-pill{
+    display:flex;align-items:center;gap:10px;padding:7px 8px 7px 14px;
+    border:1px solid var(--line-strong);border-radius:var(--radius-full);background:var(--panel);cursor:pointer;
+    box-shadow:var(--shadow-card);transition:box-shadow .15s ease;
+  }
+  .menu-pill:hover{box-shadow:var(--shadow-lift);}
+  .menu-pill svg{width:15px;height:15px;color:var(--ink);}
+  .menu-pill .avatar{width:26px;height:26px;border-radius:50%;background:var(--ink-soft);color:#fff;display:flex;align-items:center;justify-content:center;}
+  .menu-pill .avatar svg{width:14px;height:14px;color:#fff;}
+  .menu-pill.current{box-shadow:var(--shadow-lift);}
+  .menu-pill.current .avatar{background:var(--accent);}
   .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px;}
   .nav-toggle span{display:block;width:22px;height:2px;background:var(--ink);margin:5px 0;border-radius:2px;}
 
-  /* ===== AUTH ===== */
-  .auth-page{padding:56px 0 96px;display:flex;justify-content:center;}
-  .auth-card{
-    width:100%;max-width:440px;background:var(--panel);border:1px solid var(--line);
-    border-radius:var(--radius-xl);padding:36px 32px;box-shadow:var(--shadow-lift);
-  }
-  .auth-brand{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:26px;text-align:center;}
-  .auth-brand .brand-mark{width:44px;height:44px;border-radius:12px;}
-  .auth-brand .brand-mark svg{width:24px;height:24px;}
-  .auth-brand h1{font-size:22px;}
-  .auth-brand p{margin:0;font-size:14px;color:var(--ink-soft);}
+  /* ===== PAGE HEAD ===== */
+  .page-head{padding:48px 0 8px;}
+  .page-head h1{font-size:clamp(28px,3.6vw,40px);margin:16px 0 10px;}
+  .page-head p{color:var(--ink-soft);font-size:15.5px;line-height:1.6;max-width:520px;}
 
-  .auth-toggle{display:flex;background:var(--bg-alt);border-radius:var(--radius-full);padding:4px;gap:4px;margin-bottom:28px;}
-  .auth-toggle button{
-    flex:1;padding:10px 4px;border:none;background:none;border-radius:var(--radius-full);
-    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;color:var(--ink-soft);cursor:pointer;
-    transition:background .15s ease, color .15s ease, box-shadow .15s ease;
-  }
-  .auth-toggle button.active{background:var(--panel);color:var(--ink);box-shadow:var(--shadow-card);}
+  /* ===== PROFILE LAYOUT ===== */
+  .profile-page{padding:32px 0 96px;}
+  .profile-layout{display:grid;grid-template-columns:300px 1fr;gap:32px;align-items:start;}
 
-  .auth-form{display:flex;flex-direction:column;gap:16px;}
+  .profile-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:28px 24px;box-shadow:var(--shadow-card);text-align:center;
+  }
+  .profile-avatar{
+    width:84px;height:84px;border-radius:50%;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:30px;
+  }
+  .profile-card h2{font-size:19px;margin-bottom:4px;}
+  .profile-email{font-size:13.5px;color:var(--ink-soft);margin-bottom:14px;word-break:break-word;}
+  .profile-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;}
+  .profile-badge{
+    display:inline-flex;align-items:center;gap:5px;background:var(--accent-pale);color:var(--accent-deep);
+    font-weight:700;font-size:11.5px;padding:6px 11px;border-radius:var(--radius-full);
+  }
+  .profile-badge svg{width:11px;height:11px;}
+  .profile-meta{font-size:13px;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:14px;}
+
+  .quick-links{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+  .quick-link{
+    display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);
+    border-radius:var(--radius-md);background:var(--panel);font-weight:600;font-size:14px;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .quick-link:hover{background:var(--bg-alt);border-color:var(--line-strong);}
+  .quick-link .ql-icon{
+    width:34px;height:34px;border-radius:50%;background:var(--accent-pale);color:var(--accent-deep);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .quick-link .ql-icon svg{width:16px;height:16px;}
+  .quick-link .ql-arrow{margin-left:auto;color:var(--ink-faint);flex-shrink:0;}
+  .quick-link .ql-arrow svg{width:14px;height:14px;}
+
+  .profile-right{display:flex;flex-direction:column;gap:24px;}
+  .info-panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:24px;box-shadow:var(--shadow-card);
+  }
+  .info-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;}
+  .info-panel-head h2{font-size:18px;}
+  .btn-outline{
+    display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--radius-full);
+    border:1px solid var(--line-strong);background:var(--panel);color:var(--ink);
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13.5px;cursor:pointer;
+    transition:background .15s ease;white-space:nowrap;
+  }
+  .btn-outline:hover{background:var(--bg-alt-2);}
+  .btn-outline svg{width:14px;height:14px;}
+
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   .form-field{display:flex;flex-direction:column;gap:6px;}
+  .form-field.full{grid-column:1/-1;}
   .form-field label{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12.5px;}
   .form-field input{
     width:100%;padding:12px 14px;border:1px solid var(--line-strong);border-radius:var(--radius-md);
@@ -137,72 +195,19 @@
     transition:border-color .15s ease, background .15s ease;
   }
   .form-field input:focus{outline:none;border-color:var(--accent);background:var(--panel);}
-  .form-field input::placeholder{color:var(--ink-faint);}
+  .form-field input:disabled{color:var(--ink-soft);cursor:not-allowed;}
 
-  .password-wrap{position:relative;}
-  .password-wrap input{padding-right:44px;}
-  .toggle-visibility{
-    position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;
-    cursor:pointer;padding:6px;color:var(--ink-soft);display:flex;
-  }
-  .toggle-visibility svg{width:18px;height:18px;}
-  .toggle-visibility .icon-eye-off{display:none;}
-
-  .signup-only{display:none;flex-direction:column;gap:16px;}
-  .signup-only.is-visible{display:flex;}
-
-  .phone-note{
-    display:flex;gap:10px;align-items:flex-start;background:var(--accent-pale);
-    border-radius:var(--radius-md);padding:12px 14px;font-size:12.5px;color:var(--accent-deep);line-height:1.55;
-  }
-  .phone-note svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;}
-
-  .auth-submit{
-    width:100%;padding:14px;border:none;border-radius:var(--radius-full);background:var(--accent);color:#fff;
-    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;cursor:pointer;
-    transition:background .15s ease, transform .15s ease;margin-top:4px;
-    box-shadow:0 8px 20px -6px rgba(15,157,139,.55);
-  }
-  .auth-submit:hover{background:var(--accent-deep);transform:translateY(-1px);}
-
-  .auth-divider{display:flex;align-items:center;gap:12px;margin:24px 0;color:var(--ink-faint);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
-  .auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--line);}
-
-  .google-btn{
-    width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;
-    border:1px solid var(--line-strong);border-radius:var(--radius-full);background:var(--panel);
-    font-weight:700;font-size:14.5px;color:var(--ink);cursor:pointer;transition:background .15s ease;
-  }
-  .google-btn:hover{background:var(--bg-alt);}
-  .google-btn svg{width:18px;height:18px;}
-
-  .auth-switch{text-align:center;margin-top:24px;font-size:14px;color:var(--ink-soft);}
-  .auth-switch button{background:none;border:none;color:var(--accent-deep);font-weight:700;cursor:pointer;padding:0;font-size:14px;}
-  .auth-switch button:hover{text-decoration:underline;}
-
-  .auth-terms{text-align:center;margin-top:18px;font-size:12px;color:var(--ink-faint);line-height:1.5;}
-  .auth-terms a{text-decoration:underline;color:var(--ink-soft);}
-
-  /* ===== ROLE STEP ===== */
-  .role-card{max-width:600px;}
-  .back-link{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13.5px;color:var(--ink-soft);transition:color .15s ease;margin-bottom:20px;}
-  .back-link svg{width:15px;height:15px;}
-  .back-link:hover{color:var(--ink);}
-  .role-options{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px;}
-  .role-option{
-    display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;
-    border:1.5px solid var(--line-strong);border-radius:var(--radius-lg);padding:30px 20px;
-    background:var(--panel);cursor:pointer;font-family:'Inter',sans-serif;
-    transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;
-  }
-  .role-option:hover{border-color:var(--accent);box-shadow:var(--shadow-lift);transform:translateY(-3px);}
-  .role-icon{width:56px;height:56px;border-radius:50%;background:var(--accent-pale);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
-  .role-icon svg{width:26px;height:26px;color:var(--accent-deep);}
-  .role-option h3{font-size:16.5px;margin-bottom:6px;}
-  .role-option p{margin:0;font-size:13.5px;color:var(--ink-soft);line-height:1.55;}
-  @media (max-width:560px){
-    .role-options{grid-template-columns:1fr;}
-  }
+  .pref-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid var(--line);gap:16px;}
+  .pref-row:first-of-type{border-top:none;padding-top:0;}
+  .pref-text strong{display:block;font-size:14.5px;font-weight:600;margin-bottom:2px;}
+  .pref-text span{font-size:13px;color:var(--ink-soft);}
+  .switch{position:relative;width:42px;height:24px;flex-shrink:0;}
+  .switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;}
+  .switch-track{position:absolute;inset:0;background:var(--line-strong);border-radius:var(--radius-full);transition:background .15s ease;pointer-events:none;}
+  .switch-track::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:var(--shadow-card);transition:transform .15s ease;}
+  .switch input:checked ~ .switch-track{background:var(--accent);}
+  .switch input:checked ~ .switch-track::after{transform:translateX(18px);}
+  .switch input:focus-visible ~ .switch-track{outline:2px solid var(--accent);outline-offset:2px;}
 
   /* ===== SHARED ===== */
   .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease;}
@@ -228,6 +233,10 @@
   .lang-select svg{width:14px;height:14px;}
 
   /* ===== RESPONSIVE ===== */
+  @media (max-width:900px){
+    .profile-layout{grid-template-columns:1fr;}
+    .form-grid{grid-template-columns:1fr;}
+  }
   @media (max-width:920px){
     .footer-top{grid-template-columns:1fr 1fr;}
     .footer-brand{grid-column:1/-1;}
@@ -238,10 +247,6 @@
     .nav-links a{width:100%;padding:14px 32px;border-bottom:1px solid var(--line);}
     .nav-toggle{display:block;}
     .host-link{display:none;}
-  }
-  @media (max-width:480px){
-    .auth-card{padding:28px 22px;}
-    .wrap{padding:0 18px;}
   }
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto;}
@@ -277,112 +282,130 @@
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
       </button>
+      <a href="profile.html" class="menu-pill current" aria-label="Open profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg></span>
+      </a>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 </header>
 
-<section class="auth-page" id="authStep">
-  <div class="auth-card reveal">
-    <div class="auth-brand">
-      <span class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
-      </span>
-      <h1 id="authHeading">Welcome back</h1>
-      <p id="authSubheading">Log in to book homes and cars across the community.</p>
-    </div>
-
-    <div class="auth-toggle" id="authToggle" role="tablist">
-      <button type="button" class="active" data-mode="login" role="tab" aria-selected="true">Log In</button>
-      <button type="button" data-mode="signup" role="tab" aria-selected="false">Sign Up</button>
-    </div>
-
-    <form class="auth-form" id="authForm">
-
-      <div class="signup-only" id="signupFields">
-        <div class="form-field">
-          <label for="fullName">Full name</label>
-          <input type="text" id="fullName" name="fullName" placeholder="Your full name" autocomplete="name">
-        </div>
-        <div class="form-field">
-          <label for="phone">Phone number</label>
-          <input type="tel" id="phone" name="phone" placeholder="+1 (___) ___-____" autocomplete="tel">
-        </div>
-        <div class="phone-note">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9.5 12l1.8 1.8L15 10.2"/></svg>
-          <span>Verifying your phone number helps us build a trusted community of hosts and guests.</span>
-        </div>
-      </div>
-
-      <div class="form-field">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
-      </div>
-
-      <div class="form-field">
-        <label for="password">Password</label>
-        <div class="password-wrap">
-          <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
-          <button type="button" class="toggle-visibility" id="togglePassword" aria-label="Show password" aria-pressed="false">
-            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
-            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 12S5 5 12 5c2 0 3.7.55 5.1 1.35M22.5 12S19 19 12 19c-2 0-3.7-.55-5.1-1.35M3 3l18 18"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg>
-          </button>
-        </div>
-      </div>
-
-      <button type="submit" class="auth-submit" id="authSubmit">Log In</button>
-    </form>
-
-    <div class="auth-divider">or</div>
-
-    <button type="button" class="google-btn" id="googleBtn">
-      <svg viewBox="0 0 18 18">
-        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
-        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/>
-        <path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.997 8.997 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/>
-        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/>
-      </svg>
-      Continue with Google
-    </button>
-
-    <p class="auth-switch">
-      <span id="switchPrompt">New here?</span>
-      <button type="button" id="switchModeBtn">Create an account</button>
-    </p>
-
-    <p class="auth-terms">By continuing, you agree to Uzbek Rentals' <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+<section class="page-head reveal">
+  <div class="wrap">
+    <span class="eyebrow-pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
+      My profile
+    </span>
+    <h1>Your account.</h1>
+    <p>Manage your personal details, notification preferences, and jump into your dashboards.</p>
   </div>
 </section>
 
-<section class="auth-page" id="roleStep" style="display:none;">
-  <div class="auth-card role-card reveal">
-    <button type="button" class="back-link" id="roleBackBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
-      Back
-    </button>
+<section class="profile-page">
+  <div class="wrap profile-layout">
 
-    <div class="auth-brand" style="margin-bottom:0;">
-      <h1>Are you here to rent or to list?</h1>
-      <p>You can always switch or add the other later from your account settings.</p>
+    <aside class="profile-card reveal">
+      <div class="profile-avatar" id="avatarInitial">AK</div>
+      <h2 id="profileName">Aziz Karimov</h2>
+      <p class="profile-email" id="profileEmail">aziz.karimov@example.com</p>
+      <div class="profile-badges">
+        <span class="profile-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
+        <span class="profile-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Host</span>
+      </div>
+      <p class="profile-meta">Member since March 2024 · Brooklyn, NY</p>
+
+      <div class="quick-links">
+        <a href="renter-dashboard.html" class="quick-link">
+          <span class="ql-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></span>
+          Renter dashboard
+          <span class="ql-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></span>
+        </a>
+        <a href="host-dashboard.html" class="quick-link">
+          <span class="ql-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>
+          Host dashboard
+          <span class="ql-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></span>
+        </a>
+        <a href="listings.html" class="quick-link">
+          <span class="ql-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+          Browse listings
+          <span class="ql-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></span>
+        </a>
+      </div>
+    </aside>
+
+    <div class="profile-right">
+
+      <div class="info-panel reveal">
+        <div class="info-panel-head">
+          <h2>Personal information</h2>
+          <button class="btn-outline" id="editToggle" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            <span id="editToggleLabel">Edit profile</span>
+          </button>
+        </div>
+        <form class="form-grid" id="profileForm">
+          <div class="form-field">
+            <label for="fullName">Full name</label>
+            <input type="text" id="fullName" value="Aziz Karimov" disabled>
+          </div>
+          <div class="form-field">
+            <label for="email">Email</label>
+            <input type="email" id="email" value="aziz.karimov@example.com" disabled>
+          </div>
+          <div class="form-field">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" value="+1 (718) 555-0142" disabled>
+          </div>
+          <div class="form-field">
+            <label for="location">Location</label>
+            <input type="text" id="location" value="Brooklyn, NY" disabled>
+          </div>
+          <div class="form-field full">
+            <label for="bio">About</label>
+            <input type="text" id="bio" value="Renting apartments and sharing my car around Brooklyn since 2024." disabled>
+          </div>
+        </form>
+      </div>
+
+      <div class="info-panel reveal">
+        <div class="info-panel-head">
+          <h2>Notification preferences</h2>
+        </div>
+        <div class="pref-row">
+          <div class="pref-text">
+            <strong>Booking updates</strong>
+            <span>Email me when a booking is confirmed, changed, or cancelled.</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div class="pref-row">
+          <div class="pref-text">
+            <strong>New messages</strong>
+            <span>Get notified when a host or renter messages you.</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div class="pref-row">
+          <div class="pref-text">
+            <strong>Promotions & tips</strong>
+            <span>Occasional emails about pricing tips and new features.</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+      </div>
+
     </div>
 
-    <div class="role-options">
-      <button type="button" class="role-option" id="roleRent">
-        <span class="role-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        </span>
-        <h3>Rent</h3>
-        <p>Browse verified homes and cars from hosts in the community and book your next stay or trip.</p>
-      </button>
-
-      <button type="button" class="role-option" id="roleList">
-        <span class="role-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M12 13v5M9.5 15.5h5"/></svg>
-        </span>
-        <h3>List a property or car</h3>
-        <p>Become a host or driver, list your home or vehicle, and start earning from the community.</p>
-      </button>
-    </div>
   </div>
 </section>
 
@@ -469,88 +492,19 @@
     themeToggle.setAttribute('aria-pressed', next === 'dark');
   });
 
-  /* ===== AUTH MODE TOGGLE ===== */
-  const authToggle = document.getElementById('authToggle');
-  const signupFields = document.getElementById('signupFields');
-  const fullName = document.getElementById('fullName');
-  const phone = document.getElementById('phone');
-  const authHeading = document.getElementById('authHeading');
-  const authSubheading = document.getElementById('authSubheading');
-  const authSubmit = document.getElementById('authSubmit');
-  const switchPrompt = document.getElementById('switchPrompt');
-  const switchModeBtn = document.getElementById('switchModeBtn');
-  let mode = 'login';
-
-  function setMode(next){
-    mode = next;
-    authToggle.querySelectorAll('button').forEach(b => {
-      const active = b.dataset.mode === mode;
-      b.classList.toggle('active', active);
-      b.setAttribute('aria-selected', active);
-    });
-
-    const isSignup = mode === 'signup';
-    signupFields.classList.toggle('is-visible', isSignup);
-    fullName.required = isSignup;
-    phone.required = isSignup;
-
-    if(isSignup){
-      authHeading.textContent = 'Create your account';
-      authSubheading.textContent = 'Join the community to book or list homes and cars.';
-      authSubmit.textContent = 'Create Account';
-      switchPrompt.textContent = 'Already a member?';
-      switchModeBtn.textContent = 'Log in';
-    } else {
-      authHeading.textContent = 'Welcome back';
-      authSubheading.textContent = 'Log in to book homes and cars across the community.';
-      authSubmit.textContent = 'Log In';
-      switchPrompt.textContent = 'New here?';
-      switchModeBtn.textContent = 'Create an account';
+  /* ===== EDIT PROFILE TOGGLE ===== */
+  const editToggle = document.getElementById('editToggle');
+  const editToggleLabel = document.getElementById('editToggleLabel');
+  const profileForm = document.getElementById('profileForm');
+  let editing = false;
+  editToggle.addEventListener('click', () => {
+    editing = !editing;
+    profileForm.querySelectorAll('input').forEach(input => { input.disabled = !editing; });
+    editToggleLabel.textContent = editing ? 'Save changes' : 'Edit profile';
+    if(!editing){
+      document.getElementById('profileName').textContent = document.getElementById('fullName').value;
+      document.getElementById('profileEmail').textContent = document.getElementById('email').value;
     }
-  }
-
-  authToggle.addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if(!btn) return;
-    setMode(btn.dataset.mode);
-  });
-  switchModeBtn.addEventListener('click', () => setMode(mode === 'login' ? 'signup' : 'login'));
-
-  /* ===== PASSWORD VISIBILITY ===== */
-  const passwordInput = document.getElementById('password');
-  const togglePassword = document.getElementById('togglePassword');
-  togglePassword.addEventListener('click', () => {
-    const showing = passwordInput.type === 'text';
-    passwordInput.type = showing ? 'password' : 'text';
-    togglePassword.setAttribute('aria-pressed', String(!showing));
-    togglePassword.querySelector('.icon-eye').style.display = showing ? '' : 'none';
-    togglePassword.querySelector('.icon-eye-off').style.display = showing ? 'none' : '';
-  });
-
-  const authStep = document.getElementById('authStep');
-  const roleStep = document.getElementById('roleStep');
-
-  document.getElementById('authForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    if(mode === 'signup'){
-      authStep.style.display = 'none';
-      roleStep.style.display = 'flex';
-      roleStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-  document.getElementById('googleBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-  });
-
-  document.getElementById('roleBackBtn').addEventListener('click', () => {
-    roleStep.style.display = 'none';
-    authStep.style.display = 'flex';
-  });
-  document.getElementById('roleRent').addEventListener('click', () => {
-    window.location.href = 'listings.html';
-  });
-  document.getElementById('roleList').addEventListener('click', () => {
-    window.location.href = 'uzbek-rentals-landing-2.html#list';
   });
 
   const revealEls = document.querySelectorAll('.reveal');
