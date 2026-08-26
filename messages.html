@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Host Dashboard — Uzbek Rentals</title>
+<title>Messages — Uzbek Rentals</title>
 <script>
   (function(){
     var saved = localStorage.getItem('ur-theme');
@@ -29,8 +29,6 @@
     --accent:#0F9D8B;
     --accent-deep:#0B7A6C;
     --accent-pale:#E3F5F1;
-    --warn:#B7791F;
-    --warn-pale:#FBF0DC;
     --radius-xl:20px;
     --radius-lg:16px;
     --radius-md:12px;
@@ -45,7 +43,6 @@
       --ink:#F2F2F2; --ink-soft:#9BA1A8; --ink-faint:#6E747B;
       --line:#262B32; --line-strong:#333941;
       --accent:#22C3AC; --accent-deep:#1AA894; --accent-pale:rgba(34,195,172,0.14);
-      --warn:#E3B04B; --warn-pale:rgba(227,176,75,0.14);
       --shadow-card:0 6px 20px rgba(0,0,0,0.5);
       --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
       --nav-bg:rgba(15,17,21,0.86);
@@ -56,7 +53,6 @@
     --ink:#F2F2F2; --ink-soft:#9BA1A8; --ink-faint:#6E747B;
     --line:#262B32; --line-strong:#333941;
     --accent:#22C3AC; --accent-deep:#1AA894; --accent-pale:rgba(34,195,172,0.14);
-    --warn:#E3B04B; --warn-pale:rgba(227,176,75,0.14);
     --shadow-card:0 6px 20px rgba(0,0,0,0.5);
     --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
     --nav-bg:rgba(15,17,21,0.86);
@@ -123,11 +119,7 @@
   }
   .msg-btn:hover{background:var(--bg-alt);transform:translateY(-1px);}
   .msg-btn svg{width:16px;height:16px;}
-  .msg-badge{
-    position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;
-    background:#E0483E;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:10px;
-    display:flex;align-items:center;justify-content:center;border:2px solid var(--panel);
-  }
+  .msg-btn.current{box-shadow:var(--shadow-lift);}
   .menu-pill{
     display:flex;align-items:center;gap:10px;padding:7px 8px 7px 14px;
     border:1px solid var(--line-strong);border-radius:var(--radius-full);background:var(--panel);cursor:pointer;
@@ -145,74 +137,88 @@
   .page-head h1{font-size:clamp(28px,3.6vw,40px);margin:16px 0 10px;}
   .page-head p{color:var(--ink-soft);font-size:15.5px;line-height:1.6;max-width:520px;}
 
-  /* ===== DASHBOARD LAYOUT ===== */
-  .dashboard-page{padding:32px 0 96px;}
-  .dash-section{margin-top:48px;}
-  .dash-section:first-child{margin-top:0;}
-  .dash-section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
-  .dash-section-head h2{font-size:22px;}
-  .dash-section-count{font-size:13.5px;font-weight:600;color:var(--ink-soft);}
+  /* ===== MESSAGES LAYOUT ===== */
+  .messages-page{padding:32px 0 96px;}
+  .messages-shell{
+    display:grid;grid-template-columns:320px 1fr;height:640px;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-xl);
+    box-shadow:var(--shadow-card);overflow:hidden;
+  }
 
-  /* ===== STATS ROW ===== */
-  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
-  .stat-card{
-    display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line);
-    border-radius:var(--radius-lg);padding:22px 24px;box-shadow:var(--shadow-card);
+  /* ---- conversation list ---- */
+  .conv-list{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;}
+  .conv-search{padding:16px 16px 12px;border-bottom:1px solid var(--line);flex-shrink:0;}
+  .conv-search input{
+    width:100%;padding:10px 14px;border:1px solid var(--line-strong);border-radius:var(--radius-full);
+    background:var(--bg-alt);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);
   }
-  .stat-icon{
-    width:46px;height:46px;border-radius:50%;background:var(--accent-pale);color:var(--accent-deep);
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  .conv-search input:focus{outline:none;border-color:var(--accent);background:var(--panel);}
+  .conv-items{flex:1;overflow-y:auto;}
+  .conv-item{
+    display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;padding:14px 16px;
+    border:none;background:none;border-bottom:1px solid var(--line);cursor:pointer;
+    transition:background .12s ease;
   }
-  .stat-icon svg{width:21px;height:21px;}
-  .stat-number{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:28px;line-height:1.1;color:var(--ink);}
-  .stat-label{font-size:13.5px;color:var(--ink-soft);font-weight:600;margin-top:2px;}
+  .conv-item:hover{background:var(--bg-alt);}
+  .conv-item.active{background:var(--accent-pale);}
+  .conv-avatar{
+    width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;flex-shrink:0;
+  }
+  .conv-body{flex:1;min-width:0;}
+  .conv-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .conv-name{font-weight:700;font-size:14.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .conv-time{font-size:11.5px;color:var(--ink-faint);flex-shrink:0;}
+  .conv-listing{font-size:12px;color:var(--ink-faint);margin:1px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .conv-snippet{font-size:13px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .conv-item.unread .conv-snippet{color:var(--ink);font-weight:600;}
+  .conv-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px;}
 
-  /* ===== ADD LISTING BUTTON ===== */
-  .btn-dark{
-    display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:var(--radius-full);
-    border:none;background:var(--ink);color:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;
-    font-weight:700;font-size:14px;cursor:pointer;transition:transform .15s ease, opacity .15s ease;white-space:nowrap;
+  /* ---- thread panel ---- */
+  .thread-panel{display:flex;flex-direction:column;min-height:0;}
+  .thread-head{
+    display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);flex-shrink:0;
   }
-  .btn-dark:hover{transform:translateY(-2px);opacity:.9;}
-  .btn-dark svg{width:16px;height:16px;}
-  .btn-green{background:var(--accent);color:#fff;}
-  .btn-green:hover{background:var(--accent-deep);opacity:1;}
+  .thread-head .conv-avatar{width:38px;height:38px;font-size:13px;}
+  .thread-head-name{font-weight:700;font-size:15px;}
+  .thread-head-sub{font-size:12.5px;color:var(--ink-soft);}
+  .thread-head-link{margin-left:auto;font-size:13px;font-weight:700;color:var(--accent-deep);white-space:nowrap;}
+  .thread-head-link:hover{text-decoration:underline;}
 
-  /* ===== LISTINGS (cards, reused pattern) ===== */
-  .listing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:32px 24px;}
-  .listing-card{cursor:pointer;}
-  .card-media{
-    position:relative;aspect-ratio:1/1;border-radius:var(--radius-lg);overflow:hidden;
-    background:linear-gradient(150deg,var(--a),var(--b));
+  .thread-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:10px;}
+  .bubble-row{display:flex;}
+  .bubble-row.me{justify-content:flex-end;}
+  .bubble{
+    max-width:70%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;
   }
-  .card-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-  .card-media::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg, rgba(255,255,255,.12), transparent 55%);}
-  .listing-card:hover .card-media{box-shadow:var(--shadow-lift);}
-  .media-badge{
-    position:absolute;top:12px;left:12px;z-index:1;background:#fff;color:var(--ink);
-    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;
-    padding:6px 11px;border-radius:var(--radius-full);
+  .bubble-row:not(.me) .bubble{background:var(--bg-alt);color:var(--ink);border-bottom-left-radius:4px;}
+  .bubble-row.me .bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px;}
+  .bubble-time{display:block;font-size:10.5px;margin-top:4px;opacity:.7;}
+
+  .thread-input{
+    display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--line);flex-shrink:0;
   }
-  .status-badge{display:inline-flex;align-items:center;gap:5px;}
-  .status-badge.active{background:var(--accent-deep);color:#fff;}
-  .status-badge.paused{background:var(--ink-soft);color:#fff;}
-  .status-badge svg{width:8px;height:8px;}
-  .edit-btn{
-    position:absolute;top:10px;right:10px;z-index:1;width:30px;height:30px;border-radius:50%;
-    border:none;cursor:pointer;background:rgba(0,0,0,.24);display:flex;align-items:center;justify-content:center;
-    transition:transform .15s ease, background .15s ease;
+  .thread-input input{
+    flex:1;padding:12px 16px;border:1px solid var(--line-strong);border-radius:var(--radius-full);
+    background:var(--bg-alt);font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);
   }
-  .edit-btn:hover{transform:scale(1.1);background:rgba(0,0,0,.36);}
-  .edit-btn svg{width:14px;height:14px;color:#fff;stroke:#fff;stroke-width:2;fill:none;}
-  .card-info{padding-top:12px;}
-  .card-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
-  .card-row1 h3{font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--ink);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .card-rating{display:flex;align-items:center;gap:4px;font-size:13.5px;font-weight:600;color:var(--ink);flex-shrink:0;}
-  .card-rating svg{width:12.5px;height:12.5px;color:var(--ink);}
-  .card-sub{margin:3px 0 5px;font-size:13.5px;color:var(--ink-soft);}
-  .card-price{font-size:14.5px;color:var(--ink);}
-  .card-price strong{font-weight:700;}
-  .card-bookings{font-size:13px;color:var(--ink-soft);margin-top:2px;}
+  .thread-input input:focus{outline:none;border-color:var(--accent);background:var(--panel);}
+  .send-btn{
+    width:42px;height:42px;border-radius:50%;border:none;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .send-btn:hover{background:var(--accent-deep);transform:translateY(-1px);}
+  .send-btn svg{width:17px;height:17px;}
+
+  .thread-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;color:var(--ink-soft);}
+  .thread-empty svg{width:40px;height:40px;color:var(--ink-faint);margin-bottom:14px;}
+
+  @media (max-width:760px){
+    .messages-shell{grid-template-columns:1fr;height:auto;}
+    .conv-list{border-right:none;border-bottom:1px solid var(--line);max-height:280px;}
+    .thread-panel{height:520px;}
+  }
 
   /* ===== SHARED ===== */
   .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease;}
@@ -242,17 +248,12 @@
     .footer-top{grid-template-columns:1fr 1fr;}
     .footer-brand{grid-column:1/-1;}
   }
-  @media (max-width:640px){
-    .stat-grid{grid-template-columns:1fr;}
-    .dash-section-head{flex-direction:column;align-items:flex-start;}
-  }
   @media (max-width:860px){
     .nav-links{position:fixed;top:80px;left:0;right:0;background:var(--bg);flex-direction:column;align-items:flex-start;gap:0;border-bottom:1px solid var(--line);max-height:0;overflow:hidden;transition:max-height .25s ease;}
     .nav-links.open{max-height:320px;}
     .nav-links a{width:100%;padding:14px 32px;border-bottom:1px solid var(--line);}
     .nav-toggle{display:block;}
     .host-link{display:none;}
-    .listing-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:22px 16px;}
   }
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto;}
@@ -277,20 +278,19 @@
       <a href="index.html#homes">Homes</a>
       <a href="index.html#homes">Cars</a>
       <a href="listings.html">Listings</a>
-      <a href="host-dashboard.html" class="current">Host Dashboard</a>
+      <a href="renter-dashboard.html">Dashboard</a>
       <a href="index.html#how">How it works</a>
       <a href="index.html#pricing">Pricing</a>
     </nav>
 
     <div class="nav-right">
-      <a href="renter-dashboard.html" class="host-link">Switch to renter</a>
+      <a href="host-dashboard.html" class="host-link">Become a host</a>
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
       </button>
-      <a href="messages.html" class="msg-btn" aria-label="Open messages">
+      <a href="messages.html" class="msg-btn current" aria-label="Open messages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
-        <span class="msg-badge">2</span>
       </a>
       <a href="profile.html" class="menu-pill" aria-label="Open profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -304,124 +304,68 @@
 <section class="page-head reveal">
   <div class="wrap">
     <span class="eyebrow-pill">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
-      Host dashboard
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
+      Messages
     </span>
-    <h1>Manage your listings.</h1>
-    <p>Track how your homes and cars are performing, and add new listings whenever you're ready.</p>
+    <h1>Your conversations.</h1>
+    <p>Chat with hosts about a stay or a car, or with renters asking about your listings — all in one inbox.</p>
   </div>
 </section>
 
-<section class="dashboard-page">
+<section class="messages-page">
   <div class="wrap">
+    <div class="messages-shell reveal">
 
-    <!-- ===== STATS ===== -->
-    <div class="dash-section reveal">
-      <div class="stat-grid">
-        <div class="stat-card">
-          <span class="stat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
-          </span>
-          <div>
-            <div class="stat-number" id="statListings">4</div>
-            <div class="stat-label">Total listings</div>
-          </div>
+      <div class="conv-list">
+        <div class="conv-search">
+          <input type="text" id="convSearch" placeholder="Search conversations">
         </div>
-        <div class="stat-card">
-          <span class="stat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
-          </span>
-          <div>
-            <div class="stat-number" id="statBookings">9</div>
-            <div class="stat-label">Bookings this month</div>
-          </div>
+        <div class="conv-items" id="convItems">
+
+          <button class="conv-item unread active" data-conv="aziza">
+            <span class="conv-avatar" style="background:linear-gradient(150deg,#C9A66B,#9C7B3E);">A</span>
+            <span class="conv-body">
+              <span class="conv-top"><span class="conv-name">Aziza Yusupova</span><span class="conv-time">9:41 AM</span></span>
+              <span class="conv-listing">Family house with backyard · Sacramento, CA</span>
+              <span class="conv-snippet">Sure, check-in is at 3 PM, but I can leave a lockbox key if you arrive early.</span>
+            </span>
+            <span class="conv-dot"></span>
+          </button>
+
+          <button class="conv-item unread" data-conv="elyor">
+            <span class="conv-avatar" style="background:linear-gradient(150deg,#7BA7C2,#3E6B8C);">E</span>
+            <span class="conv-body">
+              <span class="conv-top"><span class="conv-name">Elyor Tashkentov</span><span class="conv-time">Yesterday</span></span>
+              <span class="conv-listing">2021 Toyota Camry · Seattle, WA</span>
+              <span class="conv-snippet">The car is available that weekend. Want me to hold it for you?</span>
+            </span>
+            <span class="conv-dot"></span>
+          </button>
+
+          <button class="conv-item" data-conv="dilnoza">
+            <span class="conv-avatar" style="background:linear-gradient(150deg,#8FA98C,#5E7A5B);">D</span>
+            <span class="conv-body">
+              <span class="conv-top"><span class="conv-name">Dilnoza Rashidova</span><span class="conv-time">Mon</span></span>
+              <span class="conv-listing">Sunlit loft near Prospect Park · Brooklyn, NY</span>
+              <span class="conv-snippet">You: Of course — I'll send the wifi password the day before check-in.</span>
+            </span>
+          </button>
+
+          <button class="conv-item" data-conv="sardor">
+            <span class="conv-avatar" style="background:linear-gradient(150deg,#D98E73,#B15F42);">S</span>
+            <span class="conv-body">
+              <span class="conv-top"><span class="conv-name">Sardor Aliyev</span><span class="conv-time">Aug 18</span></span>
+              <span class="conv-listing">Honda CR-V, AWD · Chicago, IL</span>
+              <span class="conv-snippet">Thanks again for the smooth trip, would rent from you again!</span>
+            </span>
+          </button>
+
         </div>
       </div>
+
+      <div class="thread-panel" id="threadPanel"></div>
+
     </div>
-
-    <!-- ===== ACTIVE LISTINGS ===== -->
-    <div class="dash-section reveal">
-      <div class="dash-section-head">
-        <h2>Your listings</h2>
-        <a href="index.html#list" class="btn-dark btn-green">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
-          Add New Listing
-        </a>
-      </div>
-
-      <div class="listing-grid" id="listingGrid">
-
-        <article class="listing-card" onclick="location.href='listing-detail.html'">
-          <div class="card-media" style="--a:#7BA7C2;--b:#3E6B8C;">
-            <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=60" alt="Sunlit loft near Prospect Park" loading="lazy">
-            <span class="media-badge status-badge active"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12"/></svg>Active</span>
-            <button class="edit-btn" aria-label="Edit listing"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Sunlit loft near Prospect Park</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.97</span>
-            </div>
-            <p class="card-sub">Brooklyn, NY · Entire apartment</p>
-            <p class="card-price"><strong>$145</strong> night</p>
-            <p class="card-bookings">4 bookings this month</p>
-          </div>
-        </article>
-
-        <article class="listing-card" onclick="location.href='listing-detail.html'">
-          <div class="card-media" style="--a:#C9A66B;--b:#9C7B3E;">
-            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=60" alt="Family house with backyard" loading="lazy">
-            <span class="media-badge status-badge active"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12"/></svg>Active</span>
-            <button class="edit-btn" aria-label="Edit listing"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Family house with backyard</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.88</span>
-            </div>
-            <p class="card-sub">Sacramento, CA · Entire house</p>
-            <p class="card-price"><strong>$210</strong> night</p>
-            <p class="card-bookings">3 bookings this month</p>
-          </div>
-        </article>
-
-        <article class="listing-card" onclick="location.href='car-listing-detail.html'">
-          <div class="card-media" style="--a:#A9B4BD;--b:#6E7A85;">
-            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=60" alt="2021 Toyota Camry" loading="lazy">
-            <span class="media-badge status-badge active"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12"/></svg>Active</span>
-            <button class="edit-btn" aria-label="Edit listing"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>2021 Toyota Camry</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.95</span>
-            </div>
-            <p class="card-sub">Seattle, WA · Sedan · Automatic</p>
-            <p class="card-price"><strong>$52</strong> day</p>
-            <p class="card-bookings">2 bookings this month</p>
-          </div>
-        </article>
-
-        <article class="listing-card" onclick="location.href='listing-detail.html'">
-          <div class="card-media" style="--a:#E3B77D;--b:#C68F49;">
-            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=60" alt="Modern studio downtown" loading="lazy">
-            <span class="media-badge status-badge paused"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12"/></svg>Paused</span>
-            <button class="edit-btn" aria-label="Edit listing"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Modern studio downtown</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.90</span>
-            </div>
-            <p class="card-sub">Denver, CO · Entire studio</p>
-            <p class="card-price"><strong>$98</strong> night</p>
-            <p class="card-bookings">0 bookings this month</p>
-          </div>
-        </article>
-
-      </div>
-    </div>
-
   </div>
 </section>
 
@@ -508,9 +452,117 @@
     themeToggle.setAttribute('aria-pressed', next === 'dark');
   });
 
-  document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => e.stopPropagation());
+  /* ===== CONVERSATIONS ===== */
+  const conversations = {
+    aziza: {
+      name: 'Aziza Yusupova', initial: 'A', gradient: 'linear-gradient(150deg,#C9A66B,#9C7B3E)',
+      listing: 'Family house with backyard · Sacramento, CA',
+      messages: [
+        { me: false, text: "Hi! Just confirming — is the house available Sep 12 to 16?", time: '9:12 AM' },
+        { me: true, text: "Yes, it's open those dates. Anything specific you need to know?", time: '9:20 AM' },
+        { me: false, text: "What time is check-in, and is early arrival possible?", time: '9:35 AM' },
+        { me: true, text: "Sure, check-in is at 3 PM, but I can leave a lockbox key if you arrive early.", time: '9:41 AM' }
+      ]
+    },
+    elyor: {
+      name: 'Elyor Tashkentov', initial: 'E', gradient: 'linear-gradient(150deg,#7BA7C2,#3E6B8C)',
+      listing: '2021 Toyota Camry · Seattle, WA',
+      messages: [
+        { me: true, text: "Hey, is the Camry free the weekend of Oct 3rd?", time: 'Yesterday, 4:02 PM' },
+        { me: false, text: "The car is available that weekend. Want me to hold it for you?", time: 'Yesterday, 4:15 PM' }
+      ]
+    },
+    dilnoza: {
+      name: 'Dilnoza Rashidova', initial: 'D', gradient: 'linear-gradient(150deg,#8FA98C,#5E7A5B)',
+      listing: 'Sunlit loft near Prospect Park · Brooklyn, NY',
+      messages: [
+        { me: false, text: "Hi! Is wifi included, and could you send the password ahead of time?", time: 'Mon, 11:04 AM' },
+        { me: true, text: "Of course — I'll send the wifi password the day before check-in.", time: 'Mon, 11:20 AM' }
+      ]
+    },
+    sardor: {
+      name: 'Sardor Aliyev', initial: 'S', gradient: 'linear-gradient(150deg,#D98E73,#B15F42)',
+      listing: 'Honda CR-V, AWD · Chicago, IL',
+      messages: [
+        { me: false, text: "Just dropped the keys in the lockbox, thanks for a smooth trip!", time: 'Aug 18, 6:30 PM' },
+        { me: true, text: "Thanks again for the smooth trip, would rent from you again!", time: 'Aug 18, 6:45 PM' }
+      ]
+    }
+  };
+
+  const convItems = document.getElementById('convItems');
+  const threadPanel = document.getElementById('threadPanel');
+  let activeConv = null;
+
+  function renderThread(id){
+    const conv = conversations[id];
+    activeConv = id;
+
+    convItems.querySelectorAll('.conv-item').forEach(item => {
+      const isActive = item.dataset.conv === id;
+      item.classList.toggle('active', isActive);
+      if(isActive) item.classList.remove('unread');
+    });
+
+    const bubbles = conv.messages.map(m => `
+      <div class="bubble-row ${m.me ? 'me' : ''}">
+        <div class="bubble">${m.text}<span class="bubble-time">${m.time}</span></div>
+      </div>
+    `).join('');
+
+    threadPanel.innerHTML = `
+      <div class="thread-head">
+        <span class="conv-avatar" style="background:${conv.gradient};">${conv.initial}</span>
+        <div>
+          <div class="thread-head-name">${conv.name}</div>
+          <div class="thread-head-sub">${conv.listing}</div>
+        </div>
+        <a href="listings.html" class="thread-head-link">View listing</a>
+      </div>
+      <div class="thread-body" id="threadBody">${bubbles}</div>
+      <form class="thread-input" id="threadForm">
+        <input type="text" id="threadInput" placeholder="Write a message…" autocomplete="off">
+        <button class="send-btn" type="submit" aria-label="Send message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </button>
+      </form>
+    `;
+
+    const threadBody = document.getElementById('threadBody');
+    threadBody.scrollTop = threadBody.scrollHeight;
+
+    document.getElementById('threadForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('threadInput');
+      const text = input.value.trim();
+      if(!text) return;
+      const now = new Date();
+      const time = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      conv.messages.push({ me: true, text, time });
+      const row = document.createElement('div');
+      row.className = 'bubble-row me';
+      row.innerHTML = `<div class="bubble">${text}<span class="bubble-time">${time}</span></div>`;
+      threadBody.appendChild(row);
+      threadBody.scrollTop = threadBody.scrollHeight;
+      input.value = '';
+    });
+  }
+
+  convItems.querySelectorAll('.conv-item').forEach(item => {
+    item.addEventListener('click', () => renderThread(item.dataset.conv));
   });
+
+  const convSearch = document.getElementById('convSearch');
+  convSearch.addEventListener('input', () => {
+    const q = convSearch.value.trim().toLowerCase();
+    convItems.querySelectorAll('.conv-item').forEach(item => {
+      const text = item.textContent.toLowerCase();
+      item.style.display = text.includes(q) ? '' : 'none';
+    });
+  });
+
+  const requested = new URLSearchParams(location.search).get('with');
+  renderThread(conversations[requested] ? requested : 'aziza');
 
   const revealEls = document.querySelectorAll('.reveal');
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)){
