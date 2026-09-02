@@ -83,6 +83,7 @@
   .brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .brand-mark svg{width:19px;height:19px;color:#fff;}
   .brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;color:var(--ink);white-space:nowrap;}
+  .brand-name-accent{color:var(--accent);}
   .nav-links{display:flex;align-items:center;gap:30px;font-weight:600;font-size:14.5px;color:var(--ink);}
   .nav-links a{padding:8px 0;position:relative;}
   .nav-links a::after{content:"";position:absolute;left:0;bottom:2px;width:0;height:2px;background:var(--ink);transition:width .2s ease;}
@@ -267,9 +268,9 @@
   <div class="wrap navbar-inner">
     <a href="/" class="brand">
       <span class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2l7 7-7 7-7-7 7-7zM12 9m-2.6 0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z"/><path d="M9 13.2l3 5.2 3-5.2z" opacity="0.92"/></svg>
       </span>
-      <span class="brand-name">Uzbek Rentals</span>
+      <span class="brand-name">Uzbek <span class="brand-name-accent">Rentals</span></span>
     </a>
 
     <nav id="navLinks" class="nav-links">
@@ -296,7 +297,7 @@
   <div class="auth-card reveal">
     <div class="auth-brand">
       <span class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2l7 7-7 7-7-7 7-7zM12 9m-2.6 0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z"/><path d="M9 13.2l3 5.2 3-5.2z" opacity="0.92"/></svg>
       </span>
       <h1 id="authHeading">Welcome back</h1>
       <p id="authSubheading">Log in to book homes and cars across the community.</p>
@@ -406,8 +407,8 @@
     <div class="footer-top">
       <div class="fcol footer-brand">
         <a href="/" class="brand">
-          <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>
-          <span class="brand-name">Uzbek Rentals</span>
+          <span class="brand-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2l7 7-7 7-7-7 7-7zM12 9m-2.6 0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z"/><path d="M9 13.2l3 5.2 3-5.2z" opacity="0.92"/></svg></span>
+          <span class="brand-name">Uzbek <span class="brand-name-accent">Rentals</span></span>
         </a>
         <p>A homes & cars marketplace built by and for the Uzbek community across the USA. Verified hosts, honest prices, and support that speaks your language.</p>
         <div class="footer-social">
@@ -551,6 +552,17 @@
   const authStep = document.getElementById('authStep');
   const roleStep = document.getElementById('roleStep');
 
+  /* ===== POST-AUTH REDIRECT ===== */
+  function getRedirectTarget(){
+    const raw = new URLSearchParams(location.search).get('redirect');
+    if(!raw) return null;
+    // Only ever follow a same-origin relative path — a leading "//" (or
+    // "/\") is a protocol-relative URL that would send the user off-site.
+    if(!raw.startsWith('/') || raw.startsWith('//') || raw.startsWith('/\\')) return null;
+    return raw;
+  }
+  const redirectTarget = getRedirectTarget();
+
   /* ===== BACKEND WIRING ===== */
   function showAuthError(message){
     authError.textContent = message;
@@ -603,6 +615,8 @@
         });
         localStorage.setItem('ur-access-token', data.access_token);
         localStorage.setItem('ur-refresh-token', data.refresh_token);
+        localStorage.setItem('ur-user-name', data.user.full_name);
+        localStorage.setItem('ur-user-role', data.user.role);
 
         authStep.style.display = 'none';
         roleStep.style.display = 'flex';
@@ -613,8 +627,10 @@
         });
         localStorage.setItem('ur-access-token', data.access_token);
         localStorage.setItem('ur-refresh-token', data.refresh_token);
+        localStorage.setItem('ur-user-name', data.user.full_name);
+        localStorage.setItem('ur-user-role', data.user.role);
 
-        window.location.href = data.user.role === 'host' ? '/host-dashboard' : '/listings';
+        window.location.href = redirectTarget || (data.user.role === 'host' ? '/host-dashboard' : '/renter-dashboard');
       }
     } catch(err){
       showAuthError(err.message);
@@ -641,7 +657,9 @@
       });
       localStorage.setItem('ur-access-token', data.access_token);
       localStorage.setItem('ur-refresh-token', data.refresh_token);
-      window.location.href = data.user.role === 'host' ? '/host-dashboard' : '/listings';
+      localStorage.setItem('ur-user-name', data.user.full_name);
+      localStorage.setItem('ur-user-role', data.user.role);
+      window.location.href = redirectTarget || (data.user.role === 'host' ? '/host-dashboard' : '/renter-dashboard');
     } catch(err){
       showAuthError(err.message);
     }
@@ -679,18 +697,19 @@
     authStep.style.display = 'flex';
   });
   document.getElementById('roleRent').addEventListener('click', () => {
-    window.location.href = '/listings';
+    window.location.href = redirectTarget || '/renter-dashboard';
   });
   document.getElementById('roleList').addEventListener('click', async () => {
     const token = localStorage.getItem('ur-access-token');
     if(token){
       try {
         await apiRequest('/api/auth/me/role', { method: 'PATCH', token, body: JSON.stringify({ role: 'host' }) });
+        localStorage.setItem('ur-user-role', 'host');
       } catch(_) {
         // Account was already created; let them into the host dashboard even if the role update failed.
       }
     }
-    window.location.href = '/host-dashboard';
+    window.location.href = redirectTarget || '/host-dashboard';
   });
 
   const revealEls = document.querySelectorAll('.reveal');

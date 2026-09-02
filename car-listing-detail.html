@@ -36,6 +36,7 @@
     --shadow-card:0 6px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.06);
     --shadow-lift:0 14px 34px -8px rgba(0,0,0,0.18);
     --nav-bg:rgba(255,255,255,0.92);
+    --skeleton-shine:rgba(255,255,255,0.75);
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -46,6 +47,7 @@
       --shadow-card:0 6px 20px rgba(0,0,0,0.5);
       --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
       --nav-bg:rgba(15,17,21,0.86);
+      --skeleton-shine:rgba(255,255,255,0.07);
     }
   }
   :root[data-theme="dark"]{
@@ -56,6 +58,7 @@
     --shadow-card:0 6px 20px rgba(0,0,0,0.5);
     --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
     --nav-bg:rgba(15,17,21,0.86);
+    --skeleton-shine:rgba(255,255,255,0.07);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -82,6 +85,7 @@
   .brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .brand-mark svg{width:19px;height:19px;color:#fff;}
   .brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;color:var(--ink);white-space:nowrap;}
+  .brand-name-accent{color:var(--accent);}
   .nav-links{display:flex;align-items:center;gap:30px;font-weight:600;font-size:14.5px;color:var(--ink);}
   .nav-links a{padding:8px 0;position:relative;}
   .nav-links a::after{content:"";position:absolute;left:0;bottom:2px;width:0;height:2px;background:var(--ink);transition:width .2s ease;}
@@ -90,6 +94,8 @@
 
   .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
   .host-link{font-weight:600;font-size:14.5px;padding:10px 14px;border-radius:var(--radius-full);white-space:nowrap;}
+  .nav-user{display:none;align-items:center;gap:10px;}
+  .nav-user-name{font-weight:600;font-size:14.5px;color:var(--ink);white-space:nowrap;}
   .host-link:hover{background:var(--bg-alt);}
   .theme-toggle{
     display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;
@@ -196,6 +202,26 @@
   .amenities-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;}
   .amenity{display:flex;align-items:center;gap:14px;font-size:14.5px;font-weight:600;}
   .amenity svg{width:20px;height:20px;color:var(--ink);flex-shrink:0;}
+
+  /* ===== REVIEWS ===== */
+  .reviews-list{display:flex;flex-direction:column;gap:24px;}
+  .review-card{display:flex;gap:14px;}
+  .review-avatar{
+    width:44px;height:44px;border-radius:50%;background:linear-gradient(150deg,var(--a),var(--b));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;flex-shrink:0;
+  }
+  .review-body{flex:1;min-width:0;}
+  .review-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .review-name{font-family:'Inter',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);}
+  .review-date{font-size:12.5px;color:var(--ink-soft);}
+  .review-rating{display:flex;align-items:center;gap:4px;margin:4px 0 8px;font-size:13.5px;font-weight:700;color:var(--ink);}
+  .review-rating svg{width:12.5px;height:12.5px;color:var(--ink);}
+  .review-text{margin:0;font-size:14.5px;line-height:1.65;color:var(--ink);}
+  .reviews-empty{margin:0;font-size:14.5px;color:var(--ink-soft);}
+  .review-skeleton .review-avatar{background:var(--bg-alt-2);}
+  .skeleton-line{height:11px;border-radius:6px;background:var(--bg-alt-2);}
+  .skeleton-line + .skeleton-line{margin-top:9px;}
 
   .map-block{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--line);height:220px;position:relative;background:
     radial-gradient(circle at 30% 40%, var(--accent-pale), transparent 55%),
@@ -314,9 +340,9 @@
   <div class="wrap navbar-inner">
     <a href="/" class="brand">
       <span class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2l7 7-7 7-7-7 7-7zM12 9m-2.6 0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z"/><path d="M9 13.2l3 5.2 3-5.2z" opacity="0.92"/></svg>
       </span>
-      <span class="brand-name">Uzbek Rentals</span>
+      <span class="brand-name">Uzbek <span class="brand-name-accent">Rentals</span></span>
     </a>
 
     <nav id="navLinks" class="nav-links">
@@ -331,6 +357,10 @@
     <div class="nav-right">
       <a href="/host-dashboard" class="host-link">Become a host</a>
       <a href="/login" class="host-link" id="navAuthLink">Log in</a>
+      <div class="nav-user" id="navUser">
+        <span class="nav-user-name" id="navUserName"></span>
+        <button type="button" class="host-link" id="navLogoutBtn">Log Out</button>
+      </div>
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
@@ -469,6 +499,11 @@
       </section>
 
       <section class="reveal">
+        <h2 style="font-size:19px;margin-bottom:20px;">Reviews</h2>
+        <div class="reviews-list" id="reviewsList" aria-live="polite" aria-busy="true"></div>
+      </section>
+
+      <section class="reveal">
         <h2 style="font-size:19px;margin-bottom:16px;">Where you'll pick it up</h2>
         <div class="map-block"><div class="map-pin"></div></div>
         <p class="map-caption">Seattle, WA — exact pickup location shared after booking.</p>
@@ -531,8 +566,8 @@
     <div class="footer-top">
       <div class="fcol footer-brand">
         <a href="/" class="brand">
-          <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>
-          <span class="brand-name">Uzbek Rentals</span>
+          <span class="brand-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2l7 7-7 7-7-7 7-7zM12 9m-2.6 0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z"/><path d="M9 13.2l3 5.2 3-5.2z" opacity="0.92"/></svg></span>
+          <span class="brand-name">Uzbek <span class="brand-name-accent">Rentals</span></span>
         </a>
         <p>A homes & cars marketplace built by and for the Uzbek community across the USA. Verified hosts, honest prices, and support that speaks your language.</p>
         <div class="footer-social">
@@ -621,6 +656,123 @@
     e.currentTarget.classList.toggle('saved');
   });
 
+  /* ===== REVIEWS (loaded from saved review records) ===== */
+  const REVIEW_AVATAR_PALETTE = [
+    ['#7BA7C2', '#3E6B8C'], ['#C9A66B', '#9C7B3E'], ['#D98E73', '#B15F42'],
+    ['#8FA98C', '#5E7A5B'], ['#B7A7CE', '#8368A0'], ['#E0A8B0', '#C06B79'],
+  ];
+  const REVIEW_STAR_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>';
+
+  function initialsFor(name){
+    return (name || 'Guest').trim().split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase();
+  }
+
+  function formatReviewDate(iso){
+    const d = new Date(iso);
+    return isNaN(d) ? '' : d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  function createReviewCard(review, index){
+    const [a, b] = REVIEW_AVATAR_PALETTE[index % REVIEW_AVATAR_PALETTE.length];
+    const card = document.createElement('div');
+    card.className = 'review-card';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'review-avatar';
+    avatar.style.setProperty('--a', a);
+    avatar.style.setProperty('--b', b);
+    avatar.textContent = initialsFor(review.author_name);
+    card.appendChild(avatar);
+
+    const body = document.createElement('div');
+    body.className = 'review-body';
+
+    const head = document.createElement('div');
+    head.className = 'review-head';
+    const name = document.createElement('span');
+    name.className = 'review-name';
+    name.textContent = review.author_name || 'Guest';
+    head.appendChild(name);
+    const dateStr = formatReviewDate(review.created_at);
+    if(dateStr){
+      const dateEl = document.createElement('span');
+      dateEl.className = 'review-date';
+      dateEl.textContent = dateStr;
+      head.appendChild(dateEl);
+    }
+    body.appendChild(head);
+
+    const rating = document.createElement('div');
+    rating.className = 'review-rating';
+    rating.innerHTML = REVIEW_STAR_ICON;
+    rating.appendChild(document.createTextNode(Number(review.rating).toFixed(1)));
+    body.appendChild(rating);
+
+    if(review.comment){
+      const text = document.createElement('p');
+      text.className = 'review-text';
+      text.textContent = review.comment;
+      body.appendChild(text);
+    }
+
+    card.appendChild(body);
+    return card;
+  }
+
+  function renderReviewSkeleton(list, count){
+    list.setAttribute('aria-busy', 'true');
+    list.innerHTML = '';
+    for(let i = 0; i < count; i++){
+      const s = document.createElement('div');
+      s.className = 'review-card review-skeleton';
+      s.setAttribute('aria-hidden', 'true');
+      s.innerHTML =
+        '<div class="review-avatar"></div>' +
+        '<div class="review-body">' +
+          '<div class="skeleton-line" style="width:40%;height:13px;"></div>' +
+          '<div class="skeleton-line" style="width:90%;"></div>' +
+          '<div class="skeleton-line" style="width:70%;"></div>' +
+        '</div>';
+      list.appendChild(s);
+    }
+  }
+
+  function renderReviews(list, reviews){
+    list.setAttribute('aria-busy', 'false');
+    list.innerHTML = '';
+    if(reviews.length === 0){
+      const empty = document.createElement('p');
+      empty.className = 'reviews-empty';
+      empty.textContent = 'No reviews yet.';
+      list.appendChild(empty);
+      return;
+    }
+    reviews.forEach((review, i) => list.appendChild(createReviewCard(review, i)));
+  }
+
+  async function loadReviews(){
+    const list = document.getElementById('reviewsList');
+    if(!list) return;
+    const listingId = new URLSearchParams(location.search).get('id');
+    if(!listingId){
+      renderReviews(list, []);
+      return;
+    }
+    renderReviewSkeleton(list, 3);
+    let reviews = [];
+    try {
+      const res = await fetch('/api/reviews/listing/' + encodeURIComponent(listingId));
+      if(!res.ok) throw new Error('Failed to load reviews (' + res.status + ')');
+      reviews = await res.json();
+    } catch(err){
+      console.error('Could not load reviews:', err);
+      reviews = [];
+    }
+    renderReviews(list, reviews);
+  }
+
+  loadReviews();
+
   function goToBooking(){
     document.getElementById('bookingCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
@@ -655,7 +807,8 @@
     if(e) e.preventDefault();
     localStorage.removeItem('ur-access-token');
     localStorage.removeItem('ur-refresh-token');
-    window.location.href = '/login';
+    localStorage.removeItem('ur-user-name');
+    window.location.href = '/';
   }
 
   var profileLink = document.getElementById('logoutLink');
@@ -663,13 +816,23 @@
     profileLink.addEventListener('click', logOut);
   }
 
+  var navLogoutBtn = document.getElementById('navLogoutBtn');
+  if(navLogoutBtn){
+    navLogoutBtn.addEventListener('click', logOut);
+  }
+
   if(!localStorage.getItem('ur-access-token')) return;
 
-  var navLink = document.getElementById('navAuthLink');
-  if(navLink){
-    navLink.textContent = 'Log out';
-    navLink.href = '#';
-    navLink.addEventListener('click', logOut);
+  var navAuthLink = document.getElementById('navAuthLink');
+  if(navAuthLink) navAuthLink.style.display = 'none';
+
+  var navUser = document.getElementById('navUser');
+  if(navUser) navUser.style.display = 'flex';
+
+  var navUserName = document.getElementById('navUserName');
+  if(navUserName){
+    var fullName = (localStorage.getItem('ur-user-name') || '').trim();
+    navUserName.textContent = fullName ? fullName.split(/\s+/)[0] : 'Account';
   }
 })();
 </script>

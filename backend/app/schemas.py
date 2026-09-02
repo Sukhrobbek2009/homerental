@@ -172,6 +172,7 @@ class ReviewOut(BaseModel):
     booking_id: str
     listing_id: str
     author_id: str
+    author_name: str
     rating: int
     comment: str | None
     created_at: datetime

@@ -6,7 +6,7 @@ from .config import settings
 from .database import Base, SessionLocal, engine
 from .migrations import ensure_listing_columns
 from .routers import auth, bookings, listings, pages, reviews
-from .seed import seed_starter_listings
+from .seed import seed_starter_listings, seed_starter_reviews
 
 Base.metadata.create_all(bind=engine)
 ensure_listing_columns(engine)
@@ -14,6 +14,7 @@ ensure_listing_columns(engine)
 db = SessionLocal()
 try:
     seed_starter_listings(db)
+    seed_starter_reviews(db)
 finally:
     db.close()
 
