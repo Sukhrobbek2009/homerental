@@ -29,8 +29,6 @@
     --accent:#0F9D8B;
     --accent-deep:#0B7A6C;
     --accent-pale:#E3F5F1;
-    --warn:#B7791F;
-    --warn-pale:#FBF0DC;
     --radius-xl:20px;
     --radius-lg:16px;
     --radius-md:12px;
@@ -45,7 +43,6 @@
       --ink:#F2F2F2; --ink-soft:#9BA1A8; --ink-faint:#6E747B;
       --line:#262B32; --line-strong:#333941;
       --accent:#22C3AC; --accent-deep:#1AA894; --accent-pale:rgba(34,195,172,0.14);
-      --warn:#E3B04B; --warn-pale:rgba(227,176,75,0.14);
       --shadow-card:0 6px 20px rgba(0,0,0,0.5);
       --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
       --nav-bg:rgba(15,17,21,0.86);
@@ -56,7 +53,6 @@
     --ink:#F2F2F2; --ink-soft:#9BA1A8; --ink-faint:#6E747B;
     --line:#262B32; --line-strong:#333941;
     --accent:#22C3AC; --accent-deep:#1AA894; --accent-pale:rgba(34,195,172,0.14);
-    --warn:#E3B04B; --warn-pale:rgba(227,176,75,0.14);
     --shadow-card:0 6px 20px rgba(0,0,0,0.5);
     --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
     --nav-bg:rgba(15,17,21,0.86);
@@ -82,12 +78,13 @@
   }
   .eyebrow-pill svg{width:14px;height:14px;}
 
-  /* ===== NAV ===== */
+  /* ===== NAV (shared) ===== */
   header.navbar{
     position:sticky;top:0;z-index:60;background:var(--nav-bg);
-    backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(0,0,0,.03);
+    backdrop-filter:blur(12px);border-bottom:1px solid transparent;
     transition:border-color .2s ease, box-shadow .2s ease, background .25s ease;
   }
+  header.navbar.scrolled{border-bottom-color:var(--line);box-shadow:0 1px 0 rgba(0,0,0,.03);}
   .navbar-inner{position:relative;display:flex;align-items:center;justify-content:space-between;height:80px;gap:16px;}
   .brand{display:flex;align-items:center;gap:9px;flex-shrink:0;}
   .brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -116,18 +113,6 @@
     :root:not([data-theme="light"]) .theme-toggle .icon-sun{display:none;}
     :root:not([data-theme="light"]) .theme-toggle .icon-moon{display:block;}
   }
-  .msg-btn{
-    position:relative;display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;
-    border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;flex-shrink:0;
-    transition:background .15s ease, transform .15s ease;
-  }
-  .msg-btn:hover{background:var(--bg-alt);transform:translateY(-1px);}
-  .msg-btn svg{width:16px;height:16px;}
-  .msg-badge{
-    position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;
-    background:#E0483E;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:10px;
-    display:flex;align-items:center;justify-content:center;border:2px solid var(--panel);
-  }
   .menu-pill{
     display:flex;align-items:center;gap:10px;padding:7px 8px 7px 14px;
     border:1px solid var(--line-strong);border-radius:var(--radius-full);background:var(--panel);cursor:pointer;
@@ -140,70 +125,66 @@
   .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px;}
   .nav-toggle span{display:block;width:22px;height:2px;background:var(--ink);margin:5px 0;border-radius:2px;}
 
-  /* ===== PAGE HEAD ===== */
-  .page-head{padding:48px 0 8px;}
-  .page-head h1{font-size:clamp(28px,3.6vw,40px);margin:16px 0 10px;}
-  .page-head p{color:var(--ink-soft);font-size:15.5px;line-height:1.6;max-width:520px;}
+  /* ===== PAGE HEADER ===== */
+  .page-header{padding:48px 0 32px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .page-header h1{font-size:clamp(28px,3.6vw,40px);margin-bottom:10px;}
+  .page-header p{font-size:16px;color:var(--ink-soft);max-width:520px;}
+  .add-listing-btn{
+    display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;
+    padding:13px 22px;border:none;border-radius:var(--radius-full);font-weight:700;font-size:14.5px;
+    cursor:pointer;box-shadow:var(--shadow-card);transition:background .15s ease,transform .15s ease,box-shadow .15s ease;
+    white-space:nowrap;
+  }
+  .add-listing-btn:hover{background:var(--accent-deep);transform:translateY(-1px);box-shadow:var(--shadow-lift);}
+  .add-listing-btn svg{width:17px;height:17px;}
 
   /* ===== DASHBOARD LAYOUT ===== */
-  .dashboard-page{padding:32px 0 96px;}
-  .dash-section{margin-top:48px;}
-  .dash-section:first-child{margin-top:0;}
-  .dash-section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .dashboard-page{padding:0 0 96px;}
+  .dash-section{margin-top:52px;}
+  .dash-section:first-of-type{margin-top:0;}
+  .dash-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
   .dash-section-head h2{font-size:22px;}
-  .dash-section-count{font-size:13.5px;font-weight:600;color:var(--ink-soft);}
+  .dash-section-head .count-pill{font-size:13.5px;font-weight:600;color:var(--ink-soft);}
 
-  /* ===== STATS ROW ===== */
-  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+  /* --- Stats row --- */
+  .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
   .stat-card{
     display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line);
-    border-radius:var(--radius-lg);padding:22px 24px;box-shadow:var(--shadow-card);
+    border-radius:var(--radius-xl);padding:22px 24px;box-shadow:var(--shadow-card);
   }
   .stat-icon{
-    width:46px;height:46px;border-radius:50%;background:var(--accent-pale);color:var(--accent-deep);
+    width:48px;height:48px;border-radius:50%;background:var(--accent-pale);color:var(--accent-deep);
     display:flex;align-items:center;justify-content:center;flex-shrink:0;
   }
-  .stat-icon svg{width:21px;height:21px;}
-  .stat-number{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:28px;line-height:1.1;color:var(--ink);}
+  .stat-icon svg{width:22px;height:22px;}
+  .stat-value{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:28px;color:var(--ink);line-height:1.1;}
   .stat-label{font-size:13.5px;color:var(--ink-soft);font-weight:600;margin-top:2px;}
 
-  /* ===== ADD LISTING BUTTON ===== */
-  .btn-dark{
-    display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:var(--radius-full);
-    border:none;background:var(--ink);color:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;
-    font-weight:700;font-size:14px;cursor:pointer;transition:transform .15s ease, opacity .15s ease;white-space:nowrap;
-  }
-  .btn-dark:hover{transform:translateY(-2px);opacity:.9;}
-  .btn-dark svg{width:16px;height:16px;}
-  .btn-green{background:var(--accent);color:#fff;}
-  .btn-green:hover{background:var(--accent-deep);opacity:1;}
-
-  /* ===== LISTINGS (cards, reused pattern) ===== */
+  /* --- Listings grid (reuses listing card pattern) --- */
   .listing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:32px 24px;}
   .listing-card{cursor:pointer;}
   .card-media{
     position:relative;aspect-ratio:1/1;border-radius:var(--radius-lg);overflow:hidden;
-    background:linear-gradient(150deg,var(--a),var(--b));
+    background:var(--bg-alt-2);
   }
   .card-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-  .card-media::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg, rgba(255,255,255,.12), transparent 55%);}
+  .card-media::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg, rgba(255,255,255,.22), transparent 55%);}
   .listing-card:hover .card-media{box-shadow:var(--shadow-lift);}
   .media-badge{
     position:absolute;top:12px;left:12px;z-index:1;background:#fff;color:var(--ink);
     font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;
     padding:6px 11px;border-radius:var(--radius-full);
   }
-  .status-badge{display:inline-flex;align-items:center;gap:5px;}
-  .status-badge.active{background:var(--accent-deep);color:#fff;}
-  .status-badge.paused{background:var(--ink-soft);color:#fff;}
-  .status-badge svg{width:8px;height:8px;}
+  .media-badge.active-badge{display:flex;align-items:center;gap:4px;background:var(--accent);color:#fff;}
+  .media-badge.active-badge svg{width:9px;height:9px;}
+  .media-badge.draft-badge{background:var(--ink-faint);color:#fff;}
   .edit-btn{
     position:absolute;top:10px;right:10px;z-index:1;width:30px;height:30px;border-radius:50%;
     border:none;cursor:pointer;background:rgba(0,0,0,.24);display:flex;align-items:center;justify-content:center;
-    transition:transform .15s ease, background .15s ease;
+    transition:transform .15s ease,background .15s ease;
   }
-  .edit-btn:hover{transform:scale(1.1);background:rgba(0,0,0,.36);}
-  .edit-btn svg{width:14px;height:14px;color:#fff;stroke:#fff;stroke-width:2;fill:none;}
+  .edit-btn:hover{transform:scale(1.1);background:rgba(0,0,0,.4);}
+  .edit-btn svg{width:14px;height:14px;color:#fff;}
   .card-info{padding-top:12px;}
   .card-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
   .card-row1 h3{font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--ink);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -212,14 +193,57 @@
   .card-sub{margin:3px 0 5px;font-size:13.5px;color:var(--ink-soft);}
   .card-price{font-size:14.5px;color:var(--ink);}
   .card-price strong{font-weight:700;}
-  .card-bookings{font-size:13px;color:var(--ink-soft);margin-top:2px;}
 
-  /* ===== SHARED ===== */
-  .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease;}
-  .reveal.in-view{opacity:1;transform:none;}
+  .empty-state{
+    text-align:center;padding:56px 32px;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-xl);
+    box-shadow:var(--shadow-card);color:var(--ink-soft);
+  }
+  .empty-visual{position:relative;width:72px;height:72px;margin:0 auto 18px;}
+  .empty-visual .ring{position:absolute;inset:0;border-radius:50%;background:var(--accent-pale);}
+  .empty-visual .icon-circle{
+    position:absolute;inset:14px;border-radius:50%;background:var(--panel);color:var(--accent-deep);
+    display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-card);
+  }
+  .empty-visual .icon-circle svg{width:18px;height:18px;}
+  .empty-state h3{font-size:17px;margin-bottom:6px;color:var(--ink);}
+  .empty-state p{margin:0 auto;font-size:14px;line-height:1.6;max-width:340px;}
 
-  /* ===== FOOTER ===== */
-  footer.site-footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:64px 0 0;margin-top:40px;}
+  /* --- Add listing modal --- */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:100;background:rgba(15,17,21,.5);
+    display:none;align-items:center;justify-content:center;padding:24px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-card{
+    width:100%;max-width:440px;max-height:90vh;overflow-y:auto;background:var(--panel);
+    border-radius:var(--radius-xl);box-shadow:var(--shadow-lift);padding:28px;
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+  .modal-head h2{font-size:19px;}
+  .modal-close{
+    width:32px;height:32px;border-radius:50%;border:none;background:var(--bg-alt);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  }
+  .modal-close svg{width:15px;height:15px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+  .field input,.field select{
+    width:100%;padding:13px 14px;border:1px solid var(--line-strong);border-radius:var(--radius-md);
+    background:var(--panel);color:var(--ink);font:inherit;font-size:14.5px;outline:none;
+    transition:border-color .15s ease,box-shadow .15s ease;
+  }
+  .field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);}
+  .field input::placeholder{color:var(--ink-faint);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .btn-primary{
+    width:100%;background:var(--accent);color:#fff;border:none;padding:14px;border-radius:var(--radius-full);
+    font-weight:700;font-size:15px;cursor:pointer;transition:background .15s ease,transform .15s ease;margin-top:6px;
+  }
+  .btn-primary:hover{background:var(--accent-deep);transform:translateY(-1px);}
+
+  /* ===== FOOTER (shared) ===== */
+  footer.site-footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:64px 0 0;margin-top:96px;}
   .footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px;padding-bottom:48px;}
   .footer-brand .brand{margin-bottom:14px;}
   .footer-brand p{font-size:14px;line-height:1.65;color:var(--ink-soft);max-width:280px;margin:0 0 20px;}
@@ -243,8 +267,8 @@
     .footer-brand{grid-column:1/-1;}
   }
   @media (max-width:640px){
-    .stat-grid{grid-template-columns:1fr;}
-    .dash-section-head{flex-direction:column;align-items:flex-start;}
+    .stats-row{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:1fr;}
   }
   @media (max-width:860px){
     .nav-links{position:fixed;top:80px;left:0;right:0;background:var(--bg);flex-direction:column;align-items:flex-start;gap:0;border-bottom:1px solid var(--line);max-height:0;overflow:hidden;transition:max-height .25s ease;}
@@ -253,6 +277,7 @@
     .nav-toggle{display:block;}
     .host-link{display:none;}
     .listing-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:22px 16px;}
+    .page-header{flex-direction:column;align-items:flex-start;}
   }
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto;}
@@ -260,7 +285,6 @@
   }
   :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 </style>
-<noscript><style>.reveal{opacity:1 !important;transform:none !important;}</style></noscript>
 </head>
 <body>
 
@@ -274,25 +298,19 @@
     </a>
 
     <nav id="navLinks" class="nav-links">
-      <a href="index.html#homes">Homes</a>
-      <a href="index.html#homes">Cars</a>
       <a href="listings.html">Listings</a>
       <a href="host-dashboard.html" class="current">Host Dashboard</a>
+      <a href="messages.html">Messages</a>
       <a href="index.html#how">How it works</a>
       <a href="index.html#pricing">Pricing</a>
     </nav>
 
     <div class="nav-right">
-      <a href="renter-dashboard.html" class="host-link">Switch to renter</a>
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
       </button>
-      <a href="messages.html" class="msg-btn" aria-label="Open messages">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
-        <span class="msg-badge">2</span>
-      </a>
-      <a href="profile.html" class="menu-pill" aria-label="Open profile">
+      <a href="profile.html" class="menu-pill" aria-label="Your profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg></span>
       </a>
@@ -301,61 +319,62 @@
   </div>
 </header>
 
-<section class="page-head reveal">
-  <div class="wrap">
-    <span class="eyebrow-pill">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
-      Host dashboard
-    </span>
-    <h1>Manage your listings.</h1>
-    <p>Track how your homes and cars are performing, and add new listings whenever you're ready.</p>
+<section class="page-header">
+  <div class="wrap" style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;width:100%;">
+    <div>
+      <span class="eyebrow-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+        Host dashboard
+      </span>
+      <h1 style="margin-top:16px;">Welcome back, Malika</h1>
+      <p>Manage your active listings and keep an eye on how bookings are trending this month.</p>
+    </div>
+    <button class="add-listing-btn" id="openAddListing" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+      Add New Listing
+    </button>
   </div>
 </section>
 
 <section class="dashboard-page">
   <div class="wrap">
 
-    <!-- ===== STATS ===== -->
-    <div class="dash-section reveal">
-      <div class="stat-grid">
+    <div class="dash-section" id="statsSection">
+      <div class="stats-row">
         <div class="stat-card">
           <span class="stat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
           </span>
           <div>
-            <div class="stat-number" id="statListings">4</div>
+            <div class="stat-value" id="statListings">4</div>
             <div class="stat-label">Total listings</div>
           </div>
         </div>
         <div class="stat-card">
           <span class="stat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           </span>
           <div>
-            <div class="stat-number" id="statBookings">9</div>
+            <div class="stat-value" id="statBookings">11</div>
             <div class="stat-label">Bookings this month</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ===== ACTIVE LISTINGS ===== -->
-    <div class="dash-section reveal">
+    <div class="dash-section" id="listingsSection">
       <div class="dash-section-head">
         <h2>Your listings</h2>
-        <a href="index.html#list" class="btn-dark btn-green">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
-          Add New Listing
-        </a>
+        <span class="count-pill" id="listingsCount">4 listings</span>
       </div>
 
       <div class="listing-grid" id="listingGrid">
 
         <article class="listing-card" onclick="location.href='listing-detail.html'">
-          <div class="card-media" style="--a:#7BA7C2;--b:#3E6B8C;">
-            <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=60" alt="Sunlit loft near Prospect Park" loading="lazy">
-            <span class="media-badge status-badge active"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12"/></svg>Active</span>
-            <button class="edit-btn" aria-label="Edit listing"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+          <div class="card-media">
+            <img src="https://images.pexels.com/photos/7045945/pexels-photo-7045945.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Sunlit loft near Prospect Park" loading="lazy">
+            <span class="media-badge active-badge"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Active</span>
+            <button class="edit-btn" aria-label="Edit listing" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
           </div>
           <div class="card-info">
             <div class="card-row1">
@@ -364,49 +383,14 @@
             </div>
             <p class="card-sub">Brooklyn, NY · Entire apartment</p>
             <p class="card-price"><strong>$145</strong> night</p>
-            <p class="card-bookings">4 bookings this month</p>
           </div>
         </article>
 
         <article class="listing-card" onclick="location.href='listing-detail.html'">
-          <div class="card-media" style="--a:#C9A66B;--b:#9C7B3E;">
-            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=60" alt="Family house with backyard" loading="lazy">
-            <span class="media-badge status-badge active"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12"/></svg>Active</span>
-            <button class="edit-btn" aria-label="Edit listing"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Family house with backyard</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.88</span>
-            </div>
-            <p class="card-sub">Sacramento, CA · Entire house</p>
-            <p class="card-price"><strong>$210</strong> night</p>
-            <p class="card-bookings">3 bookings this month</p>
-          </div>
-        </article>
-
-        <article class="listing-card" onclick="location.href='car-listing-detail.html'">
-          <div class="card-media" style="--a:#A9B4BD;--b:#6E7A85;">
-            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=60" alt="2021 Toyota Camry" loading="lazy">
-            <span class="media-badge status-badge active"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12"/></svg>Active</span>
-            <button class="edit-btn" aria-label="Edit listing"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>2021 Toyota Camry</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.95</span>
-            </div>
-            <p class="card-sub">Seattle, WA · Sedan · Automatic</p>
-            <p class="card-price"><strong>$52</strong> day</p>
-            <p class="card-bookings">2 bookings this month</p>
-          </div>
-        </article>
-
-        <article class="listing-card" onclick="location.href='listing-detail.html'">
-          <div class="card-media" style="--a:#E3B77D;--b:#C68F49;">
-            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=60" alt="Modern studio downtown" loading="lazy">
-            <span class="media-badge status-badge paused"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12"/></svg>Paused</span>
-            <button class="edit-btn" aria-label="Edit listing"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+          <div class="card-media">
+            <img src="https://images.pexels.com/photos/6933852/pexels-photo-6933852.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Modern studio downtown" loading="lazy">
+            <span class="media-badge active-badge"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Active</span>
+            <button class="edit-btn" aria-label="Edit listing" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
           </div>
           <div class="card-info">
             <div class="card-row1">
@@ -415,15 +399,96 @@
             </div>
             <p class="card-sub">Denver, CO · Entire studio</p>
             <p class="card-price"><strong>$98</strong> night</p>
-            <p class="card-bookings">0 bookings this month</p>
           </div>
         </article>
 
+        <article class="listing-card" onclick="location.href='car-detail.html'">
+          <div class="card-media">
+            <img src="https://images.pexels.com/photos/34404246/pexels-photo-34404246.jpeg?auto=compress&cs=tinysrgb&w=800" alt="2021 Toyota Camry" loading="lazy">
+            <span class="media-badge active-badge"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Active</span>
+            <button class="edit-btn" aria-label="Edit listing" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+          </div>
+          <div class="card-info">
+            <div class="card-row1">
+              <h3>2021 Toyota Camry</h3>
+              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.95</span>
+            </div>
+            <p class="card-sub">Seattle, WA · Sedan · Automatic</p>
+            <p class="card-price"><strong>$52</strong> day</p>
+          </div>
+        </article>
+
+        <article class="listing-card" onclick="location.href='listing-detail.html'">
+          <div class="card-media">
+            <img src="https://images.pexels.com/photos/6180674/pexels-photo-6180674.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Cozy 2BR near the park" loading="lazy">
+            <span class="media-badge draft-badge">Draft</span>
+            <button class="edit-btn" aria-label="Edit listing" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+          </div>
+          <div class="card-info">
+            <div class="card-row1">
+              <h3>Cozy 2BR near the park</h3>
+              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>—</span>
+            </div>
+            <p class="card-sub">Philadelphia, PA · Entire apartment</p>
+            <p class="card-price"><strong>$132</strong> night</p>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="empty-state" id="listingsEmpty" style="display:none;">
+        <div class="empty-visual">
+          <div class="ring"></div>
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+          </div>
+        </div>
+        <h3>No listings yet</h3>
+        <p>Add your first home or car to start receiving bookings from the community.</p>
       </div>
     </div>
 
   </div>
 </section>
+
+<div class="modal-overlay" id="addListingOverlay">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>Add new listing</h2>
+      <button class="modal-close" id="closeAddListing" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form id="addListingForm" novalidate>
+      <div class="field">
+        <label for="newTitle">Listing title</label>
+        <input id="newTitle" type="text" placeholder="e.g. Cozy 2BR near downtown" required>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="newType">Type</label>
+          <select id="newType">
+            <option value="home">Home</option>
+            <option value="car">Car</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="newPrice">Price</label>
+          <input id="newPrice" type="number" min="0" placeholder="120" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="newCity">City</label>
+        <input id="newCity" type="text" placeholder="e.g. Brooklyn, NY" required>
+      </div>
+      <div class="field">
+        <label for="newImage">Photo URL</label>
+        <input id="newImage" type="url" placeholder="https://images.pexels.com/...">
+      </div>
+      <button type="submit" class="btn-primary">Publish listing</button>
+    </form>
+  </div>
+</div>
 
 <footer class="site-footer">
   <div class="wrap">
@@ -444,20 +509,20 @@
       <div class="fcol">
         <h4>Explore</h4>
         <ul>
-          <li><a href="listings.html">All listings</a></li>
-          <li><a href="index.html#homes">Homes</a></li>
-          <li><a href="index.html#homes">Cars</a></li>
+          <li><a href="listings.html">Homes</a></li>
+          <li><a href="listings.html">Cars</a></li>
           <li><a href="index.html#how">How it works</a></li>
-          <li><a href="host-dashboard.html">Become a host</a></li>
+          <li><a href="index.html#pricing">Pricing</a></li>
+          <li><a href="index.html#list">Become a host</a></li>
         </ul>
       </div>
 
       <div class="fcol">
         <h4>Support</h4>
         <ul>
-          <li><a href="#">24/7 support · +1 (888) 555-0199</a></li>
-          <li><a href="#">help@uzbekrentals.com</a></li>
-          <li><a href="#">Live chat, in-app</a></li>
+          <li><a href="tel:+18885550199">24/7 support · +1 (888) 555-0199</a></li>
+          <li><a href="mailto:help@uzbekrentals.com">help@uzbekrentals.com</a></li>
+          <li><a href="messages.html">Live chat, in-app</a></li>
           <li><a href="#">Trust & safety</a></li>
         </ul>
       </div>
@@ -489,9 +554,15 @@
 </footer>
 
 <script>
+  /* ---- shared nav / theme behavior ---- */
   const navToggle = document.getElementById('navToggle');
   const navLinks = document.getElementById('navLinks');
   navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
 
   const themeToggle = document.getElementById('themeToggle');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -508,24 +579,73 @@
     themeToggle.setAttribute('aria-pressed', next === 'dark');
   });
 
-  document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => e.stopPropagation());
+  /* ---- stats + listings grid ---- */
+  const listingGrid = document.getElementById('listingGrid');
+  const listingsEmpty = document.getElementById('listingsEmpty');
+  const listingsCount = document.getElementById('listingsCount');
+  const statListings = document.getElementById('statListings');
+
+  function refreshListingStats(){
+    const count = listingGrid.querySelectorAll('.listing-card').length;
+    listingsCount.textContent = count + (count === 1 ? ' listing' : ' listings');
+    statListings.textContent = count;
+    listingsEmpty.style.display = count === 0 ? 'block' : 'none';
+  }
+
+  const PLACEHOLDER_IMG = 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800';
+
+  function buildListingCard({ title, type, city, price, image }){
+    const card = document.createElement('article');
+    card.className = 'listing-card';
+    const unit = type === 'car' ? 'day' : 'night';
+    card.innerHTML = `
+      <div class="card-media">
+        <img src="${image || PLACEHOLDER_IMG}" alt="${title}" loading="lazy">
+        <span class="media-badge draft-badge">Draft</span>
+        <button class="edit-btn" aria-label="Edit listing" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+      </div>
+      <div class="card-info">
+        <div class="card-row1">
+          <h3>${title}</h3>
+          <span class="card-rating">—</span>
+        </div>
+        <p class="card-sub">${city} · ${type === 'car' ? 'Car' : 'Home'}</p>
+        <p class="card-price"><strong>$${price}</strong> ${unit}</p>
+      </div>
+    `;
+    return card;
+  }
+
+  /* ---- add listing modal ---- */
+  const overlay = document.getElementById('addListingOverlay');
+  const openBtn = document.getElementById('openAddListing');
+  const closeBtn = document.getElementById('closeAddListing');
+  const addForm = document.getElementById('addListingForm');
+
+  function openModal(){ overlay.classList.add('open'); document.getElementById('newTitle').focus(); }
+  function closeModal(){ overlay.classList.remove('open'); addForm.reset(); }
+
+  openBtn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
+
+  addForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = document.getElementById('newTitle').value.trim();
+    const type = document.getElementById('newType').value;
+    const price = document.getElementById('newPrice').value;
+    const city = document.getElementById('newCity').value.trim();
+    const image = document.getElementById('newImage').value.trim();
+    if(!title || !price || !city) return;
+
+    const card = buildListingCard({ title, type, city, price, image });
+    listingGrid.prepend(card);
+    refreshListingStats();
+    closeModal();
   });
 
-  const revealEls = document.querySelectorAll('.reveal');
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)){
-    revealEls.forEach(el => el.classList.add('in-view'));
-  } else {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if(entry.isIntersecting){
-          entry.target.classList.add('in-view');
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    revealEls.forEach(el => io.observe(el));
-  }
+  refreshListingStats();
 </script>
 
 </body>

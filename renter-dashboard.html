@@ -294,7 +294,7 @@
 
 <header class="navbar" id="navbar">
   <div class="wrap navbar-inner">
-    <a href="index.html" class="brand">
+    <a href="/" class="brand">
       <span class="brand-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
       </span>
@@ -302,25 +302,26 @@
     </a>
 
     <nav id="navLinks" class="nav-links">
-      <a href="index.html#homes">Homes</a>
-      <a href="index.html#homes">Cars</a>
-      <a href="listings.html">Listings</a>
-      <a href="renter-dashboard.html" class="current">Dashboard</a>
-      <a href="index.html#how">How it works</a>
-      <a href="index.html#pricing">Pricing</a>
+      <a href="/#homes">Homes</a>
+      <a href="/#homes">Cars</a>
+      <a href="/listings">Listings</a>
+      <a href="/renter-dashboard" class="current">Dashboard</a>
+      <a href="/#how">How it works</a>
+      <a href="/#pricing">Pricing</a>
     </nav>
 
     <div class="nav-right">
-      <a href="host-dashboard.html" class="host-link">Become a host</a>
+      <a href="/host-dashboard" class="host-link">Become a host</a>
+      <a href="/login" class="host-link" id="navAuthLink">Log in</a>
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
       </button>
-      <a href="messages.html" class="msg-btn" aria-label="Open messages">
+      <a href="/messages" class="msg-btn" aria-label="Open messages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
         <span class="msg-badge">2</span>
       </a>
-      <a href="profile.html" class="menu-pill" aria-label="Open profile">
+      <a href="/profile" class="menu-pill" aria-label="Open profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg></span>
       </a>
@@ -352,7 +353,7 @@
 
       <div class="listing-grid" id="savedGrid">
 
-        <article class="listing-card" onclick="location.href='listing-detail.html'">
+        <article class="listing-card" onclick="location.href='/listings/property'">
           <div class="card-media" style="--a:#7BA7C2;--b:#3E6B8C;">
             <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=60" alt="Sunlit loft near Prospect Park" loading="lazy">
             <span class="media-badge">Guest favorite</span>
@@ -368,7 +369,7 @@
           </div>
         </article>
 
-        <article class="listing-card" onclick="location.href='car-listing-detail.html'">
+        <article class="listing-card" onclick="location.href='/listings/car'">
           <div class="card-media" style="--a:#A9B4BD;--b:#6E7A85;">
             <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=60" alt="2021 Toyota Camry" loading="lazy">
             <span class="media-badge">Guest favorite</span>
@@ -384,7 +385,7 @@
           </div>
         </article>
 
-        <article class="listing-card" onclick="location.href='listing-detail.html'">
+        <article class="listing-card" onclick="location.href='/listings/property'">
           <div class="card-media" style="--a:#F0C987;--b:#D4A24E;">
             <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=60" alt="Sunny 1BR with balcony" loading="lazy">
             <button class="fav-btn saved" aria-label="Remove from saved"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
@@ -407,7 +408,7 @@
         </span>
         <h3>No saved listings yet</h3>
         <p>Tap the heart on any home or car to save it here for later.</p>
-        <a href="listings.html" class="btn-dark">Browse listings</a>
+        <a href="/listings" class="btn-dark">Browse listings</a>
       </div>
     </div>
 
@@ -462,12 +463,12 @@
         </span>
         <h3>No upcoming bookings</h3>
         <p>When you book a home or car, it'll show up here with your dates and status.</p>
-        <a href="listings.html" class="btn-dark">Browse listings</a>
+        <a href="/listings" class="btn-dark">Browse listings</a>
       </div>
     </div>
 
     <div class="browse-more reveal">
-      <a href="listings.html" class="btn-dark">
+      <a href="/listings" class="btn-dark">
         Browse more listings
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
@@ -480,7 +481,7 @@
   <div class="wrap">
     <div class="footer-top">
       <div class="fcol footer-brand">
-        <a href="index.html" class="brand">
+        <a href="/" class="brand">
           <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>
           <span class="brand-name">Uzbek Rentals</span>
         </a>
@@ -495,11 +496,11 @@
       <div class="fcol">
         <h4>Explore</h4>
         <ul>
-          <li><a href="listings.html">All listings</a></li>
-          <li><a href="index.html#homes">Homes</a></li>
-          <li><a href="index.html#homes">Cars</a></li>
-          <li><a href="index.html#how">How it works</a></li>
-          <li><a href="host-dashboard.html">Become a host</a></li>
+          <li><a href="/listings">All listings</a></li>
+          <li><a href="/#homes">Homes</a></li>
+          <li><a href="/#homes">Cars</a></li>
+          <li><a href="/#how">How it works</a></li>
+          <li><a href="/host-dashboard">Become a host</a></li>
         </ul>
       </div>
 
@@ -613,5 +614,29 @@
   }
 </script>
 
+<script>
+(function(){
+  function logOut(e){
+    if(e) e.preventDefault();
+    localStorage.removeItem('ur-access-token');
+    localStorage.removeItem('ur-refresh-token');
+    window.location.href = '/login';
+  }
+
+  var profileLink = document.getElementById('logoutLink');
+  if(profileLink){
+    profileLink.addEventListener('click', logOut);
+  }
+
+  if(!localStorage.getItem('ur-access-token')) return;
+
+  var navLink = document.getElementById('navAuthLink');
+  if(navLink){
+    navLink.textContent = 'Log out';
+    navLink.href = '#';
+    navLink.addEventListener('click', logOut);
+  }
+})();
+</script>
 </body>
 </html>

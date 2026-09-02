@@ -1,10 +1,10 @@
 import re
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-from .models import ListingStatus, ListingType, UserRole
+from .models import BookingStatus, ListingStatus, ListingType, UserRole
 
 PHONE_RE = re.compile(r"^\+?[0-9\s\-()]{7,20}$")
 
@@ -119,6 +119,61 @@ class ListingOut(ListingBase):
     id: str
     host_id: str
     status: ListingStatus
+    rating: float | None
+    verified: bool
+    guest_favorite: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class BookingCreate(BaseModel):
+    listing_id: str
+    start_date: date
+    end_date: date
+    guest_count: int = Field(default=1, ge=1, le=50)
+
+    @field_validator("end_date")
+    @classmethod
+    def end_after_start(cls, value: date, info) -> date:
+        start = info.data.get("start_date")
+        if start is not None and value <= start:
+            raise ValueError("End date must be after start date")
+        return value
+
+
+class BookingStatusUpdate(BaseModel):
+    status: BookingStatus
+
+
+class BookingOut(BaseModel):
+    id: str
+    listing_id: str
+    renter_id: str
+    host_id: str
+    start_date: date
+    end_date: date
+    guest_count: int
+    total_price: float
+    status: BookingStatus
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class ReviewCreate(BaseModel):
+    booking_id: str
+    rating: int = Field(ge=1, le=5)
+    comment: str | None = Field(default=None, max_length=2000)
+
+
+class ReviewOut(BaseModel):
+    id: str
+    booking_id: str
+    listing_id: str
+    author_id: str
+    rating: int
+    comment: str | None
     created_at: datetime
 
     model_config = {"from_attributes": True}

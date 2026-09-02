@@ -17,6 +17,16 @@ def _get_owned_listing(listing_id: str, current_user: models.User, db: Session) 
     return listing
 
 
+@router.get("", response_model=list[schemas.ListingOut])
+def list_active_listings(db: Session = Depends(get_db)) -> list[models.Listing]:
+    return (
+        db.query(models.Listing)
+        .filter(models.Listing.status == models.ListingStatus.active)
+        .order_by(models.Listing.created_at.desc())
+        .all()
+    )
+
+
 @router.get("/mine", response_model=list[schemas.ListingOut])
 def list_my_listings(
     current_user: models.User = Depends(get_current_user),

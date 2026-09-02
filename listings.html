@@ -36,6 +36,7 @@
     --shadow-card:0 6px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.06);
     --shadow-lift:0 14px 34px -8px rgba(0,0,0,0.18);
     --nav-bg:rgba(255,255,255,0.92);
+    --skeleton-shine:rgba(255,255,255,0.75);
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -46,6 +47,7 @@
       --shadow-card:0 6px 20px rgba(0,0,0,0.5);
       --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
       --nav-bg:rgba(15,17,21,0.86);
+      --skeleton-shine:rgba(255,255,255,0.07);
     }
   }
   :root[data-theme="dark"]{
@@ -56,6 +58,7 @@
     --shadow-card:0 6px 20px rgba(0,0,0,0.5);
     --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
     --nav-bg:rgba(15,17,21,0.86);
+    --skeleton-shine:rgba(255,255,255,0.07);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -265,6 +268,19 @@
   .card-price{font-size:14.5px;color:var(--ink);}
   .card-price strong{font-weight:700;}
 
+  /* ===== LOADING SKELETON ===== */
+  .skeleton-card{cursor:default;}
+  .skeleton-card .card-media{background:var(--bg-alt-2);}
+  .skeleton-card .card-media::after{content:none;}
+  .skeleton-card .card-media::before{
+    content:"";position:absolute;inset:0;transform:translateX(-100%);
+    background:linear-gradient(90deg, transparent, var(--skeleton-shine), transparent);
+    animation:skeleton-sweep 1.6s ease-in-out infinite;
+  }
+  .skeleton-line{height:12px;border-radius:6px;background:var(--bg-alt-2);}
+  .skeleton-line + .skeleton-line{margin-top:9px;}
+  @keyframes skeleton-sweep{100%{transform:translateX(100%);}}
+
   /* ===== SHARED ===== */
   .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease;}
   .reveal.in-view{opacity:1;transform:none;}
@@ -317,7 +333,7 @@
 
 <header class="navbar" id="navbar">
   <div class="wrap navbar-inner">
-    <a href="index.html" class="brand">
+    <a href="/" class="brand">
       <span class="brand-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
       </span>
@@ -325,25 +341,26 @@
     </a>
 
     <nav id="navLinks" class="nav-links">
-      <a href="index.html#homes">Homes</a>
-      <a href="index.html#homes">Cars</a>
-      <a href="listings.html" class="current">Listings</a>
-      <a href="renter-dashboard.html">Dashboard</a>
-      <a href="index.html#how">How it works</a>
-      <a href="index.html#pricing">Pricing</a>
+      <a href="/#homes">Homes</a>
+      <a href="/#homes">Cars</a>
+      <a href="/listings" class="current">Listings</a>
+      <a href="/renter-dashboard">Dashboard</a>
+      <a href="/#how">How it works</a>
+      <a href="/#pricing">Pricing</a>
     </nav>
 
     <div class="nav-right">
-      <a href="host-dashboard.html" class="host-link">Become a host</a>
+      <a href="/host-dashboard" class="host-link">Become a host</a>
+      <a href="/login" class="host-link" id="navAuthLink">Log in</a>
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
       </button>
-      <a href="messages.html" class="msg-btn" aria-label="Open messages">
+      <a href="/messages" class="msg-btn" aria-label="Open messages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
         <span class="msg-badge">2</span>
       </a>
-      <a href="profile.html" class="menu-pill" aria-label="Open profile">
+      <a href="/profile" class="menu-pill" aria-label="Open profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg></span>
       </a>
@@ -420,199 +437,13 @@
       </div>
 
       <div class="filter-foot">
-        <span class="results-count" id="resultsCount">12 listings</span>
+        <span class="results-count" id="resultsCount">Loading…</span>
         <button class="clear-link" id="clearFilters" type="button">Clear all</button>
       </div>
     </aside>
 
     <div>
-      <div class="listing-grid reveal" id="listingGrid">
-
-        <article class="listing-card" data-type="home" data-city="Brooklyn, NY" data-price="145" data-verified="true">
-          <div class="card-media" style="--a:#7BA7C2;--b:#3E6B8C;">
-            <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=60" alt="Sunlit loft near Prospect Park" loading="lazy">
-            <span class="media-badge">Guest favorite</span>
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Sunlit loft near Prospect Park</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.97</span>
-            </div>
-            <p class="card-sub">Brooklyn, NY · Entire apartment <span class="verified-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified</span></p>
-            <p class="card-price"><strong>$145</strong> night</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="home" data-city="Sacramento, CA" data-price="210" data-verified="true">
-          <div class="card-media" style="--a:#C9A66B;--b:#9C7B3E;">
-            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=60" alt="Family house with backyard" loading="lazy">
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Family house with backyard</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.88</span>
-            </div>
-            <p class="card-sub">Sacramento, CA · Entire house <span class="verified-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified</span></p>
-            <p class="card-price"><strong>$210</strong> night</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="car" data-city="Seattle, WA" data-price="52" data-verified="true">
-          <div class="card-media" style="--a:#A9B4BD;--b:#6E7A85;">
-            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=60" alt="2021 Toyota Camry" loading="lazy">
-            <span class="media-badge">Guest favorite</span>
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>2021 Toyota Camry</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.95</span>
-            </div>
-            <p class="card-sub">Seattle, WA · Sedan · Automatic <span class="verified-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified</span></p>
-            <p class="card-price"><strong>$52</strong> day</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="home" data-city="Denver, CO" data-price="98" data-verified="false">
-          <div class="card-media" style="--a:#E3B77D;--b:#C68F49;">
-            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=60" alt="Modern studio downtown" loading="lazy">
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Modern studio downtown</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.90</span>
-            </div>
-            <p class="card-sub">Denver, CO · Entire studio</p>
-            <p class="card-price"><strong>$98</strong> night</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="car" data-city="Chicago, IL" data-price="64" data-verified="true">
-          <div class="card-media" style="--a:#8FA98C;--b:#5E7A5B;">
-            <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=60" alt="Honda CR-V, AWD" loading="lazy">
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Honda CR-V, AWD</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.82</span>
-            </div>
-            <p class="card-sub">Chicago, IL · SUV · Automatic <span class="verified-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified</span></p>
-            <p class="card-price"><strong>$64</strong> day</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="home" data-city="Philadelphia, PA" data-price="132" data-verified="false">
-          <div class="card-media" style="--a:#D98E73;--b:#B15F42;">
-            <img src="https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&q=60" alt="Cozy 2BR near the park" loading="lazy">
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Cozy 2BR near the park</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.91</span>
-            </div>
-            <p class="card-sub">Philadelphia, PA · Entire apartment</p>
-            <p class="card-price"><strong>$132</strong> night</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="car" data-city="Brooklyn, NY" data-price="71" data-verified="true">
-          <div class="card-media" style="--a:#9BB0C9;--b:#5D7B99;">
-            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800&q=60" alt="Ford Explorer, 7-seat" loading="lazy">
-            <span class="media-badge">Guest favorite</span>
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Ford Explorer, 7-seat</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.86</span>
-            </div>
-            <p class="card-sub">Brooklyn, NY · SUV · Automatic <span class="verified-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified</span></p>
-            <p class="card-price"><strong>$71</strong> day</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="home" data-city="Seattle, WA" data-price="118" data-verified="true">
-          <div class="card-media" style="--a:#F0C987;--b:#D4A24E;">
-            <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=60" alt="Sunny 1BR with balcony" loading="lazy">
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Sunny 1BR with balcony</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.93</span>
-            </div>
-            <p class="card-sub">Seattle, WA · Entire apartment <span class="verified-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified</span></p>
-            <p class="card-price"><strong>$118</strong> night</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="car" data-city="Denver, CO" data-price="45" data-verified="false">
-          <div class="card-media" style="--a:#B7A7CE;--b:#8368A0;">
-            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800&q=60" alt="Mazda 3, compact" loading="lazy">
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Mazda 3, compact</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.77</span>
-            </div>
-            <p class="card-sub">Denver, CO · Sedan · Manual</p>
-            <p class="card-price"><strong>$45</strong> day</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="home" data-city="Chicago, IL" data-price="265" data-verified="true">
-          <div class="card-media" style="--a:#7FB88F;--b:#4E8A63;">
-            <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&q=60" alt="Spacious 3BR house" loading="lazy">
-            <span class="media-badge">Guest favorite</span>
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Spacious 3BR house</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.96</span>
-            </div>
-            <p class="card-sub">Chicago, IL · Entire house <span class="verified-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified</span></p>
-            <p class="card-price"><strong>$265</strong> night</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="car" data-city="Sacramento, CA" data-price="89" data-verified="false">
-          <div class="card-media" style="--a:#CC8B6B;--b:#9C5B3E;">
-            <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=800&q=60" alt="Jeep Wrangler, 4x4" loading="lazy">
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Jeep Wrangler, 4x4</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.80</span>
-            </div>
-            <p class="card-sub">Sacramento, CA · SUV · Manual</p>
-            <p class="card-price"><strong>$89</strong> day</p>
-          </div>
-        </article>
-
-        <article class="listing-card" data-type="home" data-city="Philadelphia, PA" data-price="105" data-verified="true">
-          <div class="card-media" style="--a:#E0A8B0;--b:#C06B79;">
-            <img src="https://images.unsplash.com/photo-1571055107559-3e67626fa8be?w=800&q=60" alt="Minimalist studio loft" loading="lazy">
-            <button class="fav-btn" aria-label="Save listing"><svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Minimalist studio loft</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.89</span>
-            </div>
-            <p class="card-sub">Philadelphia, PA · Entire studio <span class="verified-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified</span></p>
-            <p class="card-price"><strong>$105</strong> night</p>
-          </div>
-        </article>
-
-      </div>
+      <div class="listing-grid reveal" id="listingGrid" aria-live="polite" aria-busy="true"></div>
 
       <div class="empty-state" id="emptyState">
         <span class="empty-icon">
@@ -633,7 +464,7 @@
   <div class="wrap">
     <div class="footer-top">
       <div class="fcol footer-brand">
-        <a href="index.html" class="brand">
+        <a href="/" class="brand">
           <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>
           <span class="brand-name">Uzbek Rentals</span>
         </a>
@@ -648,11 +479,11 @@
       <div class="fcol">
         <h4>Explore</h4>
         <ul>
-          <li><a href="listings.html">All listings</a></li>
-          <li><a href="index.html#homes">Homes</a></li>
-          <li><a href="index.html#homes">Cars</a></li>
-          <li><a href="index.html#how">How it works</a></li>
-          <li><a href="host-dashboard.html">Become a host</a></li>
+          <li><a href="/listings">All listings</a></li>
+          <li><a href="/#homes">Homes</a></li>
+          <li><a href="/#homes">Cars</a></li>
+          <li><a href="/#how">How it works</a></li>
+          <li><a href="/host-dashboard">Become a host</a></li>
         </ul>
       </div>
 
@@ -712,21 +543,160 @@
     themeToggle.setAttribute('aria-pressed', next === 'dark');
   });
 
-  document.querySelectorAll('.fav-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  /* ===== LISTING GRID (rendered from saved listing records) ===== */
+  const listingGrid = document.getElementById('listingGrid');
+
+  const CARD_PALETTE = [
+    ['#7BA7C2', '#3E6B8C'], ['#C9A66B', '#9C7B3E'], ['#A9B4BD', '#6E7A85'],
+    ['#E3B77D', '#C68F49'], ['#8FA98C', '#5E7A5B'], ['#D98E73', '#B15F42'],
+    ['#9BB0C9', '#5D7B99'], ['#F0C987', '#D4A24E'], ['#B7A7CE', '#8368A0'],
+    ['#7FB88F', '#4E8A63'], ['#CC8B6B', '#9C5B3E'], ['#E0A8B0', '#C06B79'],
+  ];
+  const FAV_ICON = '<svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg>';
+  const STAR_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>';
+  const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+
+  function subtitleFor(listing){
+    return listing.listing_type === 'car'
+      ? [listing.vehicle_type, listing.transmission].filter(Boolean).join(' · ')
+      : (listing.home_type || '');
+  }
+
+  function createListingCard(listing, index){
+    const [a, b] = CARD_PALETTE[index % CARD_PALETTE.length];
+    const detailHref = listing.listing_type === 'car' ? '/listings/car' : '/listings/property';
+
+    const card = document.createElement('article');
+    card.className = 'listing-card';
+    card.dataset.type = listing.listing_type;
+    card.dataset.city = listing.location;
+    card.dataset.price = String(Math.round(listing.price));
+    card.dataset.verified = String(!!listing.verified);
+    card.dataset.href = detailHref;
+
+    const media = document.createElement('div');
+    media.className = 'card-media';
+    media.style.setProperty('--a', a);
+    media.style.setProperty('--b', b);
+
+    const img = document.createElement('img');
+    img.src = listing.image_url || '';
+    img.alt = listing.title;
+    img.loading = 'lazy';
+    media.appendChild(img);
+
+    if(listing.guest_favorite){
+      const badge = document.createElement('span');
+      badge.className = 'media-badge';
+      badge.textContent = 'Guest favorite';
+      media.appendChild(badge);
+    }
+
+    const favBtn = document.createElement('button');
+    favBtn.type = 'button';
+    favBtn.className = 'fav-btn';
+    favBtn.setAttribute('aria-label', 'Save listing');
+    favBtn.innerHTML = FAV_ICON;
+    media.appendChild(favBtn);
+
+    const info = document.createElement('div');
+    info.className = 'card-info';
+
+    const row1 = document.createElement('div');
+    row1.className = 'card-row1';
+    const h3 = document.createElement('h3');
+    h3.textContent = listing.title;
+    row1.appendChild(h3);
+    if(listing.rating != null){
+      const rating = document.createElement('span');
+      rating.className = 'card-rating';
+      rating.innerHTML = STAR_ICON;
+      rating.appendChild(document.createTextNode(Number(listing.rating).toFixed(2)));
+      row1.appendChild(rating);
+    }
+    info.appendChild(row1);
+
+    const sub = document.createElement('p');
+    sub.className = 'card-sub';
+    const subtitle = subtitleFor(listing);
+    sub.appendChild(document.createTextNode(listing.location + (subtitle ? ' · ' + subtitle : '')));
+    if(listing.verified){
+      sub.appendChild(document.createTextNode(' '));
+      const tag = document.createElement('span');
+      tag.className = 'verified-tag';
+      tag.innerHTML = CHECK_ICON + 'Verified';
+      sub.appendChild(tag);
+    }
+    info.appendChild(sub);
+
+    const price = document.createElement('p');
+    price.className = 'card-price';
+    const strong = document.createElement('strong');
+    strong.textContent = '$' + Math.round(listing.price);
+    price.appendChild(strong);
+    price.appendChild(document.createTextNode(' ' + listing.price_unit));
+    info.appendChild(price);
+
+    card.appendChild(media);
+    card.appendChild(info);
+    return card;
+  }
+
+  function renderSkeleton(count){
+    listingGrid.setAttribute('aria-busy', 'true');
+    listingGrid.innerHTML = '';
+    for(let i = 0; i < count; i++){
+      const s = document.createElement('div');
+      s.className = 'listing-card skeleton-card';
+      s.setAttribute('aria-hidden', 'true');
+      s.innerHTML =
+        '<div class="card-media"></div>' +
+        '<div class="card-info">' +
+          '<div class="skeleton-line" style="width:72%;height:15px;"></div>' +
+          '<div class="skeleton-line" style="width:48%;"></div>' +
+          '<div class="skeleton-line" style="width:32%;"></div>' +
+        '</div>';
+      listingGrid.appendChild(s);
+    }
+  }
+
+  function renderListings(listings){
+    listingGrid.setAttribute('aria-busy', 'false');
+    listingGrid.innerHTML = '';
+    listings.forEach((listing, i) => listingGrid.appendChild(createListingCard(listing, i)));
+    cards = Array.from(listingGrid.querySelectorAll('.listing-card'));
+    applyFilters();
+  }
+
+  listingGrid.addEventListener('click', (e) => {
+    const favBtn = e.target.closest('.fav-btn');
+    if(favBtn){
       e.stopPropagation();
-      btn.classList.toggle('saved');
-    });
+      favBtn.classList.toggle('saved');
+      return;
+    }
+    const card = e.target.closest('.listing-card');
+    if(card && card.dataset.href){
+      location.href = card.dataset.href;
+    }
   });
 
-  document.querySelectorAll('.listing-card').forEach(card => {
-    card.addEventListener('click', () => {
-      location.href = card.dataset.type === 'car' ? 'car-listing-detail.html' : 'listing-detail.html';
-    });
-  });
+  async function loadListings(){
+    renderSkeleton(6);
+    let listings = [];
+    try {
+      const res = await fetch('/api/listings');
+      if(!res.ok) throw new Error('Failed to load listings (' + res.status + ')');
+      listings = await res.json();
+    } catch(err){
+      console.error('Could not load listings:', err);
+      listings = [];
+    }
+    renderListings(listings);
+  }
 
   /* ===== FILTERS ===== */
-  const cards = Array.from(document.querySelectorAll('.listing-card'));
+  let cards = [];
   const typeToggle = document.getElementById('typeToggle');
   const cityFilter = document.getElementById('cityFilter');
   const minPriceInput = document.getElementById('minPrice');
@@ -820,7 +790,7 @@
   document.getElementById('emptyClearFilters').addEventListener('click', resetFilters);
 
   updateRangeFill();
-  applyFilters();
+  loadListings();
 
   const revealEls = document.querySelectorAll('.reveal');
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)){
@@ -838,5 +808,29 @@
   }
 </script>
 
+<script>
+(function(){
+  function logOut(e){
+    if(e) e.preventDefault();
+    localStorage.removeItem('ur-access-token');
+    localStorage.removeItem('ur-refresh-token');
+    window.location.href = '/login';
+  }
+
+  var profileLink = document.getElementById('logoutLink');
+  if(profileLink){
+    profileLink.addEventListener('click', logOut);
+  }
+
+  if(!localStorage.getItem('ur-access-token')) return;
+
+  var navLink = document.getElementById('navAuthLink');
+  if(navLink){
+    navLink.textContent = 'Log out';
+    navLink.href = '#';
+    navLink.addEventListener('click', logOut);
+  }
+})();
+</script>
 </body>
 </html>

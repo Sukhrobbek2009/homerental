@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
     --bg:#FFFFFF;
@@ -164,17 +165,26 @@
     box-shadow:0 8px 20px -6px rgba(15,157,139,.55);
   }
   .auth-submit:hover{background:var(--accent-deep);transform:translateY(-1px);}
+  .auth-submit:disabled{opacity:.65;cursor:not-allowed;transform:none;}
+  .auth-error{
+    display:none;background:rgba(214,69,69,.1);border:1px solid rgba(214,69,69,.35);color:#D64545;
+    border-radius:12px;padding:10px 14px;font-size:13.5px;font-weight:600;margin:-4px 0 0;
+  }
+  .auth-error.is-visible{display:block;}
 
   .auth-divider{display:flex;align-items:center;gap:12px;margin:24px 0;color:var(--ink-faint);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
   .auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--line);}
 
+  .google-btn-wrap{position:relative;}
   .google-btn{
     width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;
     border:1px solid var(--line-strong);border-radius:var(--radius-full);background:var(--panel);
     font-weight:700;font-size:14.5px;color:var(--ink);cursor:pointer;transition:background .15s ease;
   }
   .google-btn:hover{background:var(--bg-alt);}
+  .google-btn:disabled{opacity:.55;cursor:not-allowed;}
   .google-btn svg{width:18px;height:18px;}
+  .google-btn-overlay{position:absolute;inset:0;opacity:0;overflow:hidden;border-radius:var(--radius-full);}
 
   .auth-switch{text-align:center;margin-top:24px;font-size:14px;color:var(--ink-soft);}
   .auth-switch button{background:none;border:none;color:var(--accent-deep);font-weight:700;cursor:pointer;padding:0;font-size:14px;}
@@ -255,7 +265,7 @@
 
 <header class="navbar" id="navbar">
   <div class="wrap navbar-inner">
-    <a href="index.html" class="brand">
+    <a href="/" class="brand">
       <span class="brand-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
       </span>
@@ -263,16 +273,16 @@
     </a>
 
     <nav id="navLinks" class="nav-links">
-      <a href="index.html#homes">Homes</a>
-      <a href="index.html#homes">Cars</a>
-      <a href="listings.html">Listings</a>
-      <a href="renter-dashboard.html">Dashboard</a>
-      <a href="index.html#how">How it works</a>
-      <a href="index.html#pricing">Pricing</a>
+      <a href="/#homes">Homes</a>
+      <a href="/#homes">Cars</a>
+      <a href="/listings">Listings</a>
+      <a href="/renter-dashboard">Dashboard</a>
+      <a href="/#how">How it works</a>
+      <a href="/#pricing">Pricing</a>
     </nav>
 
     <div class="nav-right">
-      <a href="host-dashboard.html" class="host-link">Become a host</a>
+      <a href="/host-dashboard" class="host-link">Become a host</a>
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
@@ -330,20 +340,25 @@
         </div>
       </div>
 
+      <p class="auth-error" id="authError" role="alert"></p>
+
       <button type="submit" class="auth-submit" id="authSubmit">Log In</button>
     </form>
 
     <div class="auth-divider">or</div>
 
-    <button type="button" class="google-btn" id="googleBtn">
-      <svg viewBox="0 0 18 18">
-        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
-        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/>
-        <path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.997 8.997 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/>
-        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/>
-      </svg>
-      Continue with Google
-    </button>
+    <div class="google-btn-wrap">
+      <button type="button" class="google-btn" id="googleBtn" title="Loading Google sign-in…">
+        <svg viewBox="0 0 18 18">
+          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/>
+          <path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.997 8.997 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/>
+          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div class="google-btn-overlay" id="googleBtnOverlay"></div>
+    </div>
 
     <p class="auth-switch">
       <span id="switchPrompt">New here?</span>
@@ -390,7 +405,7 @@
   <div class="wrap">
     <div class="footer-top">
       <div class="fcol footer-brand">
-        <a href="index.html" class="brand">
+        <a href="/" class="brand">
           <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>
           <span class="brand-name">Uzbek Rentals</span>
         </a>
@@ -405,11 +420,11 @@
       <div class="fcol">
         <h4>Explore</h4>
         <ul>
-          <li><a href="listings.html">All listings</a></li>
-          <li><a href="index.html#homes">Homes</a></li>
-          <li><a href="index.html#homes">Cars</a></li>
-          <li><a href="index.html#how">How it works</a></li>
-          <li><a href="host-dashboard.html">Become a host</a></li>
+          <li><a href="/listings">All listings</a></li>
+          <li><a href="/#homes">Homes</a></li>
+          <li><a href="/#homes">Cars</a></li>
+          <li><a href="/#how">How it works</a></li>
+          <li><a href="/host-dashboard">Become a host</a></li>
         </ul>
       </div>
 
@@ -479,6 +494,8 @@
   const authSubmit = document.getElementById('authSubmit');
   const switchPrompt = document.getElementById('switchPrompt');
   const switchModeBtn = document.getElementById('switchModeBtn');
+  const emailInput = document.getElementById('email');
+  const authError = document.getElementById('authError');
   let mode = 'login';
 
   function setMode(next){
@@ -516,6 +533,10 @@
   });
   switchModeBtn.addEventListener('click', () => setMode(mode === 'login' ? 'signup' : 'login'));
 
+  if(location.pathname === '/signup'){
+    setMode('signup');
+  }
+
   /* ===== PASSWORD VISIBILITY ===== */
   const passwordInput = document.getElementById('password');
   const togglePassword = document.getElementById('togglePassword');
@@ -530,27 +551,146 @@
   const authStep = document.getElementById('authStep');
   const roleStep = document.getElementById('roleStep');
 
-  document.getElementById('authForm').addEventListener('submit', (e) => {
+  /* ===== BACKEND WIRING ===== */
+  function showAuthError(message){
+    authError.textContent = message;
+    authError.classList.add('is-visible');
+  }
+  function clearAuthError(){
+    authError.textContent = '';
+    authError.classList.remove('is-visible');
+  }
+
+  async function apiRequest(path, { method = 'POST', body, token } = {}){
+    const headers = { 'Content-Type': 'application/json' };
+    if(token) headers.Authorization = `Bearer ${token}`;
+
+    let res;
+    try {
+      res = await fetch(path, { method, headers, body });
+    } catch(_) {
+      throw new Error('Could not reach the server. Please try again.');
+    }
+
+    let data = null;
+    try { data = await res.json(); } catch(_) { /* empty body */ }
+
+    if(!res.ok){
+      const detail = data && data.detail;
+      const message = Array.isArray(detail) ? detail.map(d => d.msg).join(' ') : detail;
+      throw new Error(message || 'Something went wrong. Please try again.');
+    }
+    return data;
+  }
+
+  document.getElementById('authForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if(mode === 'signup'){
-      authStep.style.display = 'none';
-      roleStep.style.display = 'flex';
-      roleStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    clearAuthError();
+
+    authSubmit.disabled = true;
+    const originalLabel = authSubmit.textContent;
+    authSubmit.textContent = mode === 'signup' ? 'Creating account…' : 'Logging in…';
+
+    try {
+      if(mode === 'signup'){
+        const data = await apiRequest('/api/auth/signup', {
+          body: JSON.stringify({
+            full_name: fullName.value,
+            phone: phone.value.trim() || undefined,
+            email: emailInput.value,
+            password: passwordInput.value,
+          }),
+        });
+        localStorage.setItem('ur-access-token', data.access_token);
+        localStorage.setItem('ur-refresh-token', data.refresh_token);
+
+        authStep.style.display = 'none';
+        roleStep.style.display = 'flex';
+        roleStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        const data = await apiRequest('/api/auth/login', {
+          body: JSON.stringify({ email: emailInput.value, password: passwordInput.value }),
+        });
+        localStorage.setItem('ur-access-token', data.access_token);
+        localStorage.setItem('ur-refresh-token', data.refresh_token);
+
+        window.location.href = data.user.role === 'host' ? '/host-dashboard' : '/listings';
+      }
+    } catch(err){
+      showAuthError(err.message);
+    } finally {
+      authSubmit.disabled = false;
+      authSubmit.textContent = originalLabel;
     }
   });
-  document.getElementById('googleBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-  });
+
+  /* ===== GOOGLE SIGN-IN =====
+     The visible "Continue with Google" button is our own styling. Google's
+     real button is rendered invisibly on top of it (googleBtnOverlay) so
+     clicks land on Google's actual iframe button — that's required for
+     Google Identity Services to treat it as a trusted user click. */
+  const googleBtn = document.getElementById('googleBtn');
+  const googleBtnOverlay = document.getElementById('googleBtnOverlay');
+  googleBtn.disabled = true;
+
+  async function handleGoogleCredential(response){
+    clearAuthError();
+    try {
+      const data = await apiRequest('/api/auth/google', {
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      localStorage.setItem('ur-access-token', data.access_token);
+      localStorage.setItem('ur-refresh-token', data.refresh_token);
+      window.location.href = data.user.role === 'host' ? '/host-dashboard' : '/listings';
+    } catch(err){
+      showAuthError(err.message);
+    }
+  }
+
+  async function initGoogleAuth(){
+    let clientId = '';
+    try {
+      const config = await fetch('/api/config').then(r => r.json());
+      clientId = config.google_client_id || '';
+    } catch(_) { /* config endpoint unreachable; leave Google sign-in disabled */ }
+
+    if(!clientId || !(window.google && window.google.accounts && window.google.accounts.id)){
+      googleBtn.title = 'Google sign-in is not configured yet.';
+      return;
+    }
+
+    google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredential });
+    google.accounts.id.renderButton(googleBtnOverlay, {
+      type: 'standard',
+      theme: 'outline',
+      size: 'large',
+      shape: 'pill',
+      width: Math.round(googleBtn.getBoundingClientRect().width) || 320,
+    });
+
+    googleBtn.disabled = false;
+    googleBtn.title = '';
+  }
+
+  window.addEventListener('load', initGoogleAuth);
 
   document.getElementById('roleBackBtn').addEventListener('click', () => {
     roleStep.style.display = 'none';
     authStep.style.display = 'flex';
   });
   document.getElementById('roleRent').addEventListener('click', () => {
-    window.location.href = 'listings.html';
+    window.location.href = '/listings';
   });
-  document.getElementById('roleList').addEventListener('click', () => {
-    window.location.href = 'index.html#list';
+  document.getElementById('roleList').addEventListener('click', async () => {
+    const token = localStorage.getItem('ur-access-token');
+    if(token){
+      try {
+        await apiRequest('/api/auth/me/role', { method: 'PATCH', token, body: JSON.stringify({ role: 'host' }) });
+      } catch(_) {
+        // Account was already created; let them into the host dashboard even if the role update failed.
+      }
+    }
+    window.location.href = '/host-dashboard';
   });
 
   const revealEls = document.querySelectorAll('.reveal');
