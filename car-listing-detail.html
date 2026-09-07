@@ -171,6 +171,8 @@
   .gallery-main img,.gallery-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
   .gallery-main::after,.gallery-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg, rgba(255,255,255,.1), transparent 55%);transition:background .15s ease;}
   .gallery-main:hover::after,.gallery-thumb:hover::after{background:linear-gradient(200deg, rgba(255,255,255,.28), rgba(0,0,0,.06) 100%);}
+  .gallery.single-photo{grid-template-columns:1fr;}
+  .gallery.single-photo .gallery-thumb,.gallery.single-photo .show-all-photos{display:none;}
   .show-all-photos{
     position:absolute;right:16px;bottom:16px;z-index:2;display:flex;align-items:center;gap:8px;
     padding:10px 16px;border-radius:var(--radius-full);background:var(--panel);border:1px solid var(--line-strong);
@@ -244,7 +246,7 @@
   .booking-price .rating{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:13.5px;font-weight:700;}
   .booking-price .rating svg{width:12.5px;height:12.5px;}
 
-  .booking-fields{border:1px solid var(--line-strong);border-radius:var(--radius-md);overflow:hidden;margin-bottom:14px;}
+  .booking-fields{border:1px solid var(--line-strong);border-radius:var(--radius-md);margin-bottom:14px;position:relative;}
   .field-row{display:grid;grid-template-columns:1fr 1fr;}
   .field{padding:10px 14px;border-right:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);}
   .field:nth-child(2){border-right:none;}
@@ -252,6 +254,44 @@
   .field .value{font-size:13.5px;color:var(--ink-soft);}
   .field.guests{border-bottom:none;grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
   .field.guests svg{width:14px;height:14px;color:var(--ink-soft);}
+  .field.date-field{all:unset;box-sizing:border-box;display:block;width:100%;padding:10px 14px;border-right:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);cursor:pointer;transition:background .15s ease;border-radius:0;}
+  .field.date-field:nth-child(2){border-right:none;}
+  .field.date-field:hover,.field.date-field.is-active{background:var(--bg-alt);}
+  .field.date-field .value.is-set{color:var(--ink);font-weight:600;}
+
+  .date-picker{
+    position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:40;
+    background:var(--panel);border:1px solid var(--line-strong);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-lift);padding:18px;
+  }
+  .date-picker[hidden]{display:none;}
+  .dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .dp-head .dp-label{font-weight:700;font-size:14.5px;}
+  .dp-nav{width:30px;height:30px;border-radius:50%;border:1px solid var(--line-strong);background:var(--panel);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .dp-nav:hover{background:var(--bg-alt);}
+  .dp-nav:disabled{opacity:.35;cursor:default;}
+  .dp-nav:disabled:hover{background:var(--panel);}
+  .dp-nav svg{width:13px;height:13px;}
+  .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;}
+  .dp-weekdays span{text-align:center;font-size:11px;font-weight:700;color:var(--ink-soft);}
+  .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .dp-day{
+    aspect-ratio:1/1;border:none;background:none;border-radius:8px;font-size:13px;color:var(--ink);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;font:inherit;
+  }
+  .dp-day:hover:not(:disabled){background:var(--bg-alt);}
+  .dp-day:disabled{color:var(--ink-faint);text-decoration:line-through;cursor:not-allowed;}
+  .dp-day.dp-empty{visibility:hidden;cursor:default;}
+  .dp-day.dp-today{box-shadow:inset 0 0 0 1px var(--ink-faint);}
+  .dp-day.dp-in-range{background:var(--accent-pale);border-radius:0;}
+  .dp-day.dp-range-start{background:var(--accent);color:#fff;border-radius:8px 0 0 8px;}
+  .dp-day.dp-range-end{background:var(--accent);color:#fff;border-radius:0 8px 8px 0;}
+  .dp-day.dp-range-start.dp-range-end{border-radius:8px;}
+  .dp-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;}
+  .dp-summary{font-size:12.5px;color:var(--ink-soft);}
+  .dp-clear{background:none;border:none;font-weight:700;font-size:13px;color:var(--ink);text-decoration:underline;cursor:pointer;padding:0;flex-shrink:0;}
+  .dp-error{margin:8px 0 0;font-size:12.5px;font-weight:600;color:#D64545;}
+  .booking-error{margin:10px 0 0;font-size:13px;font-weight:600;color:#D64545;text-align:center;}
 
   .book-now-btn{
     width:100%;padding:15px;border:none;border-radius:var(--radius-full);background:var(--accent);color:#fff;
@@ -266,6 +306,18 @@
   .price-breakdown .row span:last-child{color:var(--ink);font-weight:600;}
   .price-breakdown .total{border-top:1px solid var(--line);margin-top:4px;padding-top:14px;font-weight:800;color:var(--ink);}
   .price-breakdown .total span:last-child{font-weight:800;}
+
+  .booking-confirmation{display:flex;flex-direction:column;align-items:center;text-align:center;}
+  .booking-confirmation[hidden]{display:none;}
+  .confirm-icon{
+    width:52px;height:52px;border-radius:50%;background:var(--accent-pale);color:var(--accent-deep);
+    display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+  }
+  .confirm-icon svg{width:24px;height:24px;}
+  .booking-confirmation h3{font-size:19px;margin-bottom:6px;}
+  .confirm-sub{margin:0 0 20px;font-size:13.5px;color:var(--ink-soft);}
+  .confirm-details{width:100%;margin-bottom:20px;}
+  a.book-now-btn{display:block;box-sizing:border-box;text-align:center;text-decoration:none;}
 
   /* ===== MOBILE STICKY BOOK BAR ===== */
   .mobile-book-bar{
@@ -322,6 +374,7 @@
     .gallery-thumb{display:none;}
     .gallery-main{aspect-ratio:4/3;grid-row:auto;}
     .booking-card{display:none;}
+    .booking-card.force-visible{display:block;position:fixed;left:16px;right:16px;bottom:16px;top:auto;max-height:80vh;overflow-y:auto;z-index:80;}
     .mobile-book-bar{display:flex;}
     .detail-body{padding-bottom:110px;}
     .amenities-grid,.rules-grid{grid-template-columns:1fr;}
@@ -388,15 +441,15 @@
 
   <div class="detail-head reveal">
     <div>
-      <h1>2022 Toyota Camry</h1>
+      <h1 id="listingTitle">2022 Toyota Camry</h1>
       <div class="detail-meta">
-        <span class="rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.95</span>
+        <span class="rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg><span class="rating-value">4.95</span></span>
         <span>·</span>
-        <span>86 reviews</span>
+        <span id="reviewCountText">86 reviews</span>
         <span class="dot"></span>
-        <span class="place">Seattle, WA</span>
+        <span class="place" id="placeText">Seattle, WA</span>
         <span class="dot"></span>
-        <span class="verified-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified driver</span>
+        <span class="verified-tag" id="verifiedTag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified driver</span>
       </div>
     </div>
     <div class="head-actions">
@@ -413,7 +466,7 @@
 
   <div class="gallery reveal" id="gallery">
     <div class="gallery-main" style="--a:#A9B4BD;--b:#6E7A85;">
-      <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=70" alt="2022 Toyota Camry parked, front three-quarter view" loading="lazy">
+      <img id="galleryMainImg" src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=70" alt="2022 Toyota Camry parked, front three-quarter view" loading="lazy">
     </div>
     <div class="gallery-thumb" style="--a:#C3CBD1;--b:#8A96A0;">
       <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&q=60" alt="Toyota Camry side exterior" loading="lazy">
@@ -439,15 +492,15 @@
       <section class="reveal">
         <div class="host-row">
           <div>
-            <h2>Entire car listed by Elyor</h2>
-            <p>Sedan · Automatic · 5 seats · Gas</p>
+            <h2 id="hostHeading">Entire car listed by Elyor</h2>
+            <p id="hostSubline">Sedan · Automatic · 5 seats · Gas</p>
           </div>
           <div class="host-row-right">
-            <a href="/messages?with=elyor" class="icon-action">
+            <a href="/messages?with=elyor" class="icon-action" id="messageHostLink">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
               Message host
             </a>
-            <div class="host-avatar">E</div>
+            <div class="host-avatar" id="hostAvatar">E</div>
           </div>
         </div>
       </section>
@@ -458,14 +511,14 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13l2-6a2 2 0 012-2h10a2 2 0 012 2l2 6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M3 13h18v4H3z"/></svg>
             <div>
               <h4>Entire car</h4>
-              <p>You'll have this Camry all to yourself for the length of your trip.</p>
+              <p id="entireDesc">You'll have this Camry all to yourself for the length of your trip.</p>
             </div>
           </div>
-          <div class="feature-item">
+          <div class="feature-item" id="verifiedFeatureItem">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
             <div>
               <h4>Verified driver</h4>
-              <p>Elyor's identity, license, and vehicle documents have been verified by Uzbek Rentals.</p>
+              <p id="verifiedFeatureDesc">Elyor's identity, license, and vehicle documents have been verified by Uzbek Rentals.</p>
             </div>
           </div>
           <div class="feature-item">
@@ -479,14 +532,16 @@
       </section>
 
       <section class="reveal">
-        <p class="desc-text">This 2022 Toyota Camry is clean, fuel-efficient, and comfortable for both city driving and longer road trips around the Pacific Northwest. It comes with Bluetooth, Apple CarPlay, a backup camera, and adaptive cruise control.</p>
-        <p class="desc-text">Pickup is easy from a well-lit spot near downtown Seattle, with SEA-TAC airport just 20 minutes away. Regularly serviced and always returned with a full tank.</p>
+        <div id="descriptionText">
+          <p class="desc-text">This 2022 Toyota Camry is clean, fuel-efficient, and comfortable for both city driving and longer road trips around the Pacific Northwest. It comes with Bluetooth, Apple CarPlay, a backup camera, and adaptive cruise control.</p>
+          <p class="desc-text">Pickup is easy from a well-lit spot near downtown Seattle, with SEA-TAC airport just 20 minutes away. Regularly serviced and always returned with a full tank.</p>
+        </div>
         <button class="show-more-btn" type="button">Show more</button>
       </section>
 
-      <section class="reveal">
+      <section class="reveal" id="amenitiesSection">
         <h2 style="font-size:19px;margin-bottom:20px;">What's included</h2>
-        <div class="amenities-grid">
+        <div class="amenities-grid" id="amenitiesGrid">
           <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3.5"/></svg>200 mi/day included</div>
           <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>Insurance included</div>
           <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5a11 11 0 0114 0M8 16a6.5 6.5 0 018 0M12 19.5v.01"/></svg>Bluetooth &amp; CarPlay</div>
@@ -506,7 +561,7 @@
       <section class="reveal">
         <h2 style="font-size:19px;margin-bottom:16px;">Where you'll pick it up</h2>
         <div class="map-block"><div class="map-pin"></div></div>
-        <p class="map-caption">Seattle, WA — exact pickup location shared after booking.</p>
+        <p class="map-caption" id="mapCaption">Seattle, WA — exact pickup location shared after booking.</p>
       </section>
 
       <section class="reveal" style="border-bottom:none;">
@@ -522,40 +577,78 @@
     </div>
 
     <aside class="booking-card reveal" id="bookingCard">
+      <div class="booking-confirmation" id="bookingConfirmation" hidden>
+        <div class="confirm-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <h3>Booking confirmed</h3>
+        <p class="confirm-sub">You're all set — here are your details.</p>
+        <div class="price-breakdown confirm-details">
+          <div class="row"><span>Listing</span><span id="confirmListingTitle">—</span></div>
+          <div class="row"><span>Dates</span><span id="confirmDates">—</span></div>
+          <div class="row"><span>Days</span><span id="confirmNights">—</span></div>
+          <div class="row total"><span>Total price</span><span id="confirmTotal">—</span></div>
+        </div>
+        <a href="/renter-dashboard" class="book-now-btn">View my bookings</a>
+      </div>
+      <div id="bookingForm">
       <div class="booking-price">
-        <span class="amount">$45</span>
-        <span class="unit">day</span>
-        <span class="rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.95</span>
+        <span class="amount" id="bookingAmount">$45</span>
+        <span class="unit" id="bookingUnit">day</span>
+        <span class="rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg><span class="rating-value">4.95</span></span>
       </div>
 
       <div class="booking-fields">
         <div class="field-row">
-          <div class="field">
+          <button type="button" class="field date-field" id="checkinField">
             <label>Trip start</label>
-            <div class="value">Add date</div>
-          </div>
-          <div class="field">
+            <div class="value" id="checkinValue">Add date</div>
+          </button>
+          <button type="button" class="field date-field" id="checkoutField">
             <label>Trip end</label>
-            <div class="value">Add date</div>
-          </div>
+            <div class="value" id="checkoutValue">Add date</div>
+          </button>
         </div>
         <div class="field guests">
           <div>
             <label>Pickup location</label>
-            <div class="value">Seattle, WA</div>
+            <div class="value" id="pickupLocation">Seattle, WA</div>
           </div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+
+        <div class="date-picker" id="datePicker" hidden>
+          <div class="dp-head">
+            <button type="button" class="dp-nav" id="dpPrevMonth" aria-label="Previous month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span class="dp-label" id="dpLabel"></span>
+            <button type="button" class="dp-nav" id="dpNextMonth" aria-label="Next month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+          <div class="dp-weekdays">
+            <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+          </div>
+          <div class="dp-grid" id="dpGrid"></div>
+          <p class="dp-error" id="dpError" style="display:none;"></p>
+          <div class="dp-footer">
+            <span class="dp-summary" id="dpSummary">Select a trip-start date</span>
+            <button type="button" class="dp-clear" id="dpClear">Clear</button>
+          </div>
         </div>
       </div>
 
       <button class="book-now-btn" id="bookNowBtn" type="button">Book Now</button>
-      <p class="booking-note">You won't be charged yet</p>
+      <p class="booking-note" id="bookingNote">You won't be charged yet</p>
+      <p class="booking-error" id="bookingError" style="display:none;"></p>
 
       <div class="price-breakdown">
-        <div class="row"><span>$45 x 5 days</span><span>$225</span></div>
-        <div class="row"><span>Insurance fee</span><span>$25</span></div>
-        <div class="row"><span>Service fee</span><span>$30</span></div>
-        <div class="row total"><span>Total before taxes</span><span>$280</span></div>
+        <div class="row"><span id="breakdownRentLabel">$45 x 5 days</span><span id="breakdownRentValue">$225</span></div>
+        <div class="row"><span>Insurance fee</span><span id="breakdownCleaningValue">$25</span></div>
+        <div class="row"><span>Service fee</span><span id="breakdownServiceValue">$30</span></div>
+        <div class="row total"><span>Total before taxes</span><span id="breakdownTotalValue">$280</span></div>
+      </div>
       </div>
     </aside>
   </div>
@@ -652,9 +745,493 @@
     themeToggle.setAttribute('aria-pressed', next === 'dark');
   });
 
-  document.getElementById('saveBtn').addEventListener('click', (e) => {
-    e.currentTarget.classList.toggle('saved');
+  document.getElementById('saveBtn').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    if(!currentListing) return;
+    const token = localStorage.getItem('ur-access-token');
+    if(!token){
+      window.location.href = '/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+      return;
+    }
+    const willSave = !btn.classList.contains('saved');
+    btn.classList.toggle('saved', willSave);
+    btn.disabled = true;
+    try {
+      await fetch('/api/saved/' + encodeURIComponent(currentListing.id), {
+        method: willSave ? 'POST' : 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch(err){
+      console.error('Could not update saved listing:', err);
+      btn.classList.toggle('saved', !willSave);
+    } finally {
+      btn.disabled = false;
+    }
   });
+
+  async function refreshSavedState(listingId){
+    const btn = document.getElementById('saveBtn');
+    const token = localStorage.getItem('ur-access-token');
+    if(!btn || !token) return;
+    try {
+      const res = await fetch('/api/saved/ids', { headers: { Authorization: `Bearer ${token}` } });
+      if(!res.ok) return;
+      const ids = await res.json();
+      btn.classList.toggle('saved', ids.includes(listingId));
+    } catch(err){
+      console.error('Could not check saved state:', err);
+    }
+  }
+
+  /* ===== LISTING (loaded from the saved listing record) ===== */
+  const PLACEHOLDER_IMG = 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1200';
+  const AMENITY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+  let ratingText = 'New';
+  let reviewCount = 0;
+  let currentListing = null;
+
+  function initialsForHost(name){
+    return (name || 'Host').trim().split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase();
+  }
+
+  function updateRatingUI(){
+    document.querySelectorAll('.rating .rating-value').forEach(el => { el.textContent = ratingText; });
+  }
+
+  function updateMobileMeta(){
+    const el = document.getElementById('mobileMeta');
+    if(el) el.textContent = ratingText + ' · ' + reviewCount + (reviewCount === 1 ? ' review' : ' reviews');
+  }
+
+  function setReviewCount(n){
+    reviewCount = n;
+    const el = document.getElementById('reviewCountText');
+    if(el) el.textContent = n + (n === 1 ? ' review' : ' reviews');
+    updateMobileMeta();
+  }
+
+  function applyListing(listing){
+    currentListing = listing;
+    refreshSavedState(listing.id);
+    document.title = listing.title + ' — Uzbek Rentals';
+
+    const titleEl = document.getElementById('listingTitle');
+    if(titleEl) titleEl.textContent = listing.title;
+
+    ratingText = listing.rating != null ? Number(listing.rating).toFixed(2) : 'New';
+    updateRatingUI();
+    updateMobileMeta();
+
+    const placeEl = document.getElementById('placeText');
+    if(placeEl) placeEl.textContent = listing.location;
+
+    const verifiedTag = document.getElementById('verifiedTag');
+    if(verifiedTag) verifiedTag.style.display = listing.verified ? '' : 'none';
+    const verifiedFeatureItem = document.getElementById('verifiedFeatureItem');
+    if(verifiedFeatureItem) verifiedFeatureItem.style.display = listing.verified ? '' : 'none';
+
+    const gallery = document.getElementById('gallery');
+    const mainImg = document.getElementById('galleryMainImg');
+    if(mainImg){
+      mainImg.src = listing.image_url || PLACEHOLDER_IMG;
+      mainImg.alt = listing.title;
+    }
+    if(gallery) gallery.classList.add('single-photo');
+
+    const hostHeading = document.getElementById('hostHeading');
+    if(hostHeading) hostHeading.textContent = 'Entire car listed by ' + listing.host_name;
+
+    const hostSubline = document.getElementById('hostSubline');
+    if(hostSubline){
+      const bits = [listing.vehicle_type, listing.transmission].filter(Boolean);
+      hostSubline.textContent = bits.length ? bits.join(' · ') : 'Entire car';
+    }
+
+    const hostAvatar = document.getElementById('hostAvatar');
+    if(hostAvatar) hostAvatar.textContent = initialsForHost(listing.host_name);
+
+    const messageHostLink = document.getElementById('messageHostLink');
+    if(messageHostLink) messageHostLink.href = '/messages?with=' + encodeURIComponent(listing.host_id);
+
+    const entireDesc = document.getElementById('entireDesc');
+    if(entireDesc) entireDesc.textContent = "You'll have " + listing.title + ' all to yourself for the length of your trip.';
+
+    const verifiedFeatureDesc = document.getElementById('verifiedFeatureDesc');
+    if(verifiedFeatureDesc) verifiedFeatureDesc.textContent = listing.host_name + "'s identity, license, and vehicle documents have been verified by Uzbek Rentals.";
+
+    const descriptionText = document.getElementById('descriptionText');
+    if(descriptionText){
+      descriptionText.innerHTML = '';
+      const paragraphs = (listing.description || '').split(/\n+/).map(s => s.trim()).filter(Boolean);
+      if(paragraphs.length === 0) paragraphs.push('No description provided.');
+      paragraphs.forEach(text => {
+        const p = document.createElement('p');
+        p.className = 'desc-text';
+        p.textContent = text;
+        descriptionText.appendChild(p);
+      });
+    }
+
+    const amenitiesSection = document.getElementById('amenitiesSection');
+    const amenitiesGrid = document.getElementById('amenitiesGrid');
+    const amenityList = (listing.amenities || '').split(',').map(s => s.trim()).filter(Boolean);
+    if(amenitiesGrid){
+      amenitiesGrid.innerHTML = '';
+      amenityList.forEach(name => {
+        const div = document.createElement('div');
+        div.className = 'amenity';
+        div.innerHTML = AMENITY_ICON;
+        div.appendChild(document.createTextNode(name));
+        amenitiesGrid.appendChild(div);
+      });
+    }
+    if(amenitiesSection) amenitiesSection.style.display = amenityList.length ? '' : 'none';
+
+    const mapCaption = document.getElementById('mapCaption');
+    if(mapCaption) mapCaption.textContent = listing.location + ' — exact pickup location shared after booking.';
+
+    const pickupLocation = document.getElementById('pickupLocation');
+    if(pickupLocation) pickupLocation.textContent = listing.location;
+
+    const bookingAmount = document.getElementById('bookingAmount');
+    if(bookingAmount) bookingAmount.textContent = '$' + Math.round(listing.price);
+    const bookingUnit = document.getElementById('bookingUnit');
+    if(bookingUnit) bookingUnit.textContent = listing.price_unit;
+
+    const mobileAmount = document.getElementById('mobileAmount');
+    if(mobileAmount) mobileAmount.textContent = '$' + Math.round(listing.price);
+    const mobileUnit = document.getElementById('mobileUnit');
+    if(mobileUnit) mobileUnit.textContent = listing.price_unit;
+
+    updateBookingSummary();
+    loadBookedRanges(listing.id);
+  }
+
+  /* ===== BOOKING date-range picker ===== */
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const WEEKDAY_START = 0; // Sunday
+  const MONTH_LABEL = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' });
+  const DAY_LABEL = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
+
+  let bookedRanges = []; // [{start: Date, end: Date}]
+  let selectedStart = null;
+  let selectedEnd = null;
+  let pickerViewMonth = startOfMonth(new Date());
+  let pickerOpen = false;
+
+  function toISODate(d){
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function parseISODate(s){
+    if(!s) return null;
+    const [y, m, d] = s.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function startOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+  function addDays(d, n){ return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+  function isSameDay(a, b){ return !!a && !!b && a.getTime() === b.getTime(); }
+
+  async function loadBookedRanges(listingId){
+    bookedRanges = [];
+    try {
+      const res = await fetch('/api/listings/' + encodeURIComponent(listingId) + '/booked-ranges');
+      if(res.ok){
+        const ranges = await res.json();
+        bookedRanges = ranges.map(r => ({ start: parseISODate(r.start_date), end: parseISODate(r.end_date) }));
+      }
+    } catch(err){
+      console.error('Could not load booked dates:', err);
+    }
+    if(pickerOpen) renderCalendar();
+  }
+
+  function availableFromDate(){ return currentListing && currentListing.available_from ? parseISODate(currentListing.available_from) : null; }
+  function availableToDate(){ return currentListing && currentListing.available_to ? parseISODate(currentListing.available_to) : null; }
+
+  function isDayBlocked(day){
+    const today = startOfDay(new Date());
+    if(day < today) return true;
+    const from = availableFromDate();
+    if(from && day < from) return true;
+    const to = availableToDate();
+    if(to && day > to) return true;
+    return bookedRanges.some(r => day >= r.start && day < r.end);
+  }
+
+  function rangeHasBlockedDay(start, end){
+    for(let d = start; d < end; d = addDays(d, 1)){
+      if(isDayBlocked(d)) return true;
+    }
+    return false;
+  }
+
+  function showDpError(message){
+    const el = document.getElementById('dpError');
+    el.textContent = message;
+    el.style.display = message ? 'block' : 'none';
+  }
+
+  function renderCalendar(){
+    const label = document.getElementById('dpLabel');
+    const grid = document.getElementById('dpGrid');
+    const prevBtn = document.getElementById('dpPrevMonth');
+    const summary = document.getElementById('dpSummary');
+    if(!grid) return;
+
+    label.textContent = MONTH_LABEL.format(pickerViewMonth);
+
+    const thisMonthStart = startOfMonth(new Date());
+    prevBtn.disabled = pickerViewMonth.getTime() <= thisMonthStart.getTime();
+
+    grid.innerHTML = '';
+    const firstOfMonth = pickerViewMonth;
+    const daysInMonth = new Date(firstOfMonth.getFullYear(), firstOfMonth.getMonth() + 1, 0).getDate();
+    const leadingBlanks = (firstOfMonth.getDay() - WEEKDAY_START + 7) % 7;
+    const today = startOfDay(new Date());
+
+    for(let i = 0; i < leadingBlanks; i++){
+      const blank = document.createElement('span');
+      blank.className = 'dp-day dp-empty';
+      grid.appendChild(blank);
+    }
+
+    for(let dayNum = 1; dayNum <= daysInMonth; dayNum++){
+      const day = new Date(firstOfMonth.getFullYear(), firstOfMonth.getMonth(), dayNum);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'dp-day';
+      btn.textContent = String(dayNum);
+
+      const blocked = isDayBlocked(day);
+      if(blocked) btn.disabled = true;
+      if(isSameDay(day, today)) btn.classList.add('dp-today');
+
+      if(selectedStart && isSameDay(day, selectedStart)) btn.classList.add('dp-range-start');
+      if(selectedEnd && isSameDay(day, selectedEnd)) btn.classList.add('dp-range-end');
+      if(selectedStart && selectedEnd && day > selectedStart && day < selectedEnd) btn.classList.add('dp-in-range');
+
+      if(!blocked){
+        btn.addEventListener('click', () => handleDayClick(day));
+      }
+      grid.appendChild(btn);
+    }
+
+    if(selectedStart && !selectedEnd){
+      summary.textContent = DAY_LABEL.format(selectedStart) + ' → select trip-end date';
+    } else if(selectedStart && selectedEnd){
+      const days = Math.round((selectedEnd - selectedStart) / DAY_MS);
+      summary.textContent = days + (days === 1 ? ' day' : ' days') + ' selected';
+    } else {
+      summary.textContent = 'Select a trip-start date';
+    }
+  }
+
+  function handleDayClick(day){
+    showDpError('');
+    if(!selectedStart || (selectedStart && selectedEnd)){
+      selectedStart = day;
+      selectedEnd = null;
+    } else if(day <= selectedStart){
+      selectedStart = day;
+      selectedEnd = null;
+    } else if(rangeHasBlockedDay(selectedStart, day)){
+      showDpError("Your trip can't include unavailable dates in between.");
+    } else {
+      selectedEnd = day;
+    }
+    renderCalendar();
+    updateBookingSummary();
+    if(selectedStart && selectedEnd){
+      closeDatePicker();
+    }
+  }
+
+  function openDatePicker(){
+    pickerOpen = true;
+    pickerViewMonth = startOfMonth(selectedStart || new Date());
+    document.getElementById('bookingCard').classList.add('force-visible');
+    document.getElementById('datePicker').hidden = false;
+    document.getElementById('checkinField').classList.add('is-active');
+    document.getElementById('checkoutField').classList.add('is-active');
+    showDpError('');
+    renderCalendar();
+  }
+  function closeDatePicker(){
+    pickerOpen = false;
+    document.getElementById('datePicker').hidden = true;
+    document.getElementById('checkinField').classList.remove('is-active');
+    document.getElementById('checkoutField').classList.remove('is-active');
+  }
+  function toggleDatePicker(){
+    if(pickerOpen) closeDatePicker(); else openDatePicker();
+  }
+
+  document.getElementById('checkinField').addEventListener('click', (e) => { e.stopPropagation(); toggleDatePicker(); });
+  document.getElementById('checkoutField').addEventListener('click', (e) => { e.stopPropagation(); toggleDatePicker(); });
+  document.getElementById('dpPrevMonth').addEventListener('click', () => {
+    pickerViewMonth = new Date(pickerViewMonth.getFullYear(), pickerViewMonth.getMonth() - 1, 1);
+    renderCalendar();
+  });
+  document.getElementById('dpNextMonth').addEventListener('click', () => {
+    pickerViewMonth = new Date(pickerViewMonth.getFullYear(), pickerViewMonth.getMonth() + 1, 1);
+    renderCalendar();
+  });
+  document.getElementById('dpClear').addEventListener('click', () => {
+    selectedStart = null;
+    selectedEnd = null;
+    showDpError('');
+    renderCalendar();
+    updateBookingSummary();
+  });
+  document.addEventListener('click', (e) => {
+    if(!pickerOpen) return;
+    const wrap = document.getElementById('bookingCard');
+    if(e.target.closest('#mobileBookNowBtn')) return;
+    if(wrap && !wrap.contains(e.target)){
+      closeDatePicker();
+      if(!(selectedStart && selectedEnd)) wrap.classList.remove('force-visible');
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && pickerOpen) closeDatePicker();
+  });
+
+  function updateBookingSummary(){
+    const checkinValue = document.getElementById('checkinValue');
+    const checkoutValue = document.getElementById('checkoutValue');
+    if(checkinValue){
+      checkinValue.textContent = selectedStart ? DAY_LABEL.format(selectedStart) : 'Add date';
+      checkinValue.classList.toggle('is-set', !!selectedStart);
+    }
+    if(checkoutValue){
+      checkoutValue.textContent = selectedEnd ? DAY_LABEL.format(selectedEnd) : 'Add date';
+      checkoutValue.classList.toggle('is-set', !!selectedEnd);
+    }
+
+    const price = currentListing ? currentListing.price : 0;
+    const rentLabel = document.getElementById('breakdownRentLabel');
+    const rentValue = document.getElementById('breakdownRentValue');
+    const cleaningValue = document.getElementById('breakdownCleaningValue');
+    const serviceValue = document.getElementById('breakdownServiceValue');
+    const totalValue = document.getElementById('breakdownTotalValue');
+    const bookNowBtn = document.getElementById('bookNowBtn');
+
+    if(selectedStart && selectedEnd){
+      const days = Math.round((selectedEnd - selectedStart) / DAY_MS);
+      const rent = price * days;
+      const insuranceFee = Math.round(price * 0.15);
+      const serviceFee = Math.round(price * 0.12);
+      const total = Math.round(rent + insuranceFee + serviceFee);
+      if(rentLabel) rentLabel.textContent = '$' + Math.round(price) + ' x ' + days + ' ' + (days === 1 ? 'day' : 'days');
+      if(rentValue) rentValue.textContent = '$' + Math.round(rent);
+      if(cleaningValue) cleaningValue.textContent = '$' + insuranceFee;
+      if(serviceValue) serviceValue.textContent = '$' + serviceFee;
+      if(totalValue) totalValue.textContent = '$' + total;
+      if(bookNowBtn) bookNowBtn.textContent = 'Book Now';
+    } else {
+      if(rentLabel) rentLabel.textContent = 'Select dates to see the price';
+      if(rentValue) rentValue.textContent = '—';
+      if(cleaningValue) cleaningValue.textContent = '—';
+      if(serviceValue) serviceValue.textContent = '—';
+      if(totalValue) totalValue.textContent = '—';
+      if(bookNowBtn) bookNowBtn.textContent = 'Check availability';
+    }
+  }
+
+  function showBookingError(message){
+    const el = document.getElementById('bookingError');
+    el.textContent = message;
+    el.style.display = message ? 'block' : 'none';
+  }
+
+  function showBookingConfirmation(booking){
+    const bookingForm = document.getElementById('bookingForm');
+    const confirmation = document.getElementById('bookingConfirmation');
+    if(bookingForm) bookingForm.hidden = true;
+    if(confirmation) confirmation.hidden = false;
+
+    const mobileBar = document.getElementById('mobileBookBar');
+    if(mobileBar) mobileBar.style.display = 'none';
+
+    const start = parseISODate(booking.start_date);
+    const end = parseISODate(booking.end_date);
+    const days = Math.round((end - start) / DAY_MS);
+
+    document.getElementById('confirmListingTitle').textContent = booking.listing_title || (currentListing && currentListing.title) || 'Listing';
+    document.getElementById('confirmDates').textContent = DAY_LABEL.format(start) + ' – ' + DAY_LABEL.format(end);
+    document.getElementById('confirmNights').textContent = days + (days === 1 ? ' day' : ' days');
+    document.getElementById('confirmTotal').textContent = '$' + Math.round(booking.total_price);
+  }
+
+  async function submitBooking(){
+    showBookingError('');
+    const token = localStorage.getItem('ur-access-token');
+    if(!token){
+      window.location.href = '/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+      return;
+    }
+    if(!currentListing){
+      showBookingError('This listing is still loading. Please try again in a moment.');
+      return;
+    }
+
+    const bookNowBtn = document.getElementById('bookNowBtn');
+    bookNowBtn.disabled = true;
+    const originalLabel = bookNowBtn.textContent;
+    bookNowBtn.textContent = 'Booking…';
+
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          listing_id: currentListing.id,
+          start_date: toISODate(selectedStart),
+          end_date: toISODate(selectedEnd),
+          guest_count: 1,
+        }),
+      });
+      let data = null;
+      try { data = await res.json(); } catch(_) { /* empty body */ }
+      if(!res.ok){
+        const detail = data && data.detail;
+        throw new Error(Array.isArray(detail) ? detail.map(d => d.msg).join(' ') : (detail || 'Could not complete this booking.'));
+      }
+
+      bookNowBtn.textContent = 'Booked!';
+      showBookingConfirmation(data);
+    } catch(err){
+      if(String(err.message || '').toLowerCase().includes('no longer available')){
+        await loadBookedRanges(currentListing.id);
+        selectedStart = null;
+        selectedEnd = null;
+        updateBookingSummary();
+      }
+      showBookingError(err.message || 'Could not complete this booking. Please try again.');
+      bookNowBtn.disabled = false;
+      bookNowBtn.textContent = originalLabel;
+    }
+  }
+
+  async function loadListing(){
+    const listingId = new URLSearchParams(location.search).get('id');
+    if(!listingId) return;
+    try {
+      const res = await fetch('/api/listings/' + encodeURIComponent(listingId));
+      if(!res.ok) throw new Error('Failed to load listing (' + res.status + ')');
+      const listing = await res.json();
+      if(listing.listing_type !== 'car'){
+        location.replace('/listings/property?id=' + encodeURIComponent(listing.id));
+        return;
+      }
+      applyListing(listing);
+    } catch(err){
+      console.error('Could not load listing:', err);
+    }
+  }
+
+  loadListing();
 
   /* ===== REVIEWS (loaded from saved review records) ===== */
   const REVIEW_AVATAR_PALETTE = [
@@ -776,8 +1353,16 @@
   function goToBooking(){
     document.getElementById('bookingCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
-  document.getElementById('bookNowBtn').addEventListener('click', goToBooking);
-  document.getElementById('mobileBookNowBtn').addEventListener('click', goToBooking);
+  function handleBookNowClick(){
+    goToBooking();
+    if(selectedStart && selectedEnd){
+      submitBooking();
+    } else {
+      openDatePicker();
+    }
+  }
+  document.getElementById('bookNowBtn').addEventListener('click', handleBookNowClick);
+  document.getElementById('mobileBookNowBtn').addEventListener('click', handleBookNowClick);
 
   document.querySelectorAll('.gallery-main, .gallery-thumb').forEach(el => {
     el.addEventListener('click', () => {

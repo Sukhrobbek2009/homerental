@@ -17,17 +17,41 @@ def _get_accessible_booking(booking_id: str, current_user: models.User, db: Sess
     return booking
 
 
+def _attach_booking_extras(db: Session, bookings: list[models.Booking]) -> list[models.Booking]:
+    listing_ids = {b.listing_id for b in bookings}
+    listings = {}
+    if listing_ids:
+        listings = {l.id: l for l in db.query(models.Listing).filter(models.Listing.id.in_(listing_ids)).all()}
+
+    user_ids = {b.renter_id for b in bookings} | {b.host_id for b in bookings}
+    names = {}
+    if user_ids:
+        names = {u.id: u.full_name for u in db.query(models.User).filter(models.User.id.in_(user_ids)).all()}
+
+    for booking in bookings:
+        listing = listings.get(booking.listing_id)
+        booking.listing_title = listing.title if listing is not None else "Listing"
+        booking.listing_location = listing.location if listing is not None else ""
+        booking.listing_image_url = listing.image_url if listing is not None else None
+        booking.listing_type = listing.listing_type if listing is not None else models.ListingType.home
+        booking.listing_price_unit = listing.price_unit if listing is not None else "night"
+        booking.renter_name = names.get(booking.renter_id, "Guest")
+        booking.host_name = names.get(booking.host_id, "Host")
+    return bookings
+
+
 @router.get("/mine", response_model=list[schemas.BookingOut])
 def list_my_bookings(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> list[models.Booking]:
-    return (
+    bookings = (
         db.query(models.Booking)
         .filter(models.Booking.renter_id == current_user.id)
         .order_by(models.Booking.created_at.desc())
         .all()
     )
+    return _attach_booking_extras(db, bookings)
 
 
 @router.get("/hosting", response_model=list[schemas.BookingOut])
@@ -35,12 +59,13 @@ def list_bookings_for_my_listings(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> list[models.Booking]:
-    return (
+    bookings = (
         db.query(models.Booking)
         .filter(models.Booking.host_id == current_user.id)
         .order_by(models.Booking.created_at.desc())
         .all()
     )
+    return _attach_booking_extras(db, bookings)
 
 
 @router.post("", response_model=schemas.BookingOut, status_code=status.HTTP_201_CREATED)
@@ -55,6 +80,33 @@ def create_booking(
     if listing.host_id == current_user.id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You can't book your own listing")
 
+    if listing.available_from is not None and payload.start_date < listing.available_from:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"This listing isn't available before {listing.available_from.isoformat()}",
+        )
+    if listing.available_to is not None and payload.end_date > listing.available_to:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"This listing isn't available after {listing.available_to.isoformat()}",
+        )
+
+    overlapping = (
+        db.query(models.Booking)
+        .filter(
+            models.Booking.listing_id == listing.id,
+            models.Booking.status.in_([models.BookingStatus.pending, models.BookingStatus.confirmed]),
+            models.Booking.start_date < payload.end_date,
+            models.Booking.end_date > payload.start_date,
+        )
+        .first()
+    )
+    if overlapping is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Those dates are no longer available for this listing.",
+        )
+
     nights = (payload.end_date - payload.start_date).days
     booking = models.Booking(
         listing_id=listing.id,
@@ -64,11 +116,12 @@ def create_booking(
         end_date=payload.end_date,
         guest_count=payload.guest_count,
         total_price=round(listing.price * nights, 2),
+        status=models.BookingStatus.confirmed,
     )
     db.add(booking)
     db.commit()
     db.refresh(booking)
-    return booking
+    return _attach_booking_extras(db, [booking])[0]
 
 
 @router.patch("/{booking_id}/status", response_model=schemas.BookingOut)
@@ -82,4 +135,4 @@ def update_booking_status(
     booking.status = payload.status
     db.commit()
     db.refresh(booking)
-    return booking
+    return _attach_booking_extras(db, [booking])[0]

@@ -569,6 +569,20 @@
       : (listing.home_type || '');
   }
 
+  let savedIds = new Set();
+
+  async function loadSavedIds(){
+    const token = localStorage.getItem('ur-access-token');
+    if(!token) return;
+    try {
+      const res = await fetch('/api/saved/ids', { headers: { Authorization: `Bearer ${token}` } });
+      if(!res.ok) return;
+      savedIds = new Set(await res.json());
+    } catch(err){
+      console.error('Could not load saved listings:', err);
+    }
+  }
+
   function createListingCard(listing, index){
     const [a, b] = CARD_PALETTE[index % CARD_PALETTE.length];
     const detailBase = listing.listing_type === 'car' ? '/listings/car' : '/listings/property';
@@ -576,6 +590,7 @@
 
     const card = document.createElement('article');
     card.className = 'listing-card';
+    card.dataset.id = listing.id;
     card.dataset.type = listing.listing_type;
     card.dataset.city = listing.location;
     card.dataset.price = String(Math.round(listing.price));
@@ -602,7 +617,7 @@
 
     const favBtn = document.createElement('button');
     favBtn.type = 'button';
-    favBtn.className = 'fav-btn';
+    favBtn.className = 'fav-btn' + (savedIds.has(listing.id) ? ' saved' : '');
     favBtn.setAttribute('aria-label', 'Save listing');
     favBtn.innerHTML = FAV_ICON;
     media.appendChild(favBtn);
@@ -676,11 +691,33 @@
     applyFilters();
   }
 
-  listingGrid.addEventListener('click', (e) => {
+  listingGrid.addEventListener('click', async (e) => {
     const favBtn = e.target.closest('.fav-btn');
     if(favBtn){
       e.stopPropagation();
-      favBtn.classList.toggle('saved');
+      const card = favBtn.closest('.listing-card');
+      const id = card && card.dataset.id;
+      if(!id) return;
+      const token = localStorage.getItem('ur-access-token');
+      if(!token){
+        window.location.href = '/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+        return;
+      }
+      const willSave = !favBtn.classList.contains('saved');
+      favBtn.classList.toggle('saved', willSave);
+      favBtn.disabled = true;
+      try {
+        await fetch('/api/saved/' + encodeURIComponent(id), {
+          method: willSave ? 'POST' : 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if(willSave) savedIds.add(id); else savedIds.delete(id);
+      } catch(err){
+        console.error('Could not update saved listing:', err);
+        favBtn.classList.toggle('saved', !willSave);
+      } finally {
+        favBtn.disabled = false;
+      }
       return;
     }
     const card = e.target.closest('.listing-card');
@@ -691,6 +728,7 @@
 
   async function loadListings(){
     renderSkeleton(6);
+    await loadSavedIds();
     let listings = [];
     try {
       const res = await fetch('/api/listings');

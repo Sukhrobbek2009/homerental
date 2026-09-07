@@ -8,6 +8,9 @@ _LISTING_COLUMNS = {
     "rating": "FLOAT",
     "verified": "BOOLEAN NOT NULL DEFAULT 0",
     "guest_favorite": "BOOLEAN NOT NULL DEFAULT 0",
+    "amenities": "TEXT",
+    "available_from": "DATE",
+    "available_to": "DATE",
 }
 
 

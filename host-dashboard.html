@@ -48,6 +48,8 @@
     --shadow-card:0 6px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.06);
     --shadow-lift:0 14px 34px -8px rgba(0,0,0,0.18);
     --nav-bg:rgba(255,255,255,0.92);
+    --warn:#B7791F;
+    --warn-pale:#FBF0DC;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -58,6 +60,7 @@
       --shadow-card:0 6px 20px rgba(0,0,0,0.5);
       --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
       --nav-bg:rgba(15,17,21,0.86);
+      --warn:#E3B04B; --warn-pale:rgba(227,176,75,0.14);
     }
   }
   :root[data-theme="dark"]{
@@ -68,6 +71,7 @@
     --shadow-card:0 6px 20px rgba(0,0,0,0.5);
     --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
     --nav-bg:rgba(15,17,21,0.86);
+    --warn:#E3B04B; --warn-pale:rgba(227,176,75,0.14);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -199,6 +203,14 @@
   }
   .edit-btn:hover{transform:scale(1.1);background:rgba(0,0,0,.4);}
   .edit-btn svg{width:14px;height:14px;color:#fff;}
+  .delete-btn{
+    position:absolute;top:10px;right:48px;z-index:1;width:30px;height:30px;border-radius:50%;
+    border:none;cursor:pointer;background:rgba(0,0,0,.24);display:flex;align-items:center;justify-content:center;
+    transition:transform .15s ease,background .15s ease;
+  }
+  .delete-btn:hover{transform:scale(1.1);background:#D64545;}
+  .delete-btn svg{width:14px;height:14px;color:#fff;}
+  .delete-btn:disabled{opacity:.6;cursor:default;transform:none;}
   .card-info{padding-top:12px;}
   .card-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
   .card-row1 h3{font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--ink);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -223,6 +235,41 @@
   .empty-state h3{font-size:17px;margin-bottom:6px;color:var(--ink);}
   .empty-state p{margin:0 auto;font-size:14px;line-height:1.6;max-width:340px;}
 
+  /* ===== BOOKINGS ===== */
+  .booking-list{display:flex;flex-direction:column;gap:16px;}
+  .booking-item{
+    display:grid;grid-template-columns:104px 1fr auto;align-items:center;gap:20px;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:16px;box-shadow:var(--shadow-card);cursor:pointer;
+  }
+  .booking-thumb{
+    width:104px;height:88px;border-radius:var(--radius-md);overflow:hidden;position:relative;
+    background:var(--bg-alt-2);flex-shrink:0;
+  }
+  .booking-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .booking-body h3{font-size:15.5px;margin-bottom:4px;}
+  .booking-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--ink-soft);}
+  .booking-meta span{display:inline-flex;align-items:center;gap:5px;}
+  .booking-meta svg{width:13px;height:13px;flex-shrink:0;}
+  .status-pill{
+    display:inline-flex;align-items:center;gap:6px;font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;font-size:12px;padding:6px 12px;border-radius:var(--radius-full);white-space:nowrap;
+  }
+  .status-pill.confirmed{background:var(--accent-pale);color:var(--accent-deep);}
+  .status-pill.pending{background:var(--warn-pale);color:var(--warn);}
+  .status-pill.cancelled{background:rgba(214,69,69,.12);color:#D64545;}
+  .status-pill.completed{background:var(--bg-alt-2);color:var(--ink-soft);}
+  .status-pill svg{width:11px;height:11px;}
+  .booking-side{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+  .booking-price{font-size:14.5px;color:var(--ink);text-align:right;}
+  .booking-price strong{font-weight:700;font-size:16px;}
+
+  @media (max-width:640px){
+    .booking-item{grid-template-columns:76px 1fr;grid-template-rows:auto auto;}
+    .booking-thumb{width:76px;height:64px;}
+    .booking-side{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center;margin-top:6px;}
+  }
+
   /* --- Add listing modal --- */
   .modal-overlay{
     position:fixed;inset:0;z-index:100;background:rgba(15,17,21,.5);
@@ -242,14 +289,28 @@
   .modal-close svg{width:15px;height:15px;}
   .field{margin-bottom:16px;}
   .field label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;}
-  .field input,.field select{
+  .field input,.field select,.field textarea{
     width:100%;padding:13px 14px;border:1px solid var(--line-strong);border-radius:var(--radius-md);
     background:var(--panel);color:var(--ink);font:inherit;font-size:14.5px;outline:none;
     transition:border-color .15s ease,box-shadow .15s ease;
   }
-  .field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);}
-  .field input::placeholder{color:var(--ink-faint);}
+  .field textarea{resize:vertical;min-height:88px;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);}
+  .field input::placeholder,.field textarea::placeholder{color:var(--ink-faint);}
+  .field input[type="file"]{padding:9px 10px;cursor:pointer;}
+  .field-hint{margin:6px 0 0;font-size:12px;color:var(--ink-soft);}
+  .current-photo-preview{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px;border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--bg-alt);}
+  .current-photo-preview img{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;}
+  .current-photo-preview span{font-size:12.5px;color:var(--ink-soft);line-height:1.4;}
+  .field-error{display:none;margin:6px 0 0;font-size:12.5px;font-weight:600;color:#D64545;}
+  .field-error.is-visible{display:block;}
+  .field.has-error input,.field.has-error select,.field.has-error textarea{border-color:#D64545;}
+  .field.has-error input:focus,.field.has-error select:focus,.field.has-error textarea:focus{box-shadow:0 0 0 3px rgba(214,69,69,.15);}
   .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .form-message{display:none;border-radius:12px;padding:10px 14px;font-size:13.5px;font-weight:600;margin:-2px 0 14px;}
+  .form-message.is-visible{display:block;}
+  .form-error{background:rgba(214,69,69,.1);border:1px solid rgba(214,69,69,.35);color:#D64545;}
+  .form-success{background:var(--accent-pale);border:1px solid rgba(15,157,139,.35);color:var(--accent-deep);}
   .btn-primary{
     width:100%;background:var(--accent);color:#fff;border:none;padding:14px;border-radius:var(--radius-full);
     font-weight:700;font-size:15px;cursor:pointer;transition:background .15s ease,transform .15s ease;margin-top:6px;
@@ -382,73 +443,7 @@
         <span class="count-pill" id="listingsCount">4 listings</span>
       </div>
 
-      <div class="listing-grid" id="listingGrid">
-
-        <article class="listing-card" onclick="location.href='listing-detail.html'">
-          <div class="card-media">
-            <img src="https://images.pexels.com/photos/7045945/pexels-photo-7045945.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Sunlit loft near Prospect Park" loading="lazy">
-            <span class="media-badge active-badge"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Active</span>
-            <button class="edit-btn" aria-label="Edit listing" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Sunlit loft near Prospect Park</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.97</span>
-            </div>
-            <p class="card-sub">Brooklyn, NY · Entire apartment</p>
-            <p class="card-price"><strong>$145</strong> night</p>
-          </div>
-        </article>
-
-        <article class="listing-card" onclick="location.href='listing-detail.html'">
-          <div class="card-media">
-            <img src="https://images.pexels.com/photos/6933852/pexels-photo-6933852.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Modern studio downtown" loading="lazy">
-            <span class="media-badge active-badge"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Active</span>
-            <button class="edit-btn" aria-label="Edit listing" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Modern studio downtown</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.90</span>
-            </div>
-            <p class="card-sub">Denver, CO · Entire studio</p>
-            <p class="card-price"><strong>$98</strong> night</p>
-          </div>
-        </article>
-
-        <article class="listing-card" onclick="location.href='car-detail.html'">
-          <div class="card-media">
-            <img src="https://images.pexels.com/photos/34404246/pexels-photo-34404246.jpeg?auto=compress&cs=tinysrgb&w=800" alt="2021 Toyota Camry" loading="lazy">
-            <span class="media-badge active-badge"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Active</span>
-            <button class="edit-btn" aria-label="Edit listing" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>2021 Toyota Camry</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>4.95</span>
-            </div>
-            <p class="card-sub">Seattle, WA · Sedan · Automatic</p>
-            <p class="card-price"><strong>$52</strong> day</p>
-          </div>
-        </article>
-
-        <article class="listing-card" onclick="location.href='listing-detail.html'">
-          <div class="card-media">
-            <img src="https://images.pexels.com/photos/6180674/pexels-photo-6180674.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Cozy 2BR near the park" loading="lazy">
-            <span class="media-badge draft-badge">Draft</span>
-            <button class="edit-btn" aria-label="Edit listing" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-          </div>
-          <div class="card-info">
-            <div class="card-row1">
-              <h3>Cozy 2BR near the park</h3>
-              <span class="card-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>—</span>
-            </div>
-            <p class="card-sub">Philadelphia, PA · Entire apartment</p>
-            <p class="card-price"><strong>$132</strong> night</p>
-          </div>
-        </article>
-
-      </div>
+      <div class="listing-grid" id="listingGrid" aria-live="polite" aria-busy="true"></div>
 
       <div class="empty-state" id="listingsEmpty" style="display:none;">
         <div class="empty-visual">
@@ -462,22 +457,38 @@
       </div>
     </div>
 
+    <div class="dash-section" id="bookingsSection">
+      <div class="dash-section-head">
+        <h2>Bookings</h2>
+        <span class="count-pill" id="hostBookingsCount">0 bookings</span>
+      </div>
+
+      <div class="booking-list" id="hostBookingList" aria-live="polite" aria-busy="true"></div>
+
+      <div class="empty-state" id="hostBookingsEmpty" style="display:none;">
+        <div class="empty-visual">
+          <div class="ring"></div>
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+        </div>
+        <h3>No bookings yet</h3>
+        <p>When a renter books one of your listings, it'll show up here.</p>
+      </div>
+    </div>
+
   </div>
 </section>
 
 <div class="modal-overlay" id="addListingOverlay">
   <div class="modal-card">
     <div class="modal-head">
-      <h2>Add new listing</h2>
+      <h2 id="addListingHeading">Add new listing</h2>
       <button class="modal-close" id="closeAddListing" type="button" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
     <form id="addListingForm" novalidate>
-      <div class="field">
-        <label for="newTitle">Listing title</label>
-        <input id="newTitle" type="text" placeholder="e.g. Cozy 2BR near downtown" required>
-      </div>
       <div class="field-row">
         <div class="field">
           <label for="newType">Type</label>
@@ -487,19 +498,42 @@
           </select>
         </div>
         <div class="field">
-          <label for="newPrice">Price</label>
-          <input id="newPrice" type="number" min="0" placeholder="120" required>
+          <label for="newPrice" id="newPriceLabel">Price per night</label>
+          <input id="newPrice" type="number" min="0" step="0.01" placeholder="120" required>
+          <p class="field-error" id="newPriceError"></p>
         </div>
+      </div>
+      <div class="field">
+        <label for="newTitle">Listing title</label>
+        <input id="newTitle" type="text" placeholder="e.g. Cozy 2BR near downtown" required>
+        <p class="field-error" id="newTitleError"></p>
       </div>
       <div class="field">
         <label for="newCity">City</label>
         <input id="newCity" type="text" placeholder="e.g. Brooklyn, NY" required>
+        <p class="field-error" id="newCityError"></p>
       </div>
       <div class="field">
-        <label for="newImage">Photo URL</label>
-        <input id="newImage" type="url" placeholder="https://images.pexels.com/...">
+        <label for="newDescription">Description</label>
+        <textarea id="newDescription" rows="4" placeholder="Tell guests what makes this place or car great…" required></textarea>
+        <p class="field-error" id="newDescriptionError"></p>
       </div>
-      <button type="submit" class="btn-primary">Publish listing</button>
+      <div class="field">
+        <label for="newAmenities">Amenities</label>
+        <input id="newAmenities" type="text" placeholder="e.g. WiFi, Parking, Pool">
+        <p class="field-hint">Separate each amenity with a comma.</p>
+      </div>
+      <div class="field">
+        <label for="newPhoto">Photo</label>
+        <div class="current-photo-preview" id="currentPhotoPreview" style="display:none;">
+          <img id="currentPhotoImg" alt="Current listing photo">
+          <span>Current photo — choose a new file to replace it.</span>
+        </div>
+        <input id="newPhoto" type="file" accept="image/*">
+      </div>
+      <p class="form-message form-error" id="addListingError" role="alert"></p>
+      <p class="form-message form-success" id="addListingSuccess" role="status"></p>
+      <button type="submit" class="btn-primary" id="addListingSubmit">Publish listing</button>
     </form>
   </div>
 </div>
@@ -593,11 +627,116 @@
     themeToggle.setAttribute('aria-pressed', next === 'dark');
   });
 
-  /* ---- stats + listings grid ---- */
+  /* ---- stats + listings grid (rendered from saved listing records) ---- */
   const listingGrid = document.getElementById('listingGrid');
   const listingsEmpty = document.getElementById('listingsEmpty');
   const listingsCount = document.getElementById('listingsCount');
   const statListings = document.getElementById('statListings');
+
+  const PLACEHOLDER_IMG = 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800';
+  const STAR_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>';
+  const DOT_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>';
+  const CALENDAR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>';
+  const PERSON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>';
+  const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+  const CLOCK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>';
+  const CANCEL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  const myListingsCache = new Map();
+
+  function subtitleFor(listing){
+    return listing.listing_type === 'car'
+      ? [listing.vehicle_type, listing.transmission].filter(Boolean).join(' · ')
+      : (listing.home_type || '');
+  }
+
+  function buildListingCard(listing){
+    const detailBase = listing.listing_type === 'car' ? '/listings/car' : '/listings/property';
+    const detailHref = detailBase + '?id=' + encodeURIComponent(listing.id);
+    const isActive = listing.status === 'active';
+
+    const card = document.createElement('article');
+    card.className = 'listing-card';
+    card.addEventListener('click', () => { location.href = detailHref; });
+
+    const media = document.createElement('div');
+    media.className = 'card-media';
+
+    const img = document.createElement('img');
+    img.src = listing.image_url || PLACEHOLDER_IMG;
+    img.alt = listing.title;
+    img.loading = 'lazy';
+    media.appendChild(img);
+
+    const badge = document.createElement('span');
+    if(isActive){
+      badge.className = 'media-badge active-badge';
+      badge.innerHTML = DOT_ICON;
+      badge.appendChild(document.createTextNode('Active'));
+    } else {
+      badge.className = 'media-badge draft-badge';
+      badge.textContent = 'Paused';
+    }
+    media.appendChild(badge);
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'edit-btn';
+    editBtn.type = 'button';
+    editBtn.setAttribute('aria-label', 'Edit listing');
+    editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openEditModal(listing.id);
+    });
+    media.appendChild(editBtn);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.type = 'button';
+    deleteBtn.setAttribute('aria-label', 'Delete listing');
+    deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>';
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleDeleteListing(listing, card, badge, deleteBtn);
+    });
+    media.appendChild(deleteBtn);
+
+    const info = document.createElement('div');
+    info.className = 'card-info';
+
+    const row1 = document.createElement('div');
+    row1.className = 'card-row1';
+    const h3 = document.createElement('h3');
+    h3.textContent = listing.title;
+    row1.appendChild(h3);
+    const rating = document.createElement('span');
+    rating.className = 'card-rating';
+    if(listing.rating != null){
+      rating.innerHTML = STAR_ICON;
+      rating.appendChild(document.createTextNode(Number(listing.rating).toFixed(2)));
+    } else {
+      rating.textContent = '—';
+    }
+    row1.appendChild(rating);
+    info.appendChild(row1);
+
+    const sub = document.createElement('p');
+    sub.className = 'card-sub';
+    const subtitle = subtitleFor(listing);
+    sub.textContent = listing.location + (subtitle ? ' · ' + subtitle : '');
+    info.appendChild(sub);
+
+    const price = document.createElement('p');
+    price.className = 'card-price';
+    const strong = document.createElement('strong');
+    strong.textContent = '$' + Math.round(listing.price);
+    price.appendChild(strong);
+    price.appendChild(document.createTextNode(' ' + listing.price_unit));
+    info.appendChild(price);
+
+    card.appendChild(media);
+    card.appendChild(info);
+    return card;
+  }
 
   function refreshListingStats(){
     const count = listingGrid.querySelectorAll('.listing-card').length;
@@ -606,28 +745,183 @@
     listingsEmpty.style.display = count === 0 ? 'block' : 'none';
   }
 
-  const PLACEHOLDER_IMG = 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800';
+  function renderMyListings(listings){
+    listingGrid.setAttribute('aria-busy', 'false');
+    listingGrid.innerHTML = '';
+    myListingsCache.clear();
+    listings.forEach(listing => {
+      myListingsCache.set(listing.id, listing);
+      listingGrid.appendChild(buildListingCard(listing));
+    });
+    refreshListingStats();
+  }
 
-  function buildListingCard({ title, type, city, price, image }){
-    const card = document.createElement('article');
-    card.className = 'listing-card';
-    const unit = type === 'car' ? 'day' : 'night';
-    card.innerHTML = `
-      <div class="card-media">
-        <img src="${image || PLACEHOLDER_IMG}" alt="${title}" loading="lazy">
-        <span class="media-badge draft-badge">Draft</span>
-        <button class="edit-btn" aria-label="Edit listing" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
-      </div>
-      <div class="card-info">
-        <div class="card-row1">
-          <h3>${title}</h3>
-          <span class="card-rating">—</span>
-        </div>
-        <p class="card-sub">${city} · ${type === 'car' ? 'Car' : 'Home'}</p>
-        <p class="card-price"><strong>$${price}</strong> ${unit}</p>
-      </div>
-    `;
-    return card;
+  /* ---- delete listing ---- */
+  async function handleDeleteListing(listing, card, badge, deleteBtn){
+    const confirmed = window.confirm(
+      `Delete "${listing.title}"? This can't be undone.\n\n` +
+      `If this listing has existing bookings, it will be marked unavailable instead of deleted.`
+    );
+    if(!confirmed) return;
+
+    const token = localStorage.getItem('ur-access-token');
+    if(!token){
+      window.location.href = '/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+      return;
+    }
+
+    deleteBtn.disabled = true;
+    try {
+      const result = await apiRequest('/api/listings/' + encodeURIComponent(listing.id), {
+        method: 'DELETE',
+        token,
+      });
+
+      if(result && result.deleted === false){
+        window.alert(result.message || 'This listing has existing bookings, so it was marked unavailable instead of being deleted.');
+        listing.status = (result.listing && result.listing.status) || 'paused';
+        badge.className = 'media-badge draft-badge';
+        badge.textContent = 'Paused';
+        deleteBtn.disabled = false;
+      } else {
+        myListingsCache.delete(listing.id);
+        card.remove();
+        refreshListingStats();
+      }
+    } catch(err){
+      window.alert(err.message || 'Could not delete this listing. Please try again.');
+      deleteBtn.disabled = false;
+    }
+  }
+
+  async function loadMyListings(){
+    const token = localStorage.getItem('ur-access-token');
+    if(!token) return;
+    let listings = [];
+    try {
+      const res = await fetch('/api/listings/mine', { headers: { Authorization: `Bearer ${token}` } });
+      if(!res.ok) throw new Error('Failed to load listings (' + res.status + ')');
+      listings = await res.json();
+    } catch(err){
+      console.error('Could not load your listings:', err);
+      listings = [];
+    }
+    renderMyListings(listings);
+  }
+
+  /* ---- bookings on my listings ---- */
+  const hostBookingList = document.getElementById('hostBookingList');
+  const hostBookingsEmpty = document.getElementById('hostBookingsEmpty');
+  const hostBookingsCount = document.getElementById('hostBookingsCount');
+  const statBookings = document.getElementById('statBookings');
+
+  const STATUS_LABELS = { confirmed: 'Confirmed', pending: 'Pending', cancelled: 'Cancelled', completed: 'Completed' };
+  const STATUS_ICONS = { confirmed: CHECK_ICON, pending: CLOCK_ICON, cancelled: CANCEL_ICON, completed: CHECK_ICON };
+
+  function formatDateShort(iso){
+    const d = new Date(iso + 'T00:00:00');
+    return isNaN(d) ? iso : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function unitCountBetween(startIso, endIso){
+    const start = new Date(startIso + 'T00:00:00');
+    const end = new Date(endIso + 'T00:00:00');
+    return Math.max(1, Math.round((end - start) / 86400000));
+  }
+
+  function createHostBookingItem(booking){
+    const detailBase = booking.listing_type === 'car' ? '/listings/car' : '/listings/property';
+    const detailHref = detailBase + '?id=' + encodeURIComponent(booking.listing_id);
+
+    const article = document.createElement('article');
+    article.className = 'booking-item';
+    article.addEventListener('click', () => { location.href = detailHref; });
+
+    const thumb = document.createElement('div');
+    thumb.className = 'booking-thumb';
+    const img = document.createElement('img');
+    img.src = booking.listing_image_url || PLACEHOLDER_IMG;
+    img.alt = booking.listing_title;
+    img.loading = 'lazy';
+    thumb.appendChild(img);
+
+    const body = document.createElement('div');
+    body.className = 'booking-body';
+    const h3 = document.createElement('h3');
+    h3.textContent = booking.listing_title;
+    body.appendChild(h3);
+
+    const meta = document.createElement('div');
+    meta.className = 'booking-meta';
+
+    const dateSpan = document.createElement('span');
+    dateSpan.innerHTML = CALENDAR_ICON;
+    dateSpan.appendChild(document.createTextNode(formatDateShort(booking.start_date) + ' – ' + formatDateShort(booking.end_date)));
+    meta.appendChild(dateSpan);
+
+    const guestSpan = document.createElement('span');
+    guestSpan.innerHTML = PERSON_ICON;
+    guestSpan.appendChild(document.createTextNode(booking.renter_name));
+    meta.appendChild(guestSpan);
+
+    const statusSpan = document.createElement('span');
+    const statusKey = STATUS_LABELS[booking.status] ? booking.status : 'pending';
+    statusSpan.className = 'status-pill ' + statusKey;
+    statusSpan.innerHTML = STATUS_ICONS[statusKey];
+    statusSpan.appendChild(document.createTextNode(STATUS_LABELS[statusKey]));
+    meta.appendChild(statusSpan);
+
+    body.appendChild(meta);
+
+    const side = document.createElement('div');
+    side.className = 'booking-side';
+    const price = document.createElement('div');
+    price.className = 'booking-price';
+    const strong = document.createElement('strong');
+    strong.textContent = '$' + Math.round(booking.total_price);
+    price.appendChild(strong);
+    price.appendChild(document.createElement('br'));
+    const units = unitCountBetween(booking.start_date, booking.end_date);
+    const unitWord = booking.listing_type === 'car' ? 'day' : 'night';
+    price.appendChild(document.createTextNode(units + ' ' + unitWord + (units === 1 ? '' : 's')));
+    side.appendChild(price);
+
+    article.appendChild(thumb);
+    article.appendChild(body);
+    article.appendChild(side);
+    return article;
+  }
+
+  function bookingsThisMonthCount(bookings){
+    const now = new Date();
+    return bookings.filter(b => {
+      if(b.status === 'cancelled') return false;
+      const start = new Date(b.start_date + 'T00:00:00');
+      return start.getFullYear() === now.getFullYear() && start.getMonth() === now.getMonth();
+    }).length;
+  }
+
+  async function loadHostBookings(){
+    const token = localStorage.getItem('ur-access-token');
+    if(!token) return;
+    hostBookingList.setAttribute('aria-busy', 'true');
+    let bookings = [];
+    try {
+      const res = await fetch('/api/bookings/hosting', { headers: { Authorization: `Bearer ${token}` } });
+      if(!res.ok) throw new Error('Failed to load bookings (' + res.status + ')');
+      bookings = await res.json();
+    } catch(err){
+      console.error('Could not load bookings:', err);
+      bookings = [];
+    }
+    bookings.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+
+    hostBookingList.setAttribute('aria-busy', 'false');
+    hostBookingList.innerHTML = '';
+    bookings.forEach(booking => hostBookingList.appendChild(createHostBookingItem(booking)));
+    hostBookingsCount.textContent = bookings.length + (bookings.length === 1 ? ' booking' : ' bookings');
+    hostBookingsEmpty.style.display = bookings.length === 0 ? 'block' : 'none';
+    statBookings.textContent = bookingsThisMonthCount(bookings);
   }
 
   /* ---- add listing modal ---- */
@@ -635,31 +929,272 @@
   const openBtn = document.getElementById('openAddListing');
   const closeBtn = document.getElementById('closeAddListing');
   const addForm = document.getElementById('addListingForm');
+  const addListingError = document.getElementById('addListingError');
+  const addListingSuccess = document.getElementById('addListingSuccess');
+  const submitBtn = addForm.querySelector('.btn-primary');
+  const newTypeEl = document.getElementById('newType');
+  const newPriceLabel = document.getElementById('newPriceLabel');
+  const addListingHeading = document.getElementById('addListingHeading');
+  const currentPhotoPreview = document.getElementById('currentPhotoPreview');
+  const currentPhotoImg = document.getElementById('currentPhotoImg');
 
-  function openModal(){ overlay.classList.add('open'); document.getElementById('newTitle').focus(); }
-  function closeModal(){ overlay.classList.remove('open'); addForm.reset(); }
+  let editingListingId = null;
+
+  function updatePriceLabel(){
+    newPriceLabel.textContent = newTypeEl.value === 'car' ? 'Price per day' : 'Price per night';
+  }
+  newTypeEl.addEventListener('change', updatePriceLabel);
+  updatePriceLabel();
+
+  function showAddListingError(message){
+    addListingSuccess.classList.remove('is-visible');
+    addListingError.textContent = message;
+    addListingError.classList.add('is-visible');
+  }
+  function clearAddListingMessages(){
+    addListingError.textContent = '';
+    addListingError.classList.remove('is-visible');
+    addListingSuccess.textContent = '';
+    addListingSuccess.classList.remove('is-visible');
+  }
+
+  const FIELD_ERROR_IDS = {
+    newTitle: 'newTitleError',
+    newCity: 'newCityError',
+    newDescription: 'newDescriptionError',
+    newPrice: 'newPriceError',
+  };
+
+  function setFieldError(inputEl, message){
+    const errorEl = document.getElementById(FIELD_ERROR_IDS[inputEl.id]);
+    const field = inputEl.closest('.field');
+    if(message){
+      field.classList.add('has-error');
+      if(errorEl){ errorEl.textContent = message; errorEl.classList.add('is-visible'); }
+    } else {
+      field.classList.remove('has-error');
+      if(errorEl){ errorEl.textContent = ''; errorEl.classList.remove('is-visible'); }
+    }
+  }
+  function clearFieldErrors(){
+    Object.keys(FIELD_ERROR_IDS).forEach(id => setFieldError(document.getElementById(id), ''));
+  }
+  Object.keys(FIELD_ERROR_IDS).forEach(id => {
+    document.getElementById(id).addEventListener('input', (e) => setFieldError(e.target, ''));
+  });
+
+  function openModal(){
+    editingListingId = null;
+    addForm.reset();
+    updatePriceLabel();
+    clearAddListingMessages();
+    clearFieldErrors();
+    currentPhotoPreview.style.display = 'none';
+    addListingHeading.textContent = 'Add new listing';
+    submitBtn.textContent = 'Publish listing';
+    overlay.classList.add('open');
+    document.getElementById('newTitle').focus();
+  }
+  function openEditModal(listingId){
+    const listing = myListingsCache.get(listingId);
+    if(!listing) return;
+
+    editingListingId = listingId;
+    clearAddListingMessages();
+    clearFieldErrors();
+
+    newTypeEl.value = listing.listing_type;
+    updatePriceLabel();
+    document.getElementById('newPrice').value = listing.price;
+    document.getElementById('newTitle').value = listing.title;
+    document.getElementById('newCity').value = listing.location;
+    document.getElementById('newDescription').value = listing.description || '';
+    document.getElementById('newAmenities').value = listing.amenities || '';
+    document.getElementById('newPhoto').value = '';
+
+    if(listing.image_url){
+      currentPhotoImg.src = listing.image_url;
+      currentPhotoPreview.style.display = 'flex';
+    } else {
+      currentPhotoPreview.style.display = 'none';
+    }
+
+    addListingHeading.textContent = 'Edit listing';
+    submitBtn.textContent = 'Save changes';
+
+    overlay.classList.add('open');
+    document.getElementById('newTitle').focus();
+  }
+  function closeModal(){
+    overlay.classList.remove('open');
+    addForm.reset();
+    updatePriceLabel();
+    clearAddListingMessages();
+    clearFieldErrors();
+    currentPhotoPreview.style.display = 'none';
+    editingListingId = null;
+    addListingHeading.textContent = 'Add new listing';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Publish listing';
+  }
 
   openBtn.addEventListener('click', openModal);
   closeBtn.addEventListener('click', closeModal);
   overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
 
-  addForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const title = document.getElementById('newTitle').value.trim();
-    const type = document.getElementById('newType').value;
-    const price = document.getElementById('newPrice').value;
-    const city = document.getElementById('newCity').value.trim();
-    const image = document.getElementById('newImage').value.trim();
-    if(!title || !price || !city) return;
+  async function apiRequest(path, { method = 'POST', body, token } = {}){
+    const headers = { 'Content-Type': 'application/json' };
+    if(token) headers.Authorization = `Bearer ${token}`;
 
-    const card = buildListingCard({ title, type, city, price, image });
-    listingGrid.prepend(card);
-    refreshListingStats();
-    closeModal();
+    let res;
+    try {
+      res = await fetch(path, { method, headers, body });
+    } catch(_) {
+      throw new Error('Could not reach the server. Please try again.');
+    }
+
+    let data = null;
+    try { data = await res.json(); } catch(_) { /* empty body */ }
+
+    if(!res.ok){
+      const detail = data && data.detail;
+      const message = Array.isArray(detail) ? detail.map(d => d.msg).join(' ') : detail;
+      throw new Error(message || 'Something went wrong. Please try again.');
+    }
+    return data;
+  }
+
+  function readImageAsCompressedDataUrl(file, maxDimension, quality){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Could not read the selected photo.'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('That file is not a valid image.'));
+        img.onload = () => {
+          let { width, height } = img;
+          if(width > maxDimension || height > maxDimension){
+            const scale = maxDimension / Math.max(width, height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  addForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAddListingMessages();
+    clearFieldErrors();
+
+    const titleEl = document.getElementById('newTitle');
+    const priceEl = document.getElementById('newPrice');
+    const cityEl = document.getElementById('newCity');
+    const descriptionEl = document.getElementById('newDescription');
+    const amenitiesEl = document.getElementById('newAmenities');
+    const photoEl = document.getElementById('newPhoto');
+
+    const type = newTypeEl.value;
+    const title = titleEl.value.trim();
+    const city = cityEl.value.trim();
+    const description = descriptionEl.value.trim();
+    const amenities = amenitiesEl.value.trim();
+    const priceRaw = priceEl.value.trim();
+    const price = Number(priceRaw);
+
+    let hasFieldErrors = false;
+    if(!title){ setFieldError(titleEl, 'Listing title is required.'); hasFieldErrors = true; }
+    if(!city){ setFieldError(cityEl, 'City is required.'); hasFieldErrors = true; }
+    if(!description){ setFieldError(descriptionEl, 'Description is required.'); hasFieldErrors = true; }
+    if(!priceRaw){
+      setFieldError(priceEl, 'Price is required.');
+      hasFieldErrors = true;
+    } else if(!Number.isFinite(price) || price <= 0){
+      setFieldError(priceEl, 'Price must be a positive number.');
+      hasFieldErrors = true;
+    }
+
+    if(hasFieldErrors){
+      showAddListingError('Please fix the highlighted fields.');
+      return;
+    }
+
+    const token = localStorage.getItem('ur-access-token');
+    if(!token){
+      window.location.href = '/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+      return;
+    }
+
+    const isEditing = !!editingListingId;
+    submitBtn.disabled = true;
+    submitBtn.textContent = isEditing ? 'Saving…' : 'Publishing…';
+
+    try {
+      let imageUrl; // undefined = leave unchanged (only meaningful when editing)
+      const file = photoEl.files && photoEl.files[0];
+      if(file){
+        if(!file.type.startsWith('image/')){
+          throw new Error('Please choose an image file for the photo.');
+        }
+        imageUrl = await readImageAsCompressedDataUrl(file, 1400, 0.75);
+      } else if(!isEditing){
+        imageUrl = null;
+      }
+
+      const payload = {
+        listing_type: type,
+        title,
+        description,
+        location: city,
+        price,
+        price_unit: type === 'car' ? 'day' : 'night',
+        amenities: amenities || null,
+      };
+      if(imageUrl !== undefined) payload.image_url = imageUrl;
+
+      const listing = isEditing
+        ? await apiRequest('/api/listings/' + encodeURIComponent(editingListingId), {
+            method: 'PATCH',
+            token,
+            body: JSON.stringify(payload),
+          })
+        : await apiRequest('/api/listings', { token, body: JSON.stringify(payload) });
+
+      if(isEditing){
+        myListingsCache.set(listing.id, listing);
+        addListingSuccess.textContent = 'Listing updated!';
+        addListingSuccess.classList.add('is-visible');
+        setTimeout(() => {
+          closeModal();
+          loadMyListings();
+        }, 700);
+      } else {
+        addListingSuccess.textContent = 'Listing published! Taking you to it…';
+        addListingSuccess.classList.add('is-visible');
+
+        const detailBase = listing.listing_type === 'car' ? '/listings/car' : '/listings/property';
+        setTimeout(() => {
+          window.location.href = detailBase + '?id=' + encodeURIComponent(listing.id);
+        }, 900);
+      }
+    } catch(err){
+      showAddListingError(err.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = isEditing ? 'Save changes' : 'Publish listing';
+    }
   });
 
-  refreshListingStats();
+  loadMyListings();
+  loadHostBookings();
 </script>
 
 </body>

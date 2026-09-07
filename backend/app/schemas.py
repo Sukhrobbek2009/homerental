@@ -84,16 +84,35 @@ class ListingBase(BaseModel):
     location: str = Field(min_length=2, max_length=160)
     price: float = Field(gt=0, le=1_000_000)
     price_unit: Literal["night", "day"]
-    image_url: str | None = Field(default=None, max_length=500)
+    image_url: str | None = Field(default=None, max_length=3_000_000)
+    amenities: str | None = Field(default=None, max_length=1000)
     bedrooms: int | None = Field(default=None, ge=0, le=50)
     home_type: str | None = Field(default=None, max_length=60)
     vehicle_type: str | None = Field(default=None, max_length=60)
     transmission: str | None = Field(default=None, max_length=30)
+    available_from: date | None = Field(default=None)
+    available_to: date | None = Field(default=None)
 
     @field_validator("title", "location")
     @classmethod
     def strip_text(cls, value: str) -> str:
         return value.strip()
+
+    @field_validator("amenities")
+    @classmethod
+    def strip_amenities(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        return value or None
+
+    @field_validator("available_to")
+    @classmethod
+    def available_to_after_from(cls, value: date | None, info) -> date | None:
+        start = info.data.get("available_from")
+        if value is not None and start is not None and value <= start:
+            raise ValueError("Available-to date must be after the available-from date")
+        return value
 
 
 class ListingCreate(ListingBase):
@@ -107,17 +126,29 @@ class ListingUpdate(BaseModel):
     location: str | None = Field(default=None, min_length=2, max_length=160)
     price: float | None = Field(default=None, gt=0, le=1_000_000)
     price_unit: Literal["night", "day"] | None = None
-    image_url: str | None = Field(default=None, max_length=500)
+    image_url: str | None = Field(default=None, max_length=3_000_000)
+    amenities: str | None = Field(default=None, max_length=1000)
     status: ListingStatus | None = None
     bedrooms: int | None = Field(default=None, ge=0, le=50)
     home_type: str | None = Field(default=None, max_length=60)
     vehicle_type: str | None = Field(default=None, max_length=60)
     transmission: str | None = Field(default=None, max_length=30)
+    available_from: date | None = Field(default=None)
+    available_to: date | None = Field(default=None)
+
+    @field_validator("available_to")
+    @classmethod
+    def available_to_after_from(cls, value: date | None, info) -> date | None:
+        start = info.data.get("available_from")
+        if value is not None and start is not None and value <= start:
+            raise ValueError("Available-to date must be after the available-from date")
+        return value
 
 
 class ListingOut(ListingBase):
     id: str
     host_id: str
+    host_name: str = "Host"
     status: ListingStatus
     rating: float | None
     verified: bool
@@ -125,6 +156,17 @@ class ListingOut(ListingBase):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ListingDeleteResult(BaseModel):
+    deleted: bool
+    message: str
+    listing: ListingOut | None = None
+
+
+class BookedRangeOut(BaseModel):
+    start_date: date
+    end_date: date
 
 
 class BookingCreate(BaseModel):
@@ -157,6 +199,13 @@ class BookingOut(BaseModel):
     total_price: float
     status: BookingStatus
     created_at: datetime
+    listing_title: str = "Listing"
+    listing_location: str = ""
+    listing_image_url: str | None = None
+    listing_type: ListingType = ListingType.home
+    listing_price_unit: str = "night"
+    renter_name: str = "Guest"
+    host_name: str = "Host"
 
     model_config = {"from_attributes": True}
 
