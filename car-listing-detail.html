@@ -260,7 +260,7 @@
   .field.date-field .value.is-set{color:var(--ink);font-weight:600;}
 
   .date-picker{
-    position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:40;
+    margin-top:10px;
     background:var(--panel);border:1px solid var(--line-strong);border-radius:var(--radius-lg);
     box-shadow:var(--shadow-lift);padding:18px;
   }
@@ -1012,7 +1012,7 @@
       if(selectedStart && selectedEnd && day > selectedStart && day < selectedEnd) btn.classList.add('dp-in-range');
 
       if(!blocked){
-        btn.addEventListener('click', () => handleDayClick(day));
+        btn.addEventListener('click', (e) => { e.stopPropagation(); handleDayClick(day); });
       }
       grid.appendChild(btn);
     }

@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..database import get_db
 from ..deps import get_current_user
+
+DATES_TAKEN_MESSAGE = "Those dates are no longer available for this listing. Please choose different dates."
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
@@ -91,21 +94,21 @@ def create_booking(
             detail=f"This listing isn't available after {listing.available_to.isoformat()}",
         )
 
-    overlapping = (
-        db.query(models.Booking)
-        .filter(
+    def _overlap_filters(*, statuses: list[models.BookingStatus], exclude_id: str | None = None):
+        filters = [
             models.Booking.listing_id == listing.id,
-            models.Booking.status.in_([models.BookingStatus.pending, models.BookingStatus.confirmed]),
+            models.Booking.status.in_(statuses),
             models.Booking.start_date < payload.end_date,
             models.Booking.end_date > payload.start_date,
-        )
-        .first()
-    )
+        ]
+        if exclude_id is not None:
+            filters.append(models.Booking.id != exclude_id)
+        return filters
+
+    active_statuses = [models.BookingStatus.pending, models.BookingStatus.confirmed]
+    overlapping = db.query(models.Booking).filter(*_overlap_filters(statuses=active_statuses)).first()
     if overlapping is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Those dates are no longer available for this listing.",
-        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=DATES_TAKEN_MESSAGE)
 
     nights = (payload.end_date - payload.start_date).days
     booking = models.Booking(
@@ -121,6 +124,29 @@ def create_booking(
     db.add(booking)
     db.commit()
     db.refresh(booking)
+
+    # A concurrent request may have booked the same dates in the gap between our
+    # check and our insert above. Re-check now that we're committed, and if another
+    # booking beat us to it, cancel the one we just made instead of leaving two
+    # confirmed bookings for the same dates. Priority goes to whichever booking was
+    # created first, tie-broken by id so exactly one of the two ever wins.
+    beat_us_to_it = (
+        db.query(models.Booking)
+        .filter(
+            *_overlap_filters(statuses=[models.BookingStatus.confirmed], exclude_id=booking.id),
+            or_(
+                models.Booking.created_at < booking.created_at,
+                and_(models.Booking.created_at == booking.created_at, models.Booking.id < booking.id),
+            ),
+        )
+        .first()
+    )
+    if beat_us_to_it is not None:
+        booking.status = models.BookingStatus.cancelled
+        db.commit()
+        db.refresh(booking)
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=DATES_TAKEN_MESSAGE)
+
     return _attach_booking_extras(db, [booking])[0]
 
 

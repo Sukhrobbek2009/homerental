@@ -745,6 +745,7 @@
   let cards = [];
   const typeToggle = document.getElementById('typeToggle');
   const cityFilter = document.getElementById('cityFilter');
+  const cityFilterDefaultHTML = cityFilter.innerHTML;
   const minPriceInput = document.getElementById('minPrice');
   const maxPriceInput = document.getElementById('maxPrice');
   const rangeFill = document.getElementById('rangeFill');
@@ -824,6 +825,7 @@
   function resetFilters(){
     currentType = 'all';
     typeToggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.type === 'all'));
+    cityFilter.innerHTML = cityFilterDefaultHTML;
     cityFilter.value = 'all';
     minPriceInput.value = 0;
     maxPriceInput.value = PRICE_MAX;
@@ -835,6 +837,37 @@
   clearFilters.addEventListener('click', resetFilters);
   document.getElementById('emptyClearFilters').addEventListener('click', resetFilters);
 
+  /* ===== INCOMING SEARCH (from homepage search bar) ===== */
+  function applyFiltersFromQuery(){
+    const params = new URLSearchParams(window.location.search);
+
+    const typeParam = (params.get('type') || '').toLowerCase();
+    if(typeParam === 'home' || typeParam === 'car'){
+      currentType = typeParam;
+      typeToggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.type === typeParam));
+    }
+
+    const cityParam = (params.get('city') || params.get('location') || '').trim();
+    if(cityParam){
+      const options = Array.from(cityFilter.options).filter(o => o.value !== 'all');
+      let match = options.find(o => o.value.toLowerCase() === cityParam.toLowerCase());
+      if(!match) match = options.find(o => o.value.toLowerCase().includes(cityParam.toLowerCase()));
+      if(!match){
+        match = document.createElement('option');
+        match.value = cityParam;
+        match.textContent = cityParam;
+        cityFilter.insertBefore(match, cityFilter.options[1] || null);
+      }
+      cityFilter.value = match.value;
+    }
+
+    const verifiedParam = (params.get('verified') || '').toLowerCase();
+    if(verifiedParam === 'true' || verifiedParam === '1'){
+      verifiedOnly.checked = true;
+    }
+  }
+
+  applyFiltersFromQuery();
   updateRangeFill();
   loadListings();
 

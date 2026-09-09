@@ -892,6 +892,38 @@
     });
   });
 
+  function goToListings(){
+    const tabHomes = document.getElementById('tabHomes');
+    const locInput = document.getElementById('locInput');
+    const type = tabHomes && tabHomes.classList.contains('active') ? 'home' : 'car';
+    const params = new URLSearchParams();
+    params.set('type', type);
+    const city = (locInput && locInput.value || '').trim();
+    if(city) params.set('city', city);
+    window.location.href = '/listings?' + params.toString();
+  }
+
+  const pillSearchBtn = document.querySelector('.pill-search-btn');
+  if(pillSearchBtn) pillSearchBtn.addEventListener('click', goToListings);
+
+  const locInput = document.getElementById('locInput');
+  if(locInput){
+    locInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        goToListings();
+      }
+    });
+  }
+
+  const navSearchPill = document.querySelector('.nav-search-pill');
+  if(navSearchPill){
+    navSearchPill.addEventListener('click', () => {
+      document.querySelector('.search-pill').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if(locInput) locInput.focus();
+    });
+  }
+
   const activitySpans = document.querySelectorAll('#activityCopy span');
   if(activitySpans.length){
     let activeIdx = 0;
