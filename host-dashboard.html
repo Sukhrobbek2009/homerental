@@ -1,3 +1,6 @@
+---
+permalink: /host-dashboard/
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -407,7 +410,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
         Host dashboard
       </span>
-      <h1 style="margin-top:16px;">Welcome back, Malika</h1>
+      <h1 style="margin-top:16px;" id="hostWelcomeHeading">Welcome back.</h1>
       <p>Manage your active listings and keep an eye on how bookings are trending this month.</p>
     </div>
     <button class="add-listing-btn" id="openAddListing" type="button">
@@ -1227,9 +1230,14 @@
   if(navUser) navUser.style.display = 'flex';
 
   var navUserName = document.getElementById('navUserName');
+  var fullName = (localStorage.getItem('ur-user-name') || '').trim();
   if(navUserName){
-    var fullName = (localStorage.getItem('ur-user-name') || '').trim();
     navUserName.textContent = fullName ? fullName.split(/\s+/)[0] : 'Account';
+  }
+
+  var hostWelcomeHeading = document.getElementById('hostWelcomeHeading');
+  if(hostWelcomeHeading){
+    hostWelcomeHeading.textContent = fullName ? 'Welcome back, ' + fullName.split(/\s+/)[0] + '.' : 'Welcome back.';
   }
 })();
 </script>

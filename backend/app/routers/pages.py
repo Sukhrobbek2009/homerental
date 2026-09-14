@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -20,12 +21,17 @@ PAGE_FILES = {
     "profile": "profile.html",
 }
 
+# Strips a leading Jekyll front matter block (--- ... ---) used only to give
+# these pages clean permalinks when GitHub Pages builds the site with Jekyll.
+_FRONT_MATTER_RE = re.compile(r"\A---\n.*?\n---\n", re.DOTALL)
+
 
 def _page(key: str) -> HTMLResponse:
     path = FRONTEND_DIR / PAGE_FILES[key]
     if not path.exists():
         raise HTTPException(status_code=500, detail=f"Missing frontend file: {PAGE_FILES[key]}")
-    return HTMLResponse(path.read_text(encoding="utf-8"))
+    html = _FRONT_MATTER_RE.sub("", path.read_text(encoding="utf-8"), count=1)
+    return HTMLResponse(html)
 
 
 @router.get("/", include_in_schema=False)
