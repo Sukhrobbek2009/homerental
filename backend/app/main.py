@@ -5,7 +5,7 @@ from . import models
 from .config import settings
 from .database import Base, SessionLocal, engine
 from .migrations import ensure_listing_columns
-from .routers import auth, bookings, listings, pages, reviews, saved
+from .routers import auth, bookings, listings, messages, pages, reviews, saved
 from .seed import seed_starter_listings, seed_starter_reviews
 
 Base.metadata.create_all(bind=engine)
@@ -33,6 +33,7 @@ app.include_router(listings.router)
 app.include_router(bookings.router)
 app.include_router(reviews.router)
 app.include_router(saved.router)
+app.include_router(messages.router)
 app.include_router(pages.router)
 
 

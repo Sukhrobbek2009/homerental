@@ -210,6 +210,65 @@ class BookingOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class MessageCreate(BaseModel):
+    listing_id: str
+    body: str = Field(min_length=1, max_length=2000)
+
+    @field_validator("body")
+    @classmethod
+    def strip_body(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Message can't be empty")
+        return value
+
+
+class MessageOut(BaseModel):
+    id: str
+    thread_id: str
+    from_id: str
+    to_id: str
+    body: str
+    read: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class MessageReply(BaseModel):
+    body: str = Field(min_length=1, max_length=2000)
+
+    @field_validator("body")
+    @classmethod
+    def strip_body(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Message can't be empty")
+        return value
+
+
+class ThreadOut(BaseModel):
+    thread_id: str
+    listing_id: str
+    listing_title: str = "Listing"
+    listing_type: ListingType = ListingType.home
+    other_user_id: str
+    other_user_name: str = "User"
+    last_message: str
+    last_message_at: datetime
+    unread: bool
+
+
+class ThreadDetailOut(BaseModel):
+    thread_id: str
+    listing_id: str
+    listing_title: str = "Listing"
+    listing_type: ListingType = ListingType.home
+    other_user_id: str
+    other_user_name: str = "User"
+    messages: list[MessageOut]
+
+
 class ReviewCreate(BaseModel):
     booking_id: str
     rating: int = Field(ge=1, le=5)

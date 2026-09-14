@@ -15,6 +15,14 @@ permalink: /messages/
     }
   })();
 </script>
+<script>
+  (function(){
+    if(!localStorage.getItem('ur-access-token')){
+      var dest = location.pathname + location.search;
+      window.location.replace('{{ site.baseurl }}/login?redirect=' + encodeURIComponent(dest));
+    }
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -331,47 +339,7 @@ permalink: /messages/
         <div class="conv-search">
           <input type="text" id="convSearch" placeholder="Search conversations">
         </div>
-        <div class="conv-items" id="convItems">
-
-          <button class="conv-item unread active" data-conv="aziza">
-            <span class="conv-avatar" style="background:linear-gradient(150deg,#C9A66B,#9C7B3E);">A</span>
-            <span class="conv-body">
-              <span class="conv-top"><span class="conv-name">Aziza Yusupova</span><span class="conv-time">9:41 AM</span></span>
-              <span class="conv-listing">Family house with backyard · Sacramento, CA</span>
-              <span class="conv-snippet">Sure, check-in is at 3 PM, but I can leave a lockbox key if you arrive early.</span>
-            </span>
-            <span class="conv-dot"></span>
-          </button>
-
-          <button class="conv-item unread" data-conv="elyor">
-            <span class="conv-avatar" style="background:linear-gradient(150deg,#7BA7C2,#3E6B8C);">E</span>
-            <span class="conv-body">
-              <span class="conv-top"><span class="conv-name">Elyor Tashkentov</span><span class="conv-time">Yesterday</span></span>
-              <span class="conv-listing">2021 Toyota Camry · Seattle, WA</span>
-              <span class="conv-snippet">The car is available that weekend. Want me to hold it for you?</span>
-            </span>
-            <span class="conv-dot"></span>
-          </button>
-
-          <button class="conv-item" data-conv="dilnoza">
-            <span class="conv-avatar" style="background:linear-gradient(150deg,#8FA98C,#5E7A5B);">D</span>
-            <span class="conv-body">
-              <span class="conv-top"><span class="conv-name">Dilnoza Rashidova</span><span class="conv-time">Mon</span></span>
-              <span class="conv-listing">Sunlit loft near Prospect Park · Brooklyn, NY</span>
-              <span class="conv-snippet">You: Of course — I'll send the wifi password the day before check-in.</span>
-            </span>
-          </button>
-
-          <button class="conv-item" data-conv="sardor">
-            <span class="conv-avatar" style="background:linear-gradient(150deg,#D98E73,#B15F42);">S</span>
-            <span class="conv-body">
-              <span class="conv-top"><span class="conv-name">Sardor Aliyev</span><span class="conv-time">Aug 18</span></span>
-              <span class="conv-listing">Honda CR-V, AWD · Chicago, IL</span>
-              <span class="conv-snippet">Thanks again for the smooth trip, would rent from you again!</span>
-            </span>
-          </button>
-
-        </div>
+        <div class="conv-items" id="convItems" aria-live="polite" aria-busy="true"></div>
       </div>
 
       <div class="thread-panel" id="threadPanel"></div>
@@ -464,116 +432,314 @@ permalink: /messages/
   });
 
   /* ===== CONVERSATIONS ===== */
-  const conversations = {
-    aziza: {
-      name: 'Aziza Yusupova', initial: 'A', gradient: 'linear-gradient(150deg,#C9A66B,#9C7B3E)',
-      listing: 'Family house with backyard · Sacramento, CA',
-      messages: [
-        { me: false, text: "Hi! Just confirming — is the house available Sep 12 to 16?", time: '9:12 AM' },
-        { me: true, text: "Yes, it's open those dates. Anything specific you need to know?", time: '9:20 AM' },
-        { me: false, text: "What time is check-in, and is early arrival possible?", time: '9:35 AM' },
-        { me: true, text: "Sure, check-in is at 3 PM, but I can leave a lockbox key if you arrive early.", time: '9:41 AM' }
-      ]
-    },
-    elyor: {
-      name: 'Elyor Tashkentov', initial: 'E', gradient: 'linear-gradient(150deg,#7BA7C2,#3E6B8C)',
-      listing: '2021 Toyota Camry · Seattle, WA',
-      messages: [
-        { me: true, text: "Hey, is the Camry free the weekend of Oct 3rd?", time: 'Yesterday, 4:02 PM' },
-        { me: false, text: "The car is available that weekend. Want me to hold it for you?", time: 'Yesterday, 4:15 PM' }
-      ]
-    },
-    dilnoza: {
-      name: 'Dilnoza Rashidova', initial: 'D', gradient: 'linear-gradient(150deg,#8FA98C,#5E7A5B)',
-      listing: 'Sunlit loft near Prospect Park · Brooklyn, NY',
-      messages: [
-        { me: false, text: "Hi! Is wifi included, and could you send the password ahead of time?", time: 'Mon, 11:04 AM' },
-        { me: true, text: "Of course — I'll send the wifi password the day before check-in.", time: 'Mon, 11:20 AM' }
-      ]
-    },
-    sardor: {
-      name: 'Sardor Aliyev', initial: 'S', gradient: 'linear-gradient(150deg,#D98E73,#B15F42)',
-      listing: 'Honda CR-V, AWD · Chicago, IL',
-      messages: [
-        { me: false, text: "Just dropped the keys in the lockbox, thanks for a smooth trip!", time: 'Aug 18, 6:30 PM' },
-        { me: true, text: "Thanks again for the smooth trip, would rent from you again!", time: 'Aug 18, 6:45 PM' }
-      ]
+  const AVATAR_PALETTE = [
+    'linear-gradient(150deg,#C9A66B,#9C7B3E)', 'linear-gradient(150deg,#7BA7C2,#3E6B8C)',
+    'linear-gradient(150deg,#8FA98C,#5E7A5B)', 'linear-gradient(150deg,#D98E73,#B15F42)',
+    'linear-gradient(150deg,#B7A7CE,#8368A0)', 'linear-gradient(150deg,#E0A8B0,#C06B79)',
+  ];
+  const SEND_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>';
+  const EMPTY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>';
+
+  function authHeaders(){
+    const token = localStorage.getItem('ur-access-token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  function handleAuthFailure(status){
+    if(status !== 401) return false;
+    localStorage.removeItem('ur-access-token');
+    localStorage.removeItem('ur-refresh-token');
+    localStorage.removeItem('ur-user-name');
+    window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+    return true;
+  }
+
+  function initialsFor(name){
+    return (name || 'User').trim().split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase();
+  }
+
+  function gradientFor(id){
+    let hash = 0;
+    for(let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+    return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+  }
+
+  function formatConvTime(iso){
+    const d = new Date(iso);
+    if(isNaN(d)) return '';
+    const now = new Date();
+    if(d.toDateString() === now.toDateString()){
+      return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     }
-  };
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if(d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    if((now - d) / 86400000 < 7) return d.toLocaleDateString('en-US', { weekday: 'short' });
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function formatBubbleTime(iso){
+    const d = new Date(iso);
+    return isNaN(d) ? '' : d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
 
   const convItems = document.getElementById('convItems');
   const threadPanel = document.getElementById('threadPanel');
-  let activeConv = null;
+  let threads = [];
+  let currentUserId = null;
+  let activeThreadId = null;
 
-  function renderThread(id){
-    const conv = conversations[id];
-    activeConv = id;
+  function buildConvItem(t){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'conv-item' + (t.unread ? ' unread' : '') + (t.thread_id === activeThreadId ? ' active' : '');
+    btn.dataset.threadId = t.thread_id;
 
-    convItems.querySelectorAll('.conv-item').forEach(item => {
-      const isActive = item.dataset.conv === id;
-      item.classList.toggle('active', isActive);
-      if(isActive) item.classList.remove('unread');
-    });
+    const avatar = document.createElement('span');
+    avatar.className = 'conv-avatar';
+    avatar.style.background = gradientFor(t.other_user_id);
+    avatar.textContent = initialsFor(t.other_user_name);
+    btn.appendChild(avatar);
 
-    const bubbles = conv.messages.map(m => `
-      <div class="bubble-row ${m.me ? 'me' : ''}">
-        <div class="bubble">${m.text}<span class="bubble-time">${m.time}</span></div>
-      </div>
-    `).join('');
+    const body = document.createElement('span');
+    body.className = 'conv-body';
 
-    threadPanel.innerHTML = `
-      <div class="thread-head">
-        <span class="conv-avatar" style="background:${conv.gradient};">${conv.initial}</span>
-        <div>
-          <div class="thread-head-name">${conv.name}</div>
-          <div class="thread-head-sub">${conv.listing}</div>
-        </div>
-        <a href="{{ site.baseurl }}/listings" class="thread-head-link">View listing</a>
-      </div>
-      <div class="thread-body" id="threadBody">${bubbles}</div>
-      <form class="thread-input" id="threadForm">
-        <input type="text" id="threadInput" placeholder="Write a message…" autocomplete="off">
-        <button class="send-btn" type="submit" aria-label="Send message">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-        </button>
-      </form>
-    `;
+    const top = document.createElement('span');
+    top.className = 'conv-top';
+    const name = document.createElement('span');
+    name.className = 'conv-name';
+    name.textContent = t.other_user_name;
+    top.appendChild(name);
+    const time = document.createElement('span');
+    time.className = 'conv-time';
+    time.textContent = formatConvTime(t.last_message_at);
+    top.appendChild(time);
+    body.appendChild(top);
 
-    const threadBody = document.getElementById('threadBody');
-    threadBody.scrollTop = threadBody.scrollHeight;
+    const listingLine = document.createElement('span');
+    listingLine.className = 'conv-listing';
+    listingLine.textContent = t.listing_title;
+    body.appendChild(listingLine);
 
-    document.getElementById('threadForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = document.getElementById('threadInput');
-      const text = input.value.trim();
-      if(!text) return;
-      const now = new Date();
-      const time = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-      conv.messages.push({ me: true, text, time });
-      const row = document.createElement('div');
-      row.className = 'bubble-row me';
-      row.innerHTML = `<div class="bubble">${text}<span class="bubble-time">${time}</span></div>`;
-      threadBody.appendChild(row);
+    const snippet = document.createElement('span');
+    snippet.className = 'conv-snippet';
+    snippet.textContent = t.last_message;
+    body.appendChild(snippet);
+
+    btn.appendChild(body);
+
+    if(t.unread){
+      const dot = document.createElement('span');
+      dot.className = 'conv-dot';
+      btn.appendChild(dot);
+    }
+
+    btn.addEventListener('click', () => openThread(t.thread_id));
+    return btn;
+  }
+
+  function renderThreadList(){
+    convItems.setAttribute('aria-busy', 'false');
+    convItems.innerHTML = '';
+    if(threads.length === 0){
+      const empty = document.createElement('div');
+      empty.style.cssText = 'padding:40px 20px;text-align:center;color:var(--ink-soft);font-size:13.5px;';
+      empty.textContent = 'No conversations yet.';
+      convItems.appendChild(empty);
+      return;
+    }
+    threads.forEach(t => convItems.appendChild(buildConvItem(t)));
+    applyConvSearch();
+  }
+
+  function buildBubble(m){
+    const row = document.createElement('div');
+    row.className = 'bubble-row' + (m.from_id === currentUserId ? ' me' : '');
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.appendChild(document.createTextNode(m.body));
+    const time = document.createElement('span');
+    time.className = 'bubble-time';
+    time.textContent = formatBubbleTime(m.created_at);
+    bubble.appendChild(time);
+    row.appendChild(bubble);
+    return row;
+  }
+
+  function renderThreadEmpty(message){
+    threadPanel.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'thread-empty';
+    wrap.innerHTML = EMPTY_ICON;
+    const p = document.createElement('p');
+    p.textContent = message;
+    wrap.appendChild(p);
+    threadPanel.appendChild(wrap);
+  }
+
+  async function handleReplySubmit(e, detail){
+    e.preventDefault();
+    const input = document.getElementById('threadInput');
+    const bodyText = input.value.trim();
+    if(!bodyText) return;
+    const sendBtn = e.target.querySelector('.send-btn');
+    sendBtn.disabled = true;
+    try {
+      const res = await fetch('/api/messages/threads/' + encodeURIComponent(detail.thread_id) + '/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ body: bodyText }),
+      });
+      if(handleAuthFailure(res.status)) return;
+      if(!res.ok) throw new Error('Failed to send message (' + res.status + ')');
+      const message = await res.json();
+
+      const threadBody = document.getElementById('threadBody');
+      threadBody.appendChild(buildBubble(message));
       threadBody.scrollTop = threadBody.scrollHeight;
       input.value = '';
+
+      const idx = threads.findIndex(t => t.thread_id === detail.thread_id);
+      if(idx !== -1){
+        const [t] = threads.splice(idx, 1);
+        t.last_message = message.body;
+        t.last_message_at = message.created_at;
+        t.unread = false;
+        threads.unshift(t);
+        renderThreadList();
+      }
+    } catch(err){
+      console.error('Could not send message:', err);
+      window.alert('Could not send your message. Please try again.');
+    } finally {
+      sendBtn.disabled = false;
+    }
+  }
+
+  function renderThreadPanel(detail){
+    threadPanel.innerHTML = '';
+
+    const head = document.createElement('div');
+    head.className = 'thread-head';
+    const avatar = document.createElement('span');
+    avatar.className = 'conv-avatar';
+    avatar.style.background = gradientFor(detail.other_user_id);
+    avatar.textContent = initialsFor(detail.other_user_name);
+    head.appendChild(avatar);
+
+    const nameWrap = document.createElement('div');
+    const nameEl = document.createElement('div');
+    nameEl.className = 'thread-head-name';
+    nameEl.textContent = detail.other_user_name;
+    nameWrap.appendChild(nameEl);
+    const subEl = document.createElement('div');
+    subEl.className = 'thread-head-sub';
+    subEl.textContent = detail.listing_title;
+    nameWrap.appendChild(subEl);
+    head.appendChild(nameWrap);
+
+    const viewLink = document.createElement('a');
+    viewLink.className = 'thread-head-link';
+    const detailBase = detail.listing_type === 'car' ? '{{ site.baseurl }}/listings/car' : '{{ site.baseurl }}/listings/property';
+    viewLink.href = detailBase + '?id=' + encodeURIComponent(detail.listing_id);
+    viewLink.textContent = 'View listing';
+    head.appendChild(viewLink);
+
+    threadPanel.appendChild(head);
+
+    const body = document.createElement('div');
+    body.className = 'thread-body';
+    body.id = 'threadBody';
+    detail.messages.forEach(m => body.appendChild(buildBubble(m)));
+    threadPanel.appendChild(body);
+
+    const form = document.createElement('form');
+    form.className = 'thread-input';
+    form.id = 'threadForm';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'threadInput';
+    input.placeholder = 'Write a message…';
+    input.autocomplete = 'off';
+    form.appendChild(input);
+    const sendBtn = document.createElement('button');
+    sendBtn.className = 'send-btn';
+    sendBtn.type = 'submit';
+    sendBtn.setAttribute('aria-label', 'Send message');
+    sendBtn.innerHTML = SEND_ICON;
+    form.appendChild(sendBtn);
+    threadPanel.appendChild(form);
+
+    body.scrollTop = body.scrollHeight;
+    form.addEventListener('submit', (e) => handleReplySubmit(e, detail));
+  }
+
+  async function openThread(threadId){
+    activeThreadId = threadId;
+    renderThreadList();
+    try {
+      const res = await fetch('/api/messages/threads/' + encodeURIComponent(threadId), { headers: authHeaders() });
+      if(handleAuthFailure(res.status)) return;
+      if(!res.ok) throw new Error('Failed to load conversation (' + res.status + ')');
+      const detail = await res.json();
+      renderThreadPanel(detail);
+
+      const idx = threads.findIndex(t => t.thread_id === threadId);
+      if(idx !== -1 && threads[idx].unread){
+        threads[idx].unread = false;
+        renderThreadList();
+      }
+    } catch(err){
+      console.error('Could not load conversation:', err);
+      renderThreadEmpty('Could not load this conversation. Please try again.');
+    }
+  }
+
+  function applyConvSearch(){
+    const q = convSearch.value.trim().toLowerCase();
+    if(!q) return;
+    convItems.querySelectorAll('.conv-item').forEach(item => {
+      item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
   }
 
-  convItems.querySelectorAll('.conv-item').forEach(item => {
-    item.addEventListener('click', () => renderThread(item.dataset.conv));
-  });
-
   const convSearch = document.getElementById('convSearch');
-  convSearch.addEventListener('input', () => {
-    const q = convSearch.value.trim().toLowerCase();
-    convItems.querySelectorAll('.conv-item').forEach(item => {
-      const text = item.textContent.toLowerCase();
-      item.style.display = text.includes(q) ? '' : 'none';
-    });
-  });
+  convSearch.addEventListener('input', applyConvSearch);
 
-  const requested = new URLSearchParams(location.search).get('with');
-  renderThread(conversations[requested] ? requested : 'aziza');
+  async function loadCurrentUser(){
+    try {
+      const res = await fetch('/api/auth/me', { headers: authHeaders() });
+      if(handleAuthFailure(res.status)) return;
+      if(!res.ok) throw new Error('Failed to load current user');
+      const user = await res.json();
+      currentUserId = user.id;
+    } catch(err){
+      console.error('Could not load current user:', err);
+    }
+  }
+
+  async function loadThreads(){
+    try {
+      const res = await fetch('/api/messages/threads', { headers: authHeaders() });
+      if(handleAuthFailure(res.status)) return;
+      if(!res.ok) throw new Error('Failed to load conversations (' + res.status + ')');
+      threads = await res.json();
+    } catch(err){
+      console.error('Could not load conversations:', err);
+      threads = [];
+    }
+    renderThreadList();
+    if(threads.length > 0){
+      openThread(threads[0].thread_id);
+    } else {
+      renderThreadEmpty('When you message a host, or a renter messages you about a listing, it will show up here.');
+    }
+  }
+
+  (async function initMessages(){
+    await loadCurrentUser();
+    await loadThreads();
+  })();
 
   const revealEls = document.querySelectorAll('.reveal');
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)){
