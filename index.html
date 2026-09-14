@@ -1,3 +1,5 @@
+---
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -393,8 +395,8 @@
     <nav id="navLinks" class="nav-links">
       <a href="#homes" onclick="setMode('homes')">Homes</a>
       <a href="#homes" onclick="setMode('cars')">Cars</a>
-      <a href="/listings">Listings</a>
-      <a href="/renter-dashboard">Dashboard</a>
+      <a href="{{ site.baseurl }}/listings">Listings</a>
+      <a href="{{ site.baseurl }}/renter-dashboard">Dashboard</a>
       <a href="#how">How it works</a>
       <a href="#pricing">Pricing</a>
     </nav>
@@ -406,7 +408,7 @@
 
     <div class="nav-right">
       <a href="#list" class="host-link">Become a host</a>
-      <a href="/login" class="host-link" id="navAuthLink">Log in</a>
+      <a href="{{ site.baseurl }}/login" class="host-link" id="navAuthLink">Log in</a>
       <div class="nav-user" id="navUser">
         <span class="nav-user-name" id="navUserName"></span>
         <button type="button" class="host-link" id="navLogoutBtn">Log Out</button>
@@ -415,11 +417,11 @@
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
       </button>
-      <a href="/messages" class="msg-btn" aria-label="Open messages">
+      <a href="{{ site.baseurl }}/messages" class="msg-btn" aria-label="Open messages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
         <span class="msg-badge">2</span>
       </a>
-      <a href="/profile" class="menu-pill" aria-label="Open profile">
+      <a href="{{ site.baseurl }}/profile" class="menu-pill" aria-label="Open profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg></span>
       </a>
@@ -661,7 +663,7 @@
         <span class="eyebrow-pill">For hosts & car owners</span>
         <h2>Turn your extra space — or car — into income.</h2>
         <p>List your home or vehicle on Uzbek Rentals and start earning from renters who already trust your community.</p>
-        <a href="/host-dashboard" class="btn-dark">Start hosting
+        <a href="{{ site.baseurl }}/host-dashboard" class="btn-dark">Start hosting
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
       </div>
@@ -788,7 +790,7 @@
       <div class="fcol">
         <h4>Explore</h4>
         <ul>
-          <li><a href="/listings">All listings</a></li>
+          <li><a href="{{ site.baseurl }}/listings">All listings</a></li>
           <li><a href="#homes">Homes</a></li>
           <li><a href="#homes">Cars</a></li>
           <li><a href="#how">How it works</a></li>
@@ -888,7 +890,7 @@
 
   document.querySelectorAll('.listing-card[data-type]').forEach(card => {
     card.addEventListener('click', () => {
-      location.href = card.dataset.type === 'car' ? '/listings/car' : '/listings/property';
+      location.href = card.dataset.type === 'car' ? '{{ site.baseurl }}/listings/car' : '{{ site.baseurl }}/listings/property';
     });
   });
 
@@ -900,7 +902,7 @@
     params.set('type', type);
     const city = (locInput && locInput.value || '').trim();
     if(city) params.set('city', city);
-    window.location.href = '/listings?' + params.toString();
+    window.location.href = '{{ site.baseurl }}/listings?' + params.toString();
   }
 
   const pillSearchBtn = document.querySelector('.pill-search-btn');

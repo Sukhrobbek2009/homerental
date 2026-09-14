@@ -25,12 +25,19 @@ PAGE_FILES = {
 # these pages clean permalinks when GitHub Pages builds the site with Jekyll.
 _FRONT_MATTER_RE = re.compile(r"\A---\n.*?\n---\n", re.DOTALL)
 
+# GitHub Pages serves this site under a /homerental subpath (see _config.yml's
+# baseurl), so internal links are written as "{{ site.baseurl }}/foo" for
+# Jekyll to expand. Locally the backend serves everything from "/", so that
+# tag is just dropped.
+_BASEURL_TAG = "{{ site.baseurl }}"
+
 
 def _page(key: str) -> HTMLResponse:
     path = FRONTEND_DIR / PAGE_FILES[key]
     if not path.exists():
         raise HTTPException(status_code=500, detail=f"Missing frontend file: {PAGE_FILES[key]}")
     html = _FRONT_MATTER_RE.sub("", path.read_text(encoding="utf-8"), count=1)
+    html = html.replace(_BASEURL_TAG, "")
     return HTMLResponse(html)
 
 

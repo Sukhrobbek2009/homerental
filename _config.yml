@@ -1,3 +1,4 @@
 theme: jekyll-theme-cayman
 title: Uzbek Rentals
 description: A homes & cars rental marketplace built by and for the Uzbek community across the USA.
+baseurl: "/homerental"

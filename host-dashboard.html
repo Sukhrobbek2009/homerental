@@ -19,7 +19,7 @@ permalink: /host-dashboard/
   (function(){
     if(!localStorage.getItem('ur-access-token')){
       var dest = location.pathname + location.search;
-      window.location.replace('/login?redirect=' + encodeURIComponent(dest));
+      window.location.replace('{{ site.baseurl }}/login?redirect=' + encodeURIComponent(dest));
       return;
     }
     if(localStorage.getItem('ur-user-role') !== 'host'){
@@ -369,7 +369,7 @@ permalink: /host-dashboard/
 
 <header class="navbar" id="navbar">
   <div class="wrap navbar-inner">
-    <a href="/" class="brand">
+    <a href="{{ site.baseurl }}/" class="brand">
       <span class="brand-mark">
         <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2l7 7-7 7-7-7 7-7zM12 9m-2.6 0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z"/><path d="M9 13.2l3 5.2 3-5.2z" opacity="0.92"/></svg>
       </span>
@@ -377,15 +377,15 @@ permalink: /host-dashboard/
     </a>
 
     <nav id="navLinks" class="nav-links">
-      <a href="/listings">Listings</a>
-      <a href="/host-dashboard" class="current">Host Dashboard</a>
-      <a href="/messages">Messages</a>
-      <a href="/#how">How it works</a>
-      <a href="/#pricing">Pricing</a>
+      <a href="{{ site.baseurl }}/listings">Listings</a>
+      <a href="{{ site.baseurl }}/host-dashboard" class="current">Host Dashboard</a>
+      <a href="{{ site.baseurl }}/messages">Messages</a>
+      <a href="{{ site.baseurl }}/#how">How it works</a>
+      <a href="{{ site.baseurl }}/#pricing">Pricing</a>
     </nav>
 
     <div class="nav-right">
-      <a href="/login" class="host-link" id="navAuthLink">Log in</a>
+      <a href="{{ site.baseurl }}/login" class="host-link" id="navAuthLink">Log in</a>
       <div class="nav-user" id="navUser" style="display:none;align-items:center;gap:10px;">
         <span class="nav-user-name" id="navUserName"></span>
         <button type="button" class="host-link" id="navLogoutBtn">Log Out</button>
@@ -394,7 +394,7 @@ permalink: /host-dashboard/
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
       </button>
-      <a href="/profile" class="menu-pill" aria-label="Your profile">
+      <a href="{{ site.baseurl }}/profile" class="menu-pill" aria-label="Your profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg></span>
       </a>
@@ -551,7 +551,7 @@ permalink: /host-dashboard/
   <div class="wrap">
     <div class="footer-top">
       <div class="fcol footer-brand">
-        <a href="/" class="brand">
+        <a href="{{ site.baseurl }}/" class="brand">
           <span class="brand-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2l7 7-7 7-7-7 7-7zM12 9m-2.6 0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z"/><path d="M9 13.2l3 5.2 3-5.2z" opacity="0.92"/></svg></span>
           <span class="brand-name">Uzbek <span class="brand-name-accent">Rentals</span></span>
         </a>
@@ -566,11 +566,11 @@ permalink: /host-dashboard/
       <div class="fcol">
         <h4>Explore</h4>
         <ul>
-          <li><a href="/listings">Homes</a></li>
-          <li><a href="/listings">Cars</a></li>
-          <li><a href="/#how">How it works</a></li>
-          <li><a href="/#pricing">Pricing</a></li>
-          <li><a href="/host-dashboard">Become a host</a></li>
+          <li><a href="{{ site.baseurl }}/listings">Homes</a></li>
+          <li><a href="{{ site.baseurl }}/listings">Cars</a></li>
+          <li><a href="{{ site.baseurl }}/#how">How it works</a></li>
+          <li><a href="{{ site.baseurl }}/#pricing">Pricing</a></li>
+          <li><a href="{{ site.baseurl }}/host-dashboard">Become a host</a></li>
         </ul>
       </div>
 
@@ -579,7 +579,7 @@ permalink: /host-dashboard/
         <ul>
           <li><a href="tel:+18885550199">24/7 support · +1 (888) 555-0199</a></li>
           <li><a href="mailto:help@uzbekrentals.com">help@uzbekrentals.com</a></li>
-          <li><a href="/messages">Live chat, in-app</a></li>
+          <li><a href="{{ site.baseurl }}/messages">Live chat, in-app</a></li>
           <li><a href="#">Trust & safety</a></li>
         </ul>
       </div>
@@ -659,7 +659,7 @@ permalink: /host-dashboard/
   }
 
   function buildListingCard(listing){
-    const detailBase = listing.listing_type === 'car' ? '/listings/car' : '/listings/property';
+    const detailBase = listing.listing_type === 'car' ? '{{ site.baseurl }}/listings/car' : '{{ site.baseurl }}/listings/property';
     const detailHref = detailBase + '?id=' + encodeURIComponent(listing.id);
     const isActive = listing.status === 'active';
 
@@ -775,7 +775,7 @@ permalink: /host-dashboard/
 
     const token = localStorage.getItem('ur-access-token');
     if(!token){
-      window.location.href = '/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+      window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
       return;
     }
 
@@ -839,7 +839,7 @@ permalink: /host-dashboard/
   }
 
   function createHostBookingItem(booking){
-    const detailBase = booking.listing_type === 'car' ? '/listings/car' : '/listings/property';
+    const detailBase = booking.listing_type === 'car' ? '{{ site.baseurl }}/listings/car' : '{{ site.baseurl }}/listings/property';
     const detailHref = detailBase + '?id=' + encodeURIComponent(booking.listing_id);
 
     const article = document.createElement('article');
@@ -1139,7 +1139,7 @@ permalink: /host-dashboard/
 
     const token = localStorage.getItem('ur-access-token');
     if(!token){
-      window.location.href = '/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+      window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
       return;
     }
 
@@ -1190,7 +1190,7 @@ permalink: /host-dashboard/
         addListingSuccess.textContent = 'Listing published! Taking you to it…';
         addListingSuccess.classList.add('is-visible');
 
-        const detailBase = listing.listing_type === 'car' ? '/listings/car' : '/listings/property';
+        const detailBase = listing.listing_type === 'car' ? '{{ site.baseurl }}/listings/car' : '{{ site.baseurl }}/listings/property';
         setTimeout(() => {
           window.location.href = detailBase + '?id=' + encodeURIComponent(listing.id);
         }, 900);

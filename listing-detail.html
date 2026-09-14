@@ -194,6 +194,40 @@ permalink: /listings/property/
   .host-row p{margin:0;font-size:14px;color:var(--ink-soft);}
   .host-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(150deg,#E0A8B0,#C06B79);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:19px;flex-shrink:0;}
 
+  /* ===== CONTACT HOST MODAL ===== */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:100;background:rgba(15,17,21,.5);
+    display:none;align-items:center;justify-content:center;padding:24px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-card{
+    width:100%;max-width:440px;max-height:90vh;overflow-y:auto;background:var(--panel);
+    border-radius:var(--radius-xl);box-shadow:var(--shadow-lift);padding:28px;
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .modal-head h2{font-size:19px;}
+  .modal-close{
+    width:32px;height:32px;border-radius:50%;border:none;background:var(--bg-alt);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  }
+  .modal-close svg{width:15px;height:15px;}
+  .modal-card textarea{
+    width:100%;padding:13px 14px;border:1px solid var(--line-strong);border-radius:var(--radius-md);
+    background:var(--panel);color:var(--ink);font:inherit;font-size:14.5px;outline:none;resize:vertical;min-height:110px;
+    transition:border-color .15s ease,box-shadow .15s ease;
+  }
+  .modal-card textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);}
+  .modal-message{display:none;border-radius:12px;padding:10px 14px;font-size:13.5px;font-weight:600;margin:12px 0 0;}
+  .modal-message.is-visible{display:block;}
+  .modal-error{background:rgba(214,69,69,.1);border:1px solid rgba(214,69,69,.35);color:#D64545;}
+  .modal-success{background:var(--accent-pale);border:1px solid rgba(15,157,139,.35);color:var(--accent-deep);}
+  .modal-submit{
+    width:100%;background:var(--accent);color:#fff;border:none;padding:14px;border-radius:var(--radius-full);
+    font-weight:700;font-size:15px;cursor:pointer;transition:background .15s ease,transform .15s ease;margin-top:14px;
+  }
+  .modal-submit:hover{background:var(--accent-deep);transform:translateY(-1px);}
+  .modal-submit:disabled{opacity:.7;cursor:default;transform:none;}
+
   .feature-list{display:flex;flex-direction:column;gap:20px;}
   .feature-item{display:flex;gap:16px;align-items:flex-start;}
   .feature-item svg{width:24px;height:24px;color:var(--ink);flex-shrink:0;margin-top:2px;}
@@ -394,7 +428,7 @@ permalink: /listings/property/
 
 <header class="navbar" id="navbar">
   <div class="wrap navbar-inner">
-    <a href="/" class="brand">
+    <a href="{{ site.baseurl }}/" class="brand">
       <span class="brand-mark">
         <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2l7 7-7 7-7-7 7-7zM12 9m-2.6 0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z"/><path d="M9 13.2l3 5.2 3-5.2z" opacity="0.92"/></svg>
       </span>
@@ -402,17 +436,17 @@ permalink: /listings/property/
     </a>
 
     <nav id="navLinks" class="nav-links">
-      <a href="/#homes">Homes</a>
-      <a href="/#homes">Cars</a>
-      <a href="/listings" class="current">Listings</a>
-      <a href="/renter-dashboard">Dashboard</a>
-      <a href="/#how">How it works</a>
-      <a href="/#pricing">Pricing</a>
+      <a href="{{ site.baseurl }}/#homes">Homes</a>
+      <a href="{{ site.baseurl }}/#homes">Cars</a>
+      <a href="{{ site.baseurl }}/listings" class="current">Listings</a>
+      <a href="{{ site.baseurl }}/renter-dashboard">Dashboard</a>
+      <a href="{{ site.baseurl }}/#how">How it works</a>
+      <a href="{{ site.baseurl }}/#pricing">Pricing</a>
     </nav>
 
     <div class="nav-right">
-      <a href="/host-dashboard" class="host-link">Become a host</a>
-      <a href="/login" class="host-link" id="navAuthLink">Log in</a>
+      <a href="{{ site.baseurl }}/host-dashboard" class="host-link">Become a host</a>
+      <a href="{{ site.baseurl }}/login" class="host-link" id="navAuthLink">Log in</a>
       <div class="nav-user" id="navUser">
         <span class="nav-user-name" id="navUserName"></span>
         <button type="button" class="host-link" id="navLogoutBtn">Log Out</button>
@@ -421,11 +455,11 @@ permalink: /listings/property/
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
       </button>
-      <a href="/messages" class="msg-btn" aria-label="Open messages">
+      <a href="{{ site.baseurl }}/messages" class="msg-btn" aria-label="Open messages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
         <span class="msg-badge">2</span>
       </a>
-      <a href="/profile" class="menu-pill" aria-label="Open profile">
+      <a href="{{ site.baseurl }}/profile" class="menu-pill" aria-label="Open profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg></span>
       </a>
@@ -436,7 +470,7 @@ permalink: /listings/property/
 
 <div class="wrap">
   <div class="breadcrumb">
-    <a href="/listings" class="back-link">
+    <a href="{{ site.baseurl }}/listings" class="back-link">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
       Back to listings
     </a>
@@ -499,10 +533,10 @@ permalink: /listings/property/
             <p id="hostSubline">3 bedrooms · 2 beds · 2 baths · Sleeps 6</p>
           </div>
           <div class="host-row-right">
-            <a href="/messages?with=aziza" class="icon-action" id="messageHostLink">
+            <button type="button" class="icon-action" id="contactHostBtn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
-              Message host
-            </a>
+              Contact host
+            </button>
             <div class="host-avatar" id="hostAvatar">A</div>
           </div>
         </div>
@@ -592,7 +626,7 @@ permalink: /listings/property/
           <div class="row"><span>Nights</span><span id="confirmNights">—</span></div>
           <div class="row total"><span>Total price</span><span id="confirmTotal">—</span></div>
         </div>
-        <a href="/renter-dashboard" class="book-now-btn">View my bookings</a>
+        <a href="{{ site.baseurl }}/renter-dashboard" class="book-now-btn">View my bookings</a>
       </div>
       <div id="bookingForm">
       <div class="booking-price">
@@ -661,7 +695,7 @@ permalink: /listings/property/
   <div class="wrap">
     <div class="footer-top">
       <div class="fcol footer-brand">
-        <a href="/" class="brand">
+        <a href="{{ site.baseurl }}/" class="brand">
           <span class="brand-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2l7 7-7 7-7-7 7-7zM12 9m-2.6 0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z"/><path d="M9 13.2l3 5.2 3-5.2z" opacity="0.92"/></svg></span>
           <span class="brand-name">Uzbek <span class="brand-name-accent">Rentals</span></span>
         </a>
@@ -676,11 +710,11 @@ permalink: /listings/property/
       <div class="fcol">
         <h4>Explore</h4>
         <ul>
-          <li><a href="/listings">All listings</a></li>
-          <li><a href="/#homes">Homes</a></li>
-          <li><a href="/#homes">Cars</a></li>
-          <li><a href="/#how">How it works</a></li>
-          <li><a href="/host-dashboard">Become a host</a></li>
+          <li><a href="{{ site.baseurl }}/listings">All listings</a></li>
+          <li><a href="{{ site.baseurl }}/#homes">Homes</a></li>
+          <li><a href="{{ site.baseurl }}/#homes">Cars</a></li>
+          <li><a href="{{ site.baseurl }}/#how">How it works</a></li>
+          <li><a href="{{ site.baseurl }}/host-dashboard">Become a host</a></li>
         </ul>
       </div>
 
@@ -753,7 +787,7 @@ permalink: /listings/property/
     if(!currentListing) return;
     const token = localStorage.getItem('ur-access-token');
     if(!token){
-      window.location.href = '/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+      window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
       return;
     }
     const willSave = !btn.classList.contains('saved');
@@ -854,9 +888,6 @@ permalink: /listings/property/
 
     const hostAvatar = document.getElementById('hostAvatar');
     if(hostAvatar) hostAvatar.textContent = initialsForHost(listing.host_name);
-
-    const messageHostLink = document.getElementById('messageHostLink');
-    if(messageHostLink) messageHostLink.href = '/messages?with=' + encodeURIComponent(listing.host_id);
 
     const entireDesc = document.getElementById('entireDesc');
     if(entireDesc) entireDesc.textContent = "You'll have " + listing.title + ' all to yourself.';
@@ -1171,7 +1202,7 @@ permalink: /listings/property/
     showBookingError('');
     const token = localStorage.getItem('ur-access-token');
     if(!token){
-      window.location.href = '/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+      window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
       return;
     }
     if(!currentListing){
@@ -1225,7 +1256,7 @@ permalink: /listings/property/
       if(!res.ok) throw new Error('Failed to load listing (' + res.status + ')');
       const listing = await res.json();
       if(listing.listing_type === 'car'){
-        location.replace('/listings/car?id=' + encodeURIComponent(listing.id));
+        location.replace('{{ site.baseurl }}/listings/car?id=' + encodeURIComponent(listing.id));
         return;
       }
       applyListing(listing);
@@ -1388,6 +1419,120 @@ permalink: /listings/property/
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
     revealEls.forEach(el => io.observe(el));
   }
+</script>
+
+<div class="modal-overlay" id="contactHostOverlay">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="contactHostHeading">Contact host</h2>
+      <button class="modal-close" id="closeContactHost" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form id="contactHostForm">
+      <textarea id="contactHostBody" placeholder="Ask about check-in times, amenities, or anything else…" required></textarea>
+      <p class="modal-message modal-error" id="contactHostError" role="alert"></p>
+      <p class="modal-message modal-success" id="contactHostSuccess" role="status"></p>
+      <button type="submit" class="modal-submit" id="contactHostSubmit">Send message</button>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  const contactHostBtn = document.getElementById('contactHostBtn');
+  const contactHostOverlay = document.getElementById('contactHostOverlay');
+  const closeContactHost = document.getElementById('closeContactHost');
+  const contactHostForm = document.getElementById('contactHostForm');
+  const contactHostBody = document.getElementById('contactHostBody');
+  const contactHostError = document.getElementById('contactHostError');
+  const contactHostSuccess = document.getElementById('contactHostSuccess');
+  const contactHostSubmit = document.getElementById('contactHostSubmit');
+
+  function clearContactHostMessages(){
+    contactHostError.textContent = '';
+    contactHostError.classList.remove('is-visible');
+    contactHostSuccess.textContent = '';
+    contactHostSuccess.classList.remove('is-visible');
+  }
+
+  function openContactHost(){
+    contactHostForm.hidden = false;
+    contactHostBody.value = '';
+    clearContactHostMessages();
+    contactHostSubmit.disabled = false;
+    contactHostSubmit.textContent = 'Send message';
+    contactHostOverlay.classList.add('open');
+    contactHostBody.focus();
+  }
+  function closeContactHostModal(){
+    contactHostOverlay.classList.remove('open');
+  }
+
+  if(contactHostBtn){
+    contactHostBtn.addEventListener('click', () => {
+      const token = localStorage.getItem('ur-access-token');
+      if(!token){
+        window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+        return;
+      }
+      openContactHost();
+    });
+  }
+  if(closeContactHost) closeContactHost.addEventListener('click', closeContactHostModal);
+  contactHostOverlay.addEventListener('click', (e) => { if(e.target === contactHostOverlay) closeContactHostModal(); });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && contactHostOverlay.classList.contains('open')) closeContactHostModal(); });
+
+  contactHostForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearContactHostMessages();
+
+    const body = contactHostBody.value.trim();
+    if(!body){
+      contactHostError.textContent = 'Please write a message before sending.';
+      contactHostError.classList.add('is-visible');
+      return;
+    }
+    if(!currentListing){
+      contactHostError.textContent = 'This listing is still loading. Please try again in a moment.';
+      contactHostError.classList.add('is-visible');
+      return;
+    }
+
+    const token = localStorage.getItem('ur-access-token');
+    if(!token){
+      window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+      return;
+    }
+
+    contactHostSubmit.disabled = true;
+    contactHostSubmit.textContent = 'Sending…';
+
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ listing_id: currentListing.id, body }),
+      });
+      let data = null;
+      try { data = await res.json(); } catch(_) { /* empty body */ }
+      if(!res.ok){
+        const detail = data && data.detail;
+        throw new Error(Array.isArray(detail) ? detail.map(d => d.msg).join(' ') : (detail || 'Could not send this message.'));
+      }
+
+      contactHostForm.hidden = true;
+      contactHostSuccess.textContent = 'Message sent to ' + (currentListing.host_name || 'the host') + '.';
+      contactHostSuccess.classList.add('is-visible');
+      setTimeout(closeContactHostModal, 1600);
+    } catch(err){
+      contactHostError.textContent = err.message || 'Could not send this message. Please try again.';
+      contactHostError.classList.add('is-visible');
+      contactHostSubmit.disabled = false;
+      contactHostSubmit.textContent = 'Send message';
+    }
+  });
+})();
 </script>
 
 <script>
