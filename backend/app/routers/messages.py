@@ -62,6 +62,19 @@ def contact_host(
     return message
 
 
+@router.get("/unread-count", response_model=schemas.UnreadCountOut)
+def unread_count(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> schemas.UnreadCountOut:
+    count = (
+        db.query(models.Message)
+        .filter(models.Message.to_id == current_user.id, models.Message.read.is_(False))
+        .count()
+    )
+    return schemas.UnreadCountOut(count=count)
+
+
 @router.get("/threads", response_model=list[schemas.ThreadOut])
 def list_my_threads(
     current_user: models.User = Depends(get_current_user),
@@ -140,6 +153,7 @@ def get_thread(
         listing_type=listing.listing_type if listing else models.ListingType.home,
         other_user_id=other_id,
         other_user_name=other_user.full_name if other_user else "User",
+        can_reply=other_user is not None,
         messages=messages,
     )
 
@@ -153,6 +167,12 @@ def reply_in_thread(
 ) -> models.Message:
     messages = _get_thread_messages(thread_id, current_user, db)
     other_id = _other_party(messages[-1], current_user.id)
+
+    if db.get(models.User, other_id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This conversation is read-only because the other person's account no longer exists",
+        )
 
     message = models.Message(
         thread_id=thread_id,

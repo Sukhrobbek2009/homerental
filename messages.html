@@ -134,6 +134,12 @@ permalink: /messages/
   .msg-btn:hover{background:var(--bg-alt);transform:translateY(-1px);}
   .msg-btn svg{width:16px;height:16px;}
   .msg-btn.current{box-shadow:var(--shadow-lift);}
+  .msg-badge{
+    position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;
+    background:#E0483E;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:10px;
+    display:flex;align-items:center;justify-content:center;border:2px solid var(--panel);
+  }
+  .msg-badge[hidden]{display:none;}
   .menu-pill{
     display:flex;align-items:center;gap:10px;padding:7px 8px 7px 14px;
     border:1px solid var(--line-strong);border-radius:var(--radius-full);background:var(--panel);cursor:pointer;
@@ -224,6 +230,10 @@ permalink: /messages/
   }
   .send-btn:hover{background:var(--accent-deep);transform:translateY(-1px);}
   .send-btn svg{width:17px;height:17px;}
+  .thread-readonly{
+    padding:14px 20px;border-top:1px solid var(--line);flex-shrink:0;
+    font-size:13px;color:var(--ink-soft);text-align:center;
+  }
 
   .thread-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;color:var(--ink-soft);}
   .thread-empty svg{width:40px;height:40px;color:var(--ink-faint);margin-bottom:14px;}
@@ -310,6 +320,7 @@ permalink: /messages/
       </button>
       <a href="{{ site.baseurl }}/messages" class="msg-btn current" aria-label="Open messages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
+        <span class="msg-badge" id="navMsgBadge" hidden>0</span>
       </a>
       <a href="{{ site.baseurl }}/profile" class="menu-pill" aria-label="Open profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -452,6 +463,28 @@ permalink: /messages/
     localStorage.removeItem('ur-user-name');
     window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
     return true;
+  }
+
+  const navMsgBadge = document.getElementById('navMsgBadge');
+  function renderUnreadBadge(count){
+    if(!navMsgBadge) return;
+    if(count > 0){
+      navMsgBadge.textContent = count > 99 ? '99+' : String(count);
+      navMsgBadge.hidden = false;
+    } else {
+      navMsgBadge.hidden = true;
+    }
+  }
+  async function refreshUnreadBadge(){
+    if(!navMsgBadge) return;
+    try {
+      const res = await fetch('/api/messages/unread-count', { headers: authHeaders() });
+      if(!res.ok) return;
+      const data = await res.json();
+      renderUnreadBadge(data.count);
+    } catch(err){
+      console.error('Could not load unread message count:', err);
+    }
   }
 
   function initialsFor(name){
@@ -653,25 +686,32 @@ permalink: /messages/
     detail.messages.forEach(m => body.appendChild(buildBubble(m)));
     threadPanel.appendChild(body);
 
-    const form = document.createElement('form');
-    form.className = 'thread-input';
-    form.id = 'threadForm';
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.id = 'threadInput';
-    input.placeholder = 'Write a message…';
-    input.autocomplete = 'off';
-    form.appendChild(input);
-    const sendBtn = document.createElement('button');
-    sendBtn.className = 'send-btn';
-    sendBtn.type = 'submit';
-    sendBtn.setAttribute('aria-label', 'Send message');
-    sendBtn.innerHTML = SEND_ICON;
-    form.appendChild(sendBtn);
-    threadPanel.appendChild(form);
+    if(detail.can_reply === false){
+      const readOnly = document.createElement('div');
+      readOnly.className = 'thread-readonly';
+      readOnly.textContent = "This conversation is read-only — " + detail.other_user_name + "'s account no longer exists.";
+      threadPanel.appendChild(readOnly);
+    } else {
+      const form = document.createElement('form');
+      form.className = 'thread-input';
+      form.id = 'threadForm';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = 'threadInput';
+      input.placeholder = 'Write a message…';
+      input.autocomplete = 'off';
+      form.appendChild(input);
+      const sendBtn = document.createElement('button');
+      sendBtn.className = 'send-btn';
+      sendBtn.type = 'submit';
+      sendBtn.setAttribute('aria-label', 'Send message');
+      sendBtn.innerHTML = SEND_ICON;
+      form.appendChild(sendBtn);
+      threadPanel.appendChild(form);
+      form.addEventListener('submit', (e) => handleReplySubmit(e, detail));
+    }
 
     body.scrollTop = body.scrollHeight;
-    form.addEventListener('submit', (e) => handleReplySubmit(e, detail));
   }
 
   async function openThread(threadId){
@@ -688,6 +728,7 @@ permalink: /messages/
       if(idx !== -1 && threads[idx].unread){
         threads[idx].unread = false;
         renderThreadList();
+        refreshUnreadBadge();
       }
     } catch(err){
       console.error('Could not load conversation:', err);
@@ -739,6 +780,11 @@ permalink: /messages/
   (async function initMessages(){
     await loadCurrentUser();
     await loadThreads();
+    await refreshUnreadBadge();
+    setInterval(refreshUnreadBadge, 20000);
+    document.addEventListener('visibilitychange', () => {
+      if(document.visibilityState === 'visible') refreshUnreadBadge();
+    });
   })();
 
   const revealEls = document.querySelectorAll('.reveal');

@@ -147,6 +147,7 @@
     background:#E0483E;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:10px;
     display:flex;align-items:center;justify-content:center;border:2px solid var(--panel);
   }
+  .msg-badge[hidden]{display:none;}
   .menu-pill{
     display:flex;align-items:center;gap:10px;padding:7px 8px 7px 14px;
     border:1px solid var(--line-strong);border-radius:var(--radius-full);background:var(--panel);cursor:pointer;
@@ -419,7 +420,7 @@
       </button>
       <a href="{{ site.baseurl }}/messages" class="msg-btn" aria-label="Open messages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg>
-        <span class="msg-badge">2</span>
+        <span class="msg-badge" id="navMsgBadge" hidden>0</span>
       </a>
       <a href="{{ site.baseurl }}/profile" class="menu-pill" aria-label="Open profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -984,6 +985,31 @@
   if(navUserName){
     var fullName = (localStorage.getItem('ur-user-name') || '').trim();
     navUserName.textContent = fullName ? fullName.split(/\s+/)[0] : 'Account';
+  }
+
+  var navMsgBadge = document.getElementById('navMsgBadge');
+  if(navMsgBadge){
+    var renderUnreadBadge = function(count){
+      if(count > 0){
+        navMsgBadge.textContent = count > 99 ? '99+' : String(count);
+        navMsgBadge.hidden = false;
+      } else {
+        navMsgBadge.hidden = true;
+      }
+    };
+    var refreshUnreadBadge = function(){
+      var t = localStorage.getItem('ur-access-token');
+      if(!t) return;
+      fetch('/api/messages/unread-count', { headers: { Authorization: 'Bearer ' + t } })
+        .then(function(res){ return res.ok ? res.json() : null; })
+        .then(function(data){ if(data) renderUnreadBadge(data.count); })
+        .catch(function(err){ console.error('Could not load unread message count:', err); });
+    };
+    refreshUnreadBadge();
+    setInterval(refreshUnreadBadge, 20000);
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'visible') refreshUnreadBadge();
+    });
   }
 })();
 </script>

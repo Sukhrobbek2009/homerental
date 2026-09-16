@@ -7,6 +7,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from .models import BookingStatus, ListingStatus, ListingType, UserRole
 
 PHONE_RE = re.compile(r"^\+?[0-9\s\-()]{7,20}$")
+MESSAGE_BODY_MAX_LENGTH = 2000
 
 
 class SignupRequest(BaseModel):
@@ -212,15 +213,15 @@ class BookingOut(BaseModel):
 
 class MessageCreate(BaseModel):
     listing_id: str
-    body: str = Field(min_length=1, max_length=2000)
+    body: str = Field(min_length=1)
 
     @field_validator("body")
     @classmethod
-    def strip_body(cls, value: str) -> str:
+    def clean_body(cls, value: str) -> str:
         value = value.strip()
         if not value:
             raise ValueError("Message can't be empty")
-        return value
+        return value[:MESSAGE_BODY_MAX_LENGTH]
 
 
 class MessageOut(BaseModel):
@@ -236,15 +237,19 @@ class MessageOut(BaseModel):
 
 
 class MessageReply(BaseModel):
-    body: str = Field(min_length=1, max_length=2000)
+    body: str = Field(min_length=1)
 
     @field_validator("body")
     @classmethod
-    def strip_body(cls, value: str) -> str:
+    def clean_body(cls, value: str) -> str:
         value = value.strip()
         if not value:
             raise ValueError("Message can't be empty")
-        return value
+        return value[:MESSAGE_BODY_MAX_LENGTH]
+
+
+class UnreadCountOut(BaseModel):
+    count: int
 
 
 class ThreadOut(BaseModel):
@@ -266,6 +271,7 @@ class ThreadDetailOut(BaseModel):
     listing_type: ListingType = ListingType.home
     other_user_id: str
     other_user_name: str = "User"
+    can_reply: bool = True
     messages: list[MessageOut]
 
 
