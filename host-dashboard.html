@@ -182,6 +182,24 @@ permalink: /host-dashboard/
   .stat-value{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:28px;color:var(--ink);line-height:1.1;}
   .stat-label{font-size:13.5px;color:var(--ink-soft);font-weight:600;margin-top:2px;}
 
+  /* --- Host verification banner --- */
+  .verify-banner{
+    display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-xl);
+    padding:20px 24px;box-shadow:var(--shadow-card);
+  }
+  .verify-banner.verify-banner-done{background:var(--accent-pale);border-color:transparent;}
+  .verify-banner h3{font-size:16px;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+  .verify-banner h3 svg{width:17px;height:17px;color:var(--accent-deep);}
+  .verify-banner p{margin:0;font-size:13.5px;color:var(--ink-soft);}
+  .btn-outline-accent{
+    padding:12px 22px;border-radius:var(--radius-full);border:1.5px solid var(--accent);background:transparent;
+    color:var(--accent-deep);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13.5px;
+    cursor:pointer;white-space:nowrap;transition:background .15s ease;
+  }
+  .btn-outline-accent:hover{background:var(--accent-pale);}
+  .btn-outline-accent:disabled{opacity:.6;cursor:default;}
+
   /* --- Listings grid (reuses listing card pattern) --- */
   .listing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:32px 24px;}
   .listing-card{cursor:pointer;}
@@ -220,6 +238,7 @@ permalink: /host-dashboard/
   .card-row1 h3{font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--ink);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .card-rating{display:flex;align-items:center;gap:4px;font-size:13.5px;font-weight:600;color:var(--ink);flex-shrink:0;}
   .card-rating svg{width:12.5px;height:12.5px;color:var(--ink);}
+  .card-rating.card-rating-new{color:var(--ink-soft);}
   .card-sub{margin:3px 0 5px;font-size:13.5px;color:var(--ink-soft);}
   .card-price{font-size:14.5px;color:var(--ink);}
   .card-price strong{font-weight:700;}
@@ -267,6 +286,35 @@ permalink: /host-dashboard/
   .booking-side{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
   .booking-price{font-size:14.5px;color:var(--ink);text-align:right;}
   .booking-price strong{font-weight:700;font-size:16px;}
+
+  .review-list{display:flex;flex-direction:column;gap:16px;}
+  .review-item{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:18px 20px;box-shadow:var(--shadow-card);
+  }
+  .review-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .review-item-listing{font-weight:700;font-size:14.5px;}
+  .review-item-meta{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .review-item-rating{display:flex;align-items:center;gap:4px;font-weight:700;font-size:13.5px;flex-shrink:0;}
+  .review-item-rating svg{width:12.5px;height:12.5px;}
+  .review-item-comment{margin:12px 0 0;font-size:14px;line-height:1.6;color:var(--ink);}
+  .review-item-reply{margin-top:12px;padding:12px 14px;border-radius:var(--radius-md);background:var(--bg-alt);}
+  .review-item-reply-label{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px;}
+  .review-item-reply p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-soft);}
+  .review-reply-toggle{background:none;border:none;padding:0;margin-top:10px;font-size:12.5px;font-weight:600;color:var(--accent-deep);cursor:pointer;text-decoration:underline;}
+  .review-reply-form{margin-top:14px;}
+  .review-reply-form textarea{
+    width:100%;min-height:70px;padding:10px 14px;border:1px solid var(--line-strong);border-radius:var(--radius-md);
+    background:var(--bg-alt);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);resize:vertical;
+  }
+  .review-reply-form textarea:focus{outline:none;border-color:var(--accent);background:var(--panel);}
+  .review-reply-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px;}
+  .review-reply-btn{
+    padding:8px 16px;border-radius:var(--radius-full);font-weight:700;font-size:13px;cursor:pointer;
+    border:none;background:var(--accent);color:#fff;
+  }
+  .review-reply-btn:hover{background:var(--accent-deep);}
+  .review-reply-btn:disabled{opacity:.6;cursor:default;}
 
   @media (max-width:640px){
     .booking-item{grid-template-columns:76px 1fr;grid-template-rows:auto auto;}
@@ -423,6 +471,28 @@ permalink: /host-dashboard/
 <section class="dashboard-page">
   <div class="wrap">
 
+    <div class="dash-section" id="verificationSection" style="display:none;">
+      <div class="verify-banner" id="verifyBannerNone" style="display:none;">
+        <div>
+          <h3>Get verified</h3>
+          <p>Verified hosts show a "Verified" badge on their listings, which builds trust with renters.</p>
+        </div>
+        <button type="button" class="btn-outline-accent" id="requestVerificationBtn">Request verification</button>
+      </div>
+      <div class="verify-banner" id="verifyBannerPending" style="display:none;">
+        <div>
+          <h3>Verification pending</h3>
+          <p>We've received your request and our team is reviewing it.</p>
+        </div>
+      </div>
+      <div class="verify-banner verify-banner-done" id="verifyBannerDone" style="display:none;">
+        <div>
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>You're a verified host</h3>
+          <p>Your listings show a "Verified" badge to renters.</p>
+        </div>
+      </div>
+    </div>
+
     <div class="dash-section" id="statsSection">
       <div class="stats-row">
         <div class="stat-card">
@@ -483,6 +553,26 @@ permalink: /host-dashboard/
         </div>
         <h3>No bookings yet</h3>
         <p>When a renter books one of your listings, it'll show up here.</p>
+      </div>
+    </div>
+
+    <div class="dash-section" id="hostReviewsSection">
+      <div class="dash-section-head">
+        <h2>Reviews</h2>
+        <span class="count-pill" id="hostReviewsCount">0 reviews</span>
+      </div>
+
+      <div class="review-list" id="hostReviewList" aria-live="polite" aria-busy="true"></div>
+
+      <div class="empty-state" id="hostReviewsEmpty" style="display:none;">
+        <div class="empty-visual">
+          <div class="ring"></div>
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg>
+          </div>
+        </div>
+        <h3>No reviews yet</h3>
+        <p>When a renter reviews one of your listings, it'll show up here so you can reply.</p>
       </div>
     </div>
 
@@ -658,6 +748,19 @@ permalink: /host-dashboard/
       : (listing.home_type || '');
   }
 
+  function buildRatingChip(listing){
+    const chip = document.createElement('span');
+    chip.className = 'card-rating';
+    if(listing.review_count > 0 && listing.rating_avg != null){
+      chip.innerHTML = STAR_ICON;
+      chip.appendChild(document.createTextNode(Number(listing.rating_avg).toFixed(1) + ' (' + listing.review_count + ')'));
+    } else {
+      chip.classList.add('card-rating-new');
+      chip.textContent = 'New';
+    }
+    return chip;
+  }
+
   function buildListingCard(listing){
     const detailBase = listing.listing_type === 'car' ? '{{ site.baseurl }}/listings/car' : '{{ site.baseurl }}/listings/property';
     const detailHref = detailBase + '?id=' + encodeURIComponent(listing.id);
@@ -717,15 +820,7 @@ permalink: /host-dashboard/
     const h3 = document.createElement('h3');
     h3.textContent = listing.title;
     row1.appendChild(h3);
-    const rating = document.createElement('span');
-    rating.className = 'card-rating';
-    if(listing.rating != null){
-      rating.innerHTML = STAR_ICON;
-      rating.appendChild(document.createTextNode(Number(listing.rating).toFixed(2)));
-    } else {
-      rating.textContent = '—';
-    }
-    row1.appendChild(rating);
+    row1.appendChild(buildRatingChip(listing));
     info.appendChild(row1);
 
     const sub = document.createElement('p');
@@ -931,6 +1026,159 @@ permalink: /host-dashboard/
     hostBookingsCount.textContent = bookings.length + (bookings.length === 1 ? ' booking' : ' bookings');
     hostBookingsEmpty.style.display = bookings.length === 0 ? 'block' : 'none';
     statBookings.textContent = bookingsThisMonthCount(bookings);
+  }
+
+  function authHeaders(){
+    const token = localStorage.getItem('ur-access-token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  function handleAuthFailure(status){
+    if(status !== 401) return false;
+    localStorage.removeItem('ur-access-token');
+    localStorage.removeItem('ur-refresh-token');
+    localStorage.removeItem('ur-user-name');
+    window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+    return true;
+  }
+
+  const hostReviewList = document.getElementById('hostReviewList');
+  const hostReviewsCount = document.getElementById('hostReviewsCount');
+  const hostReviewsEmpty = document.getElementById('hostReviewsEmpty');
+
+  function formatReviewItemDate(iso){
+    const d = new Date(iso);
+    return isNaN(d) ? '' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function buildReplyForm(review, item, replySlot){
+    const form = document.createElement('form');
+    form.className = 'review-reply-form';
+    const textarea = document.createElement('textarea');
+    textarea.placeholder = 'Write a public reply…';
+    textarea.required = true;
+    form.appendChild(textarea);
+    const actions = document.createElement('div');
+    actions.className = 'review-reply-actions';
+    const submitBtn = document.createElement('button');
+    submitBtn.type = 'submit';
+    submitBtn.className = 'review-reply-btn';
+    submitBtn.textContent = 'Post reply';
+    actions.appendChild(submitBtn);
+    form.appendChild(actions);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const reply = textarea.value.trim();
+      if(!reply) return;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Posting…';
+      try {
+        const res = await fetch('/api/reviews/' + encodeURIComponent(review.id) + '/reply', {
+          method: 'POST',
+          headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+          body: JSON.stringify({ reply }),
+        });
+        if(handleAuthFailure(res.status)) return;
+        if(!res.ok){
+          const data = await res.json().catch(() => null);
+          throw new Error((data && data.detail) || 'Could not post reply (' + res.status + ')');
+        }
+        const updated = await res.json();
+        replySlot.replaceWith(buildReplyDisplay(updated, item));
+      } catch(err){
+        console.error('Could not post reply:', err);
+        window.alert(err.message || 'Could not post your reply. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Post reply';
+      }
+    });
+
+    return form;
+  }
+
+  function buildReplyDisplay(review, item){
+    const wrap = document.createElement('div');
+    if(review.host_reply){
+      const reply = document.createElement('div');
+      reply.className = 'review-item-reply';
+      const label = document.createElement('div');
+      label.className = 'review-item-reply-label';
+      label.textContent = 'Your reply';
+      reply.appendChild(label);
+      const text = document.createElement('p');
+      text.textContent = review.host_reply;
+      reply.appendChild(text);
+      wrap.appendChild(reply);
+
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'review-reply-toggle';
+      editBtn.textContent = 'Edit reply';
+      editBtn.addEventListener('click', () => {
+        const form = buildReplyForm(review, item, wrap);
+        form.querySelector('textarea').value = review.host_reply;
+        wrap.replaceWith(form);
+      });
+      wrap.appendChild(editBtn);
+    } else {
+      wrap.appendChild(buildReplyForm(review, item, wrap));
+    }
+    return wrap;
+  }
+
+  function createHostReviewItem(review){
+    const item = document.createElement('div');
+    item.className = 'review-item';
+
+    const head = document.createElement('div');
+    head.className = 'review-item-head';
+    const left = document.createElement('div');
+    const listingEl = document.createElement('div');
+    listingEl.className = 'review-item-listing';
+    listingEl.textContent = review.listing_title;
+    left.appendChild(listingEl);
+    const meta = document.createElement('div');
+    meta.className = 'review-item-meta';
+    meta.textContent = 'by ' + (review.author_name || 'Guest') + ' · ' + formatReviewItemDate(review.created_at);
+    left.appendChild(meta);
+    head.appendChild(left);
+
+    const rating = document.createElement('div');
+    rating.className = 'review-item-rating';
+    rating.innerHTML = STAR_ICON;
+    rating.appendChild(document.createTextNode(String(review.rating)));
+    head.appendChild(rating);
+    item.appendChild(head);
+
+    if(review.comment){
+      const comment = document.createElement('p');
+      comment.className = 'review-item-comment';
+      comment.textContent = review.comment;
+      item.appendChild(comment);
+    }
+
+    item.appendChild(buildReplyDisplay(review, item));
+    return item;
+  }
+
+  async function loadHostReviews(){
+    hostReviewList.setAttribute('aria-busy', 'true');
+    let reviews = [];
+    try {
+      const res = await fetch('/api/reviews/hosted', { headers: authHeaders() });
+      if(handleAuthFailure(res.status)) return;
+      if(!res.ok) throw new Error('Failed to load reviews (' + res.status + ')');
+      reviews = await res.json();
+    } catch(err){
+      console.error('Could not load reviews:', err);
+      reviews = [];
+    }
+    hostReviewList.setAttribute('aria-busy', 'false');
+    hostReviewList.innerHTML = '';
+    reviews.forEach(review => hostReviewList.appendChild(createHostReviewItem(review)));
+    hostReviewsCount.textContent = reviews.length + (reviews.length === 1 ? ' review' : ' reviews');
+    hostReviewsEmpty.style.display = reviews.length === 0 ? 'block' : 'none';
   }
 
   /* ---- add listing modal ---- */
@@ -1202,8 +1450,63 @@ permalink: /host-dashboard/
     }
   });
 
+  /* ---- host verification status ---- */
+  const verificationSection = document.getElementById('verificationSection');
+  const verifyBannerNone = document.getElementById('verifyBannerNone');
+  const verifyBannerPending = document.getElementById('verifyBannerPending');
+  const verifyBannerDone = document.getElementById('verifyBannerDone');
+  const requestVerificationBtn = document.getElementById('requestVerificationBtn');
+
+  function renderVerificationStatus(user){
+    verifyBannerNone.style.display = 'none';
+    verifyBannerPending.style.display = 'none';
+    verifyBannerDone.style.display = 'none';
+    if(user.verified){
+      verifyBannerDone.style.display = 'flex';
+    } else if(user.verification_requested){
+      verifyBannerPending.style.display = 'flex';
+    } else {
+      verifyBannerNone.style.display = 'flex';
+    }
+    verificationSection.style.display = '';
+  }
+
+  async function loadVerificationStatus(){
+    const token = localStorage.getItem('ur-access-token');
+    if(!token) return;
+    try {
+      const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+      if(!res.ok) throw new Error('Failed to load account status (' + res.status + ')');
+      renderVerificationStatus(await res.json());
+    } catch(err){
+      console.error('Could not load verification status:', err);
+    }
+  }
+
+  requestVerificationBtn.addEventListener('click', async () => {
+    const token = localStorage.getItem('ur-access-token');
+    if(!token) return;
+    requestVerificationBtn.disabled = true;
+    try {
+      const res = await fetch('/api/auth/me/request-verification', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if(!res.ok){
+        const data = await res.json().catch(() => null);
+        throw new Error((data && data.detail) || 'Could not send your request. Please try again.');
+      }
+      renderVerificationStatus(await res.json());
+    } catch(err){
+      window.alert(err.message || 'Could not send your request. Please try again.');
+      requestVerificationBtn.disabled = false;
+    }
+  });
+
   loadMyListings();
   loadHostBookings();
+  loadHostReviews();
+  loadVerificationStatus();
 </script>
 
 <script>

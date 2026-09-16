@@ -19,6 +19,7 @@ PAGE_FILES = {
     "renter-dashboard": "renter-dashboard.html",
     "messages": "messages.html",
     "profile": "profile.html",
+    "admin-dashboard": "admin-dashboard.html",
 }
 
 # Strips a leading Jekyll front matter block (--- ... ---) used only to give
@@ -85,3 +86,8 @@ def messages_page() -> HTMLResponse:
 @router.get("/profile", include_in_schema=False)
 def profile_page() -> HTMLResponse:
     return _page("profile")
+
+
+@router.get("/admin-dashboard", include_in_schema=False)
+def admin_dashboard_page() -> HTMLResponse:
+    return _page("admin-dashboard")

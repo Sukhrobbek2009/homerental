@@ -196,6 +196,7 @@ permalink: /renter-dashboard/
   .card-row1 h3{font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--ink);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .card-rating{display:flex;align-items:center;gap:4px;font-size:13.5px;font-weight:600;color:var(--ink);flex-shrink:0;}
   .card-rating svg{width:12.5px;height:12.5px;color:var(--ink);}
+  .card-rating.card-rating-new{color:var(--ink-soft);}
   .card-sub{margin:3px 0 5px;font-size:13.5px;color:var(--ink-soft);}
   .verified-tag{display:inline-flex;align-items:center;gap:3px;color:var(--accent-deep);font-weight:700;margin-left:2px;}
   .verified-tag svg{width:11px;height:11px;}
@@ -250,6 +251,55 @@ permalink: /renter-dashboard/
     .booking-thumb{width:76px;height:64px;}
     .booking-side{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center;margin-top:6px;}
   }
+
+  .status-pill.completed{background:var(--bg-alt-2);color:var(--ink-soft);}
+  .review-btn{
+    display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--radius-full);
+    border:1.5px solid var(--ink);background:transparent;color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap;transition:background .15s ease, color .15s ease;
+  }
+  .review-btn:hover{background:var(--ink);color:var(--bg);}
+  .review-btn svg{width:14px;height:14px;}
+  .reviewed-tag{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap;}
+  .reviewed-tag svg{width:14px;height:14px;color:var(--accent-deep);}
+
+  /* ===== REVIEW MODAL ===== */
+  .review-modal-overlay{
+    position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.45);
+    display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .review-modal-overlay[hidden]{display:none;}
+  .review-modal{
+    width:100%;max-width:420px;background:var(--panel);border-radius:var(--radius-xl);
+    padding:28px;box-shadow:var(--shadow-lift);position:relative;
+  }
+  .review-modal-close{
+    position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:none;
+    background:var(--bg-alt);color:var(--ink);font-size:18px;line-height:1;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .review-modal h3{font-size:19px;margin-bottom:4px;padding-right:32px;}
+  .review-modal-sub{font-size:13.5px;color:var(--ink-soft);margin:0 0 20px;}
+  .star-picker{display:flex;gap:6px;margin-bottom:16px;}
+  .star-picker button{
+    width:38px;height:38px;border:none;background:none;cursor:pointer;color:var(--line-strong);
+    display:flex;align-items:center;justify-content:center;padding:0;transition:color .1s ease,transform .1s ease;
+  }
+  .star-picker button svg{width:28px;height:28px;}
+  .star-picker button:hover{transform:scale(1.08);}
+  .star-picker button.active{color:#F0B429;}
+  .review-textarea{
+    width:100%;border:1px solid var(--line-strong);border-radius:var(--radius-md);padding:12px 14px;
+    font-family:inherit;font-size:14px;color:var(--ink);background:var(--bg);resize:vertical;min-height:88px;
+  }
+  .review-textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .review-modal-error{color:#C0392B;font-size:13.5px;margin:12px 0 0;}
+  .review-modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+  .btn-ghost{
+    padding:12px 20px;border-radius:var(--radius-full);border:1px solid var(--line-strong);background:transparent;
+    color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  .btn-ghost:hover{background:var(--bg-alt);}
 
   /* ===== BUTTONS ===== */
   .btn-dark{
@@ -401,6 +451,24 @@ permalink: /renter-dashboard/
       </div>
     </div>
 
+    <!-- ===== COMPLETED STAYS ===== -->
+    <div class="dash-section reveal">
+      <div class="dash-section-head">
+        <h2>Completed stays</h2>
+        <span class="dash-section-count" id="completedCount">0 completed</span>
+      </div>
+
+      <div class="booking-list" id="completedList" aria-live="polite" aria-busy="true"></div>
+
+      <div class="empty-state" id="completedEmpty">
+        <span class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-7.2-4.4-9.8-8.8C.6 8.8 2 5 6 5c2.1 0 3.6 1.2 4 2.4C10.4 6.2 11.9 5 14 5c4 0 5.4 3.8 3.8 7.2C19.2 16.6 12 21 12 21z"/></svg>
+        </span>
+        <h3>No completed stays yet</h3>
+        <p>Once a booking wraps up, you'll be able to leave a review for your host here.</p>
+      </div>
+    </div>
+
     <div class="browse-more reveal">
       <a href="{{ site.baseurl }}/listings" class="btn-dark">
         Browse more listings
@@ -410,6 +478,21 @@ permalink: /renter-dashboard/
 
   </div>
 </section>
+
+<div class="review-modal-overlay" id="reviewModalOverlay" hidden>
+  <div class="review-modal" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+    <button type="button" class="review-modal-close" id="reviewModalClose" aria-label="Close">&times;</button>
+    <h3 id="reviewModalTitle">Leave a review</h3>
+    <p class="review-modal-sub" id="reviewModalListingTitle"></p>
+    <div class="star-picker" id="starPicker" role="radiogroup" aria-label="Rating"></div>
+    <textarea id="reviewComment" class="review-textarea" maxlength="2000" rows="4" placeholder="Share how your stay went (optional)"></textarea>
+    <p class="review-modal-error" id="reviewModalError" hidden></p>
+    <div class="review-modal-actions">
+      <button type="button" class="btn-ghost" id="reviewModalCancel">Cancel</button>
+      <button type="button" class="btn-dark" id="reviewModalSubmit">Submit review</button>
+    </div>
+  </div>
+</div>
 
 <footer class="site-footer">
   <div class="wrap">
@@ -527,6 +610,19 @@ permalink: /renter-dashboard/
       : (listing.home_type || '');
   }
 
+  function buildRatingChip(listing){
+    const chip = document.createElement('span');
+    chip.className = 'card-rating';
+    if(listing.review_count > 0 && listing.rating_avg != null){
+      chip.innerHTML = STAR_ICON;
+      chip.appendChild(document.createTextNode(Number(listing.rating_avg).toFixed(1) + ' (' + listing.review_count + ')'));
+    } else {
+      chip.classList.add('card-rating-new');
+      chip.textContent = 'New';
+    }
+    return chip;
+  }
+
   function formatDateShort(iso){
     const d = new Date(iso + 'T00:00:00');
     return isNaN(d) ? iso : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -592,20 +688,14 @@ permalink: /renter-dashboard/
     const h3 = document.createElement('h3');
     h3.textContent = listing.title;
     row1.appendChild(h3);
-    if(listing.rating != null){
-      const rating = document.createElement('span');
-      rating.className = 'card-rating';
-      rating.innerHTML = STAR_ICON;
-      rating.appendChild(document.createTextNode(Number(listing.rating).toFixed(2)));
-      row1.appendChild(rating);
-    }
+    row1.appendChild(buildRatingChip(listing));
     info.appendChild(row1);
 
     const sub = document.createElement('p');
     sub.className = 'card-sub';
     const subtitle = subtitleFor(listing);
     sub.appendChild(document.createTextNode(listing.location + (subtitle ? ' · ' + subtitle : '')));
-    if(listing.verified){
+    if(listing.host_verified){
       sub.appendChild(document.createTextNode(' '));
       const tag = document.createElement('span');
       tag.className = 'verified-tag';
@@ -670,15 +760,24 @@ permalink: /renter-dashboard/
     updateSavedCount();
   }
 
-  /* ===== UPCOMING BOOKINGS ===== */
+  /* ===== BOOKINGS (upcoming + completed) ===== */
   const bookingList = document.getElementById('bookingList');
   const bookingEmpty = document.getElementById('bookingEmpty');
   const bookingCount = document.getElementById('bookingCount');
+  const completedList = document.getElementById('completedList');
+  const completedEmpty = document.getElementById('completedEmpty');
+  const completedCount = document.getElementById('completedCount');
 
   function updateBookingCount(){
     const remaining = bookingList.querySelectorAll('.booking-item').length;
     bookingCount.textContent = remaining + (remaining === 1 ? ' upcoming' : ' upcoming');
     bookingEmpty.classList.toggle('is-visible', remaining === 0);
+  }
+
+  function updateCompletedCount(){
+    const remaining = completedList.querySelectorAll('.booking-item').length;
+    completedCount.textContent = remaining + (remaining === 1 ? ' completed' : ' completed');
+    completedEmpty.classList.toggle('is-visible', remaining === 0);
   }
 
   function createBookingItem(booking, index){
@@ -747,18 +846,102 @@ permalink: /renter-dashboard/
     return article;
   }
 
-  async function loadUpcomingBookings(){
+  function createCompletedBookingItem(booking, index, hasReview){
+    const [a, b] = CARD_PALETTE[index % CARD_PALETTE.length];
+    const detailBase = booking.listing_type === 'car' ? '{{ site.baseurl }}/listings/car' : '{{ site.baseurl }}/listings/property';
+    const detailHref = detailBase + '?id=' + encodeURIComponent(booking.listing_id);
+
+    const article = document.createElement('article');
+    article.className = 'booking-item';
+    article.addEventListener('click', () => { location.href = detailHref; });
+
+    const thumb = document.createElement('div');
+    thumb.className = 'booking-thumb';
+    thumb.style.setProperty('--a', a);
+    thumb.style.setProperty('--b', b);
+    const img = document.createElement('img');
+    img.src = booking.listing_image_url || PLACEHOLDER_IMG;
+    img.alt = booking.listing_title;
+    img.loading = 'lazy';
+    thumb.appendChild(img);
+
+    const body = document.createElement('div');
+    body.className = 'booking-body';
+    const h3 = document.createElement('h3');
+    h3.textContent = booking.listing_title;
+    body.appendChild(h3);
+
+    const meta = document.createElement('div');
+    meta.className = 'booking-meta';
+
+    const dateSpan = document.createElement('span');
+    dateSpan.innerHTML = CALENDAR_ICON;
+    dateSpan.appendChild(document.createTextNode(formatDateShort(booking.start_date) + ' – ' + formatDateShort(booking.end_date)));
+    meta.appendChild(dateSpan);
+
+    const locSpan = document.createElement('span');
+    locSpan.innerHTML = PIN_ICON;
+    locSpan.appendChild(document.createTextNode(booking.listing_location));
+    meta.appendChild(locSpan);
+
+    const statusSpan = document.createElement('span');
+    statusSpan.className = 'status-pill completed';
+    statusSpan.innerHTML = CHECK_ICON;
+    statusSpan.appendChild(document.createTextNode('Completed'));
+    meta.appendChild(statusSpan);
+
+    body.appendChild(meta);
+
+    const side = document.createElement('div');
+    side.className = 'booking-side';
+
+    if(hasReview){
+      const tag = document.createElement('span');
+      tag.className = 'reviewed-tag';
+      tag.innerHTML = CHECK_ICON;
+      tag.appendChild(document.createTextNode('Reviewed'));
+      side.appendChild(tag);
+    } else {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'review-btn';
+      btn.innerHTML = STAR_ICON;
+      btn.appendChild(document.createTextNode('Leave a review'));
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openReviewModal(booking);
+      });
+      side.appendChild(btn);
+    }
+
+    article.appendChild(thumb);
+    article.appendChild(body);
+    article.appendChild(side);
+    return article;
+  }
+
+  async function loadBookings(){
     bookingList.setAttribute('aria-busy', 'true');
+    completedList.setAttribute('aria-busy', 'true');
     let bookings = [];
+    let reviewedIds = new Set();
     try {
-      const res = await fetch('/api/bookings/mine', { headers: authHeaders() });
-      if(handleAuthFailure(res.status)) return;
-      if(!res.ok) throw new Error('Failed to load bookings (' + res.status + ')');
-      bookings = await res.json();
+      const [bookingsRes, reviewsRes] = await Promise.all([
+        fetch('/api/bookings/mine', { headers: authHeaders() }),
+        fetch('/api/reviews/mine', { headers: authHeaders() }),
+      ]);
+      if(handleAuthFailure(bookingsRes.status)) return;
+      if(!bookingsRes.ok) throw new Error('Failed to load bookings (' + bookingsRes.status + ')');
+      bookings = await bookingsRes.json();
+      if(reviewsRes.ok){
+        const reviews = await reviewsRes.json();
+        reviewedIds = new Set(reviews.map(r => r.booking_id));
+      }
     } catch(err){
       console.error('Could not load bookings:', err);
       bookings = [];
     }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const upcoming = bookings
@@ -769,10 +952,112 @@ permalink: /renter-dashboard/
     bookingList.innerHTML = '';
     upcoming.forEach((booking, i) => bookingList.appendChild(createBookingItem(booking, i)));
     updateBookingCount();
+
+    const completed = bookings
+      .filter(b => b.status === 'completed')
+      .sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
+
+    completedList.setAttribute('aria-busy', 'false');
+    completedList.innerHTML = '';
+    completed.forEach((booking, i) => completedList.appendChild(createCompletedBookingItem(booking, i, reviewedIds.has(booking.id))));
+    updateCompletedCount();
   }
 
+  /* ===== REVIEW MODAL ===== */
+  const reviewModalOverlay = document.getElementById('reviewModalOverlay');
+  const reviewModalListingTitle = document.getElementById('reviewModalListingTitle');
+  const starPicker = document.getElementById('starPicker');
+  const reviewComment = document.getElementById('reviewComment');
+  const reviewModalError = document.getElementById('reviewModalError');
+  const reviewModalSubmit = document.getElementById('reviewModalSubmit');
+  const reviewModalCancel = document.getElementById('reviewModalCancel');
+  const reviewModalClose = document.getElementById('reviewModalClose');
+
+  let activeReviewBooking = null;
+  let selectedRating = 0;
+
+  for(let i = 1; i <= 5; i++){
+    const starBtn = document.createElement('button');
+    starBtn.type = 'button';
+    starBtn.dataset.value = String(i);
+    starBtn.setAttribute('role', 'radio');
+    starBtn.setAttribute('aria-label', i + (i === 1 ? ' star' : ' stars'));
+    starBtn.setAttribute('aria-checked', 'false');
+    starBtn.innerHTML = STAR_ICON;
+    starBtn.addEventListener('click', () => setSelectedRating(i));
+    starPicker.appendChild(starBtn);
+  }
+
+  function setSelectedRating(value){
+    selectedRating = value;
+    Array.from(starPicker.children).forEach((btn, idx) => {
+      const active = idx < value;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-checked', active ? 'true' : 'false');
+    });
+  }
+
+  function openReviewModal(booking){
+    activeReviewBooking = booking;
+    reviewModalListingTitle.textContent = booking.listing_title;
+    reviewComment.value = '';
+    reviewModalError.hidden = true;
+    setSelectedRating(0);
+    reviewModalOverlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeReviewModal(){
+    reviewModalOverlay.hidden = true;
+    document.body.style.overflow = '';
+    activeReviewBooking = null;
+  }
+
+  reviewModalCancel.addEventListener('click', closeReviewModal);
+  reviewModalClose.addEventListener('click', closeReviewModal);
+  reviewModalOverlay.addEventListener('click', (e) => {
+    if(e.target === reviewModalOverlay) closeReviewModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && !reviewModalOverlay.hidden) closeReviewModal();
+  });
+
+  reviewModalSubmit.addEventListener('click', async () => {
+    if(!activeReviewBooking) return;
+    if(selectedRating < 1){
+      reviewModalError.textContent = 'Please select a star rating.';
+      reviewModalError.hidden = false;
+      return;
+    }
+    reviewModalSubmit.disabled = true;
+    reviewModalError.hidden = true;
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+        body: JSON.stringify({
+          booking_id: activeReviewBooking.id,
+          rating: selectedRating,
+          comment: reviewComment.value.trim() || null,
+        }),
+      });
+      if(handleAuthFailure(res.status)) return;
+      if(!res.ok){
+        const data = await res.json().catch(() => null);
+        throw new Error((data && data.detail) || 'Could not submit review (' + res.status + ')');
+      }
+      closeReviewModal();
+      await loadBookings();
+    } catch(err){
+      reviewModalError.textContent = err.message;
+      reviewModalError.hidden = false;
+    } finally {
+      reviewModalSubmit.disabled = false;
+    }
+  });
+
   loadSavedListings();
-  loadUpcomingBookings();
+  loadBookings();
 
   const revealEls = document.querySelectorAll('.reveal');
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)){

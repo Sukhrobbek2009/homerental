@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from .. import models, schemas
 from ..database import get_db
 from ..deps import get_current_user
-from .listings import _attach_host_names
+from .listings import _attach_host_names, _attach_ratings
 
 router = APIRouter(prefix="/api/saved", tags=["saved"])
 
@@ -28,7 +28,7 @@ def list_saved_listings(
         for listing in db.query(models.Listing).filter(models.Listing.id.in_(listing_ids)).all()
     }
     ordered = [by_id[lid] for lid in listing_ids if lid in by_id]
-    return _attach_host_names(db, ordered)
+    return _attach_ratings(db, _attach_host_names(db, ordered))
 
 
 @router.get("/ids", response_model=list[str])

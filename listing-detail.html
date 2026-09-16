@@ -153,6 +153,9 @@ permalink: /listings/property/
   .detail-meta .rating{display:flex;align-items:center;gap:5px;color:var(--ink);font-weight:700;}
   .detail-meta .rating svg{width:13px;height:13px;color:var(--ink);}
   .detail-meta .place{text-decoration:underline;}
+  .rating.rating-new svg{display:none;}
+  .host-rating{display:flex;align-items:center;gap:5px;color:var(--ink);font-weight:700;font-size:13.5px;margin-top:6px;}
+  .host-rating svg{width:12.5px;height:12.5px;color:var(--ink);}
   .verified-tag{display:inline-flex;align-items:center;gap:3px;color:var(--accent-deep);font-weight:700;}
   .verified-tag svg{width:11px;height:11px;}
   .head-actions{display:flex;align-items:center;gap:8px;}
@@ -258,6 +261,14 @@ permalink: /listings/property/
   .review-rating{display:flex;align-items:center;gap:4px;margin:4px 0 8px;font-size:13.5px;font-weight:700;color:var(--ink);}
   .review-rating svg{width:12.5px;height:12.5px;color:var(--ink);}
   .review-text{margin:0;font-size:14.5px;line-height:1.65;color:var(--ink);}
+  .review-host-reply{margin-top:12px;padding:12px 14px;border-radius:var(--radius-md);background:var(--bg-alt);}
+  .review-host-reply-label{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px;}
+  .review-host-reply p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-soft);}
+  .review-report{margin-top:10px;font-size:12.5px;}
+  .review-report-btn{background:none;border:none;padding:0;font:inherit;font-weight:600;color:var(--ink-faint);cursor:pointer;text-decoration:underline;}
+  .review-report-btn:hover{color:var(--ink-soft);}
+  .review-report-btn:disabled{cursor:default;text-decoration:none;}
+  .review-report.is-flagged{font-weight:600;color:var(--ink-soft);}
   .reviews-empty{margin:0;font-size:14.5px;color:var(--ink-soft);}
   .review-skeleton .review-avatar{background:var(--bg-alt-2);}
   .skeleton-line{height:11px;border-radius:6px;background:var(--bg-alt-2);}
@@ -482,8 +493,6 @@ permalink: /listings/property/
       <h1 id="listingTitle">Spacious 3BR house with backyard</h1>
       <div class="detail-meta">
         <span class="rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg><span class="rating-value">4.92</span></span>
-        <span>·</span>
-        <span id="reviewCountText">118 reviews</span>
         <span class="dot"></span>
         <span class="place" id="placeText">Sacramento, CA</span>
         <span class="dot"></span>
@@ -532,6 +541,7 @@ permalink: /listings/property/
           <div>
             <h2 id="hostHeading">Entire house hosted by Aziza</h2>
             <p id="hostSubline">3 bedrooms · 2 beds · 2 baths · Sleeps 6</p>
+            <span class="rating host-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7L12 2z"/></svg><span class="rating-value">4.92</span></span>
           </div>
           <div class="host-row-right">
             <button type="button" class="icon-action" id="contactHostBtn">
@@ -825,27 +835,24 @@ permalink: /listings/property/
   const PLACEHOLDER_IMG = 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1200';
   const AMENITY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
   let ratingText = 'New';
-  let reviewCount = 0;
   let currentListing = null;
 
   function initialsForHost(name){
     return (name || 'Host').trim().split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase();
   }
 
-  function updateRatingUI(){
+  function formatRatingBadge(ratingAvg, reviewCount){
+    if(reviewCount > 0 && ratingAvg != null){
+      return { text: Number(ratingAvg).toFixed(1) + ' (' + reviewCount + ')', isNew: false };
+    }
+    return { text: 'New', isNew: true };
+  }
+
+  function updateRatingUI(isNew){
+    document.querySelectorAll('.rating').forEach(el => el.classList.toggle('rating-new', !!isNew));
     document.querySelectorAll('.rating .rating-value').forEach(el => { el.textContent = ratingText; });
-  }
-
-  function updateMobileMeta(){
-    const el = document.getElementById('mobileMeta');
-    if(el) el.textContent = ratingText + ' · ' + reviewCount + (reviewCount === 1 ? ' review' : ' reviews');
-  }
-
-  function setReviewCount(n){
-    reviewCount = n;
-    const el = document.getElementById('reviewCountText');
-    if(el) el.textContent = n + (n === 1 ? ' review' : ' reviews');
-    updateMobileMeta();
+    const mobileMeta = document.getElementById('mobileMeta');
+    if(mobileMeta) mobileMeta.textContent = ratingText;
   }
 
   function applyListing(listing){
@@ -856,17 +863,17 @@ permalink: /listings/property/
     const titleEl = document.getElementById('listingTitle');
     if(titleEl) titleEl.textContent = listing.title;
 
-    ratingText = listing.rating != null ? Number(listing.rating).toFixed(2) : 'New';
-    updateRatingUI();
-    updateMobileMeta();
+    const badge = formatRatingBadge(listing.rating_avg, listing.review_count);
+    ratingText = badge.text;
+    updateRatingUI(badge.isNew);
 
     const placeEl = document.getElementById('placeText');
     if(placeEl) placeEl.textContent = listing.location;
 
     const verifiedTag = document.getElementById('verifiedTag');
-    if(verifiedTag) verifiedTag.style.display = listing.verified ? '' : 'none';
+    if(verifiedTag) verifiedTag.style.display = listing.host_verified ? '' : 'none';
     const verifiedFeatureItem = document.getElementById('verifiedFeatureItem');
-    if(verifiedFeatureItem) verifiedFeatureItem.style.display = listing.verified ? '' : 'none';
+    if(verifiedFeatureItem) verifiedFeatureItem.style.display = listing.host_verified ? '' : 'none';
 
     const gallery = document.getElementById('gallery');
     const mainImg = document.getElementById('galleryMainImg');
@@ -1327,8 +1334,65 @@ permalink: /listings/property/
       body.appendChild(text);
     }
 
+    if(review.host_reply){
+      const reply = document.createElement('div');
+      reply.className = 'review-host-reply';
+      const label = document.createElement('div');
+      label.className = 'review-host-reply-label';
+      label.textContent = 'Response from the host';
+      reply.appendChild(label);
+      const replyText = document.createElement('p');
+      replyText.textContent = review.host_reply;
+      reply.appendChild(replyText);
+      body.appendChild(reply);
+    }
+
+    body.appendChild(buildReportRow(review));
+
     card.appendChild(body);
     return card;
+  }
+
+  function buildReportRow(review){
+    const row = document.createElement('div');
+    row.className = 'review-report';
+    if(review.flagged){
+      row.classList.add('is-flagged');
+      row.textContent = 'Reported — pending review';
+      return row;
+    }
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'review-report-btn';
+    btn.textContent = 'Report review';
+    btn.addEventListener('click', () => handleReportReview(review.id, row, btn));
+    row.appendChild(btn);
+    return row;
+  }
+
+  async function handleReportReview(reviewId, row, btn){
+    const token = localStorage.getItem('ur-access-token');
+    if(!token){
+      window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Reporting…';
+    try {
+      const res = await fetch('/api/reviews/' + encodeURIComponent(reviewId) + '/flag', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if(!res.ok) throw new Error('Failed to report review (' + res.status + ')');
+      row.innerHTML = '';
+      row.classList.add('is-flagged');
+      row.textContent = 'Reported — pending review';
+    } catch(err){
+      console.error('Could not report review:', err);
+      btn.disabled = false;
+      btn.textContent = 'Report review';
+      window.alert('Could not report this review. Please try again.');
+    }
   }
 
   function renderReviewSkeleton(list, count){
@@ -1381,7 +1445,6 @@ permalink: /listings/property/
       reviews = [];
     }
     renderReviews(list, reviews);
-    setReviewCount(reviews.length);
   }
 
   loadReviews();

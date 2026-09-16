@@ -15,6 +15,14 @@ permalink: /profile/
     }
   })();
 </script>
+<script>
+  (function(){
+    if(!localStorage.getItem('ur-access-token')){
+      var dest = location.pathname + location.search;
+      window.location.replace('{{ site.baseurl }}/login?redirect=' + encodeURIComponent(dest));
+    }
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -337,10 +345,7 @@ permalink: /profile/
       <div class="profile-avatar" id="avatarInitial">AK</div>
       <h2 id="profileName">Aziz Karimov</h2>
       <p class="profile-email" id="profileEmail">aziz.karimov@example.com</p>
-      <div class="profile-badges">
-        <span class="profile-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
-        <span class="profile-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Host</span>
-      </div>
+      <div class="profile-badges" id="profileBadges"></div>
       <p class="profile-meta">Member since March 2024 · Brooklyn, NY</p>
 
       <div class="quick-links">
@@ -362,6 +367,11 @@ permalink: /profile/
         <a href="{{ site.baseurl }}/messages" class="quick-link">
           <span class="ql-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5c-1.35 0-2.62-.32-3.75-.9L3 21l1.9-5.7A8.5 8.5 0 1121 11.5z"/></svg></span>
           Messages
+          <span class="ql-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></span>
+        </a>
+        <a href="{{ site.baseurl }}/admin-dashboard" class="quick-link" id="adminQuickLink" style="display:none;">
+          <span class="ql-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>
+          Admin dashboard
           <span class="ql-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></span>
         </a>
         <a href="{{ site.baseurl }}/" class="quick-link" id="logoutLink">
@@ -594,6 +604,43 @@ permalink: /profile/
     var fullName = (localStorage.getItem('ur-user-name') || '').trim();
     navUserName.textContent = fullName ? fullName.split(/\s+/)[0] : 'Account';
   }
+
+  var profileBadges = document.getElementById('profileBadges');
+  var CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+  var HOST_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>';
+  fetch('/api/auth/me', { headers: { Authorization: 'Bearer ' + localStorage.getItem('ur-access-token') } })
+    .then(function(res){ return res.ok ? res.json() : null; })
+    .then(function(user){
+      if(!user) return;
+      var avatarInitial = document.getElementById('avatarInitial');
+      var profileName = document.getElementById('profileName');
+      var profileEmail = document.getElementById('profileEmail');
+      var fullNameInput = document.getElementById('fullName');
+      var emailInput = document.getElementById('email');
+      if(avatarInitial) avatarInitial.textContent = (user.full_name || '?').trim().split(/\s+/).slice(0, 2).map(function(p){ return p[0] || ''; }).join('').toUpperCase() || '?';
+      if(profileName) profileName.textContent = user.full_name;
+      if(profileEmail) profileEmail.textContent = user.email;
+      if(fullNameInput) fullNameInput.value = user.full_name;
+      if(emailInput) emailInput.value = user.email;
+      var adminQuickLink = document.getElementById('adminQuickLink');
+      if(adminQuickLink && user.role === 'admin') adminQuickLink.style.display = 'flex';
+      if(profileBadges){
+        profileBadges.innerHTML = '';
+        if(user.role === 'host'){
+          var hostBadge = document.createElement('span');
+          hostBadge.className = 'profile-badge';
+          hostBadge.innerHTML = HOST_ICON + 'Host';
+          profileBadges.appendChild(hostBadge);
+        }
+        if(user.verified){
+          var verifiedBadge = document.createElement('span');
+          verifiedBadge.className = 'profile-badge';
+          verifiedBadge.innerHTML = CHECK_ICON + 'Verified';
+          profileBadges.appendChild(verifiedBadge);
+        }
+      }
+    })
+    .catch(function(err){ console.error('Could not load profile:', err); });
 
   var navMsgBadge = document.getElementById('navMsgBadge');
   if(navMsgBadge){

@@ -15,14 +15,35 @@ pip install -r requirements.txt
 cp .env.example .env   # then edit SECRET_KEY at minimum
 ```
 
+`SECRET_KEY` can be left blank for local dev — a random one is generated per
+process if unset — but set a real value in `.env` for anything you want tokens
+to survive a restart on.
+
 ## Run
 
 ```bash
+source .venv/bin/activate   # if not already active
 uvicorn app.main:app --reload --port 8000
 ```
 
 Open `http://localhost:8000/` — that's the homepage now (not `index.html`). API
-docs are at `http://localhost:8000/docs`.
+docs are at `http://localhost:8000/docs`. Stop the server with `Ctrl+C`.
+
+On first startup the app seeds demo data (starter listings, hosts, renters, and
+an admin account) into the local SQLite database. `DEMO_ADMIN_PASSWORD` and
+`DEMO_USER_PASSWORD` in `.env` are optional — leave them blank and a random
+password is generated once and printed to the terminal, e.g.:
+
+```
+[seed] No DEMO_ADMIN_PASSWORD set — generated one for admin@uzbekrentals.app: <password>
+[seed] No DEMO_USER_PASSWORD set — generated one for the starter accounts: <password>
+```
+
+Copy that password from the log to sign in as `admin@uzbekrentals.app` (admin
+dashboard) or any seeded host/renter, e.g. `host-aziza@uzbekrentals.app` /
+`renter-dilnoza@uzbekrentals.app` (see `app/seed.py` for the full list) — every
+seeded host/renter account shares the one `DEMO_USER_PASSWORD`. Set both
+variables explicitly in `.env` if you want stable credentials across restarts.
 
 ## Page routes
 

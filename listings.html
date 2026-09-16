@@ -181,6 +181,11 @@ permalink: /listings/
   }
   .select-wrap svg{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--ink-soft);pointer-events:none;}
 
+  .sort-bar{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-bottom:16px;}
+  .sort-label{font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .sort-select-wrap{width:auto;}
+  .sort-select-wrap select{width:auto;padding:9px 32px 9px 14px;font-size:13.5px;}
+
   .price-values{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-bottom:16px;color:var(--ink);}
   .range-slider{position:relative;height:18px;}
   .range-slider .track{position:absolute;top:50%;left:0;right:0;height:4px;background:var(--line-strong);border-radius:2px;transform:translateY(-50%);}
@@ -269,6 +274,7 @@ permalink: /listings/
   .card-row1 h3{font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--ink);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .card-rating{display:flex;align-items:center;gap:4px;font-size:13.5px;font-weight:600;color:var(--ink);flex-shrink:0;}
   .card-rating svg{width:12.5px;height:12.5px;color:var(--ink);}
+  .card-rating.card-rating-new{color:var(--ink-soft);}
   .card-sub{margin:3px 0 5px;font-size:13.5px;color:var(--ink-soft);}
   .verified-tag{display:inline-flex;align-items:center;gap:3px;color:var(--accent-deep);font-weight:700;margin-left:2px;}
   .verified-tag svg{width:11px;height:11px;}
@@ -454,6 +460,17 @@ permalink: /listings/
     </aside>
 
     <div>
+      <div class="sort-bar">
+        <label for="sortSelect" class="sort-label">Sort by</label>
+        <div class="select-wrap sort-select-wrap">
+          <select id="sortSelect">
+            <option value="newest">Newest</option>
+            <option value="top_rated">Top rated</option>
+          </select>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
       <div class="listing-grid reveal" id="listingGrid" aria-live="polite" aria-busy="true"></div>
 
       <div class="empty-state" id="emptyState">
@@ -573,6 +590,19 @@ permalink: /listings/
       : (listing.home_type || '');
   }
 
+  function buildRatingChip(listing){
+    const chip = document.createElement('span');
+    chip.className = 'card-rating';
+    if(listing.review_count > 0 && listing.rating_avg != null){
+      chip.innerHTML = STAR_ICON;
+      chip.appendChild(document.createTextNode(Number(listing.rating_avg).toFixed(1) + ' (' + listing.review_count + ')'));
+    } else {
+      chip.classList.add('card-rating-new');
+      chip.textContent = 'New';
+    }
+    return chip;
+  }
+
   let savedIds = new Set();
 
   async function loadSavedIds(){
@@ -598,7 +628,7 @@ permalink: /listings/
     card.dataset.type = listing.listing_type;
     card.dataset.city = listing.location;
     card.dataset.price = String(Math.round(listing.price));
-    card.dataset.verified = String(!!listing.verified);
+    card.dataset.verified = String(!!listing.host_verified);
     card.dataset.href = detailHref;
 
     const media = document.createElement('div');
@@ -634,20 +664,14 @@ permalink: /listings/
     const h3 = document.createElement('h3');
     h3.textContent = listing.title;
     row1.appendChild(h3);
-    if(listing.rating != null){
-      const rating = document.createElement('span');
-      rating.className = 'card-rating';
-      rating.innerHTML = STAR_ICON;
-      rating.appendChild(document.createTextNode(Number(listing.rating).toFixed(2)));
-      row1.appendChild(rating);
-    }
+    row1.appendChild(buildRatingChip(listing));
     info.appendChild(row1);
 
     const sub = document.createElement('p');
     sub.className = 'card-sub';
     const subtitle = subtitleFor(listing);
     sub.appendChild(document.createTextNode(listing.location + (subtitle ? ' · ' + subtitle : '')));
-    if(listing.verified){
+    if(listing.host_verified){
       sub.appendChild(document.createTextNode(' '));
       const tag = document.createElement('span');
       tag.className = 'verified-tag';
@@ -730,6 +754,21 @@ permalink: /listings/
     }
   });
 
+  let allListings = [];
+  let currentSort = 'newest';
+
+  function sortListings(listings, mode){
+    if(mode !== 'top_rated') return listings.slice();
+    const rated = [];
+    const unrated = [];
+    listings.forEach(listing => {
+      if(listing.review_count > 0 && listing.rating_avg != null) rated.push(listing);
+      else unrated.push(listing);
+    });
+    rated.sort((a, b) => (b.rating_avg - a.rating_avg) || (b.review_count - a.review_count));
+    return rated.concat(unrated);
+  }
+
   async function loadListings(){
     renderSkeleton(6);
     await loadSavedIds();
@@ -742,14 +781,51 @@ permalink: /listings/
       console.error('Could not load listings:', err);
       listings = [];
     }
-    renderListings(listings);
+    allListings = listings;
+    populateCityOptions(allListings);
+    renderListings(sortListings(allListings, currentSort));
   }
+
+  const sortSelect = document.getElementById('sortSelect');
+  sortSelect.addEventListener('change', () => {
+    currentSort = sortSelect.value;
+    renderListings(sortListings(allListings, currentSort));
+  });
 
   /* ===== FILTERS ===== */
   let cards = [];
   const typeToggle = document.getElementById('typeToggle');
   const cityFilter = document.getElementById('cityFilter');
-  const cityFilterDefaultHTML = cityFilter.innerHTML;
+  let cityFilterDefaultHTML = cityFilter.innerHTML;
+
+  function populateCityOptions(listings){
+    const previousValue = cityFilter.value;
+    const cities = Array.from(new Set(listings.map(l => (l.location || '').trim()).filter(Boolean)))
+      .sort((a, b) => a.localeCompare(b));
+
+    cityFilter.innerHTML = '<option value="all">All cities</option>';
+    cities.forEach(city => {
+      const option = document.createElement('option');
+      option.value = city;
+      option.textContent = city;
+      cityFilter.appendChild(option);
+    });
+
+    if(previousValue && previousValue !== 'all'){
+      const match = cities.find(city => city.toLowerCase() === previousValue.toLowerCase());
+      if(match){
+        cityFilter.value = match;
+      } else {
+        const extra = document.createElement('option');
+        extra.value = previousValue;
+        extra.textContent = previousValue;
+        cityFilter.insertBefore(extra, cityFilter.options[1] || null);
+        cityFilter.value = previousValue;
+      }
+    }
+
+    cityFilterDefaultHTML = cityFilter.innerHTML;
+  }
   const minPriceInput = document.getElementById('minPrice');
   const maxPriceInput = document.getElementById('maxPrice');
   const rangeFill = document.getElementById('rangeFill');

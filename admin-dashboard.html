@@ -1,0 +1,405 @@
+---
+permalink: /admin-dashboard/
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — Uzbek Rentals</title>
+<script>
+  (function(){
+    var saved = localStorage.getItem('ur-theme');
+    if(saved === 'light' || saved === 'dark'){
+      document.documentElement.setAttribute('data-theme', saved);
+    }
+  })();
+</script>
+<script>
+  (function(){
+    if(!localStorage.getItem('ur-access-token')){
+      var dest = location.pathname + location.search;
+      window.location.replace('{{ site.baseurl }}/login?redirect=' + encodeURIComponent(dest));
+      return;
+    }
+    if(localStorage.getItem('ur-user-role') !== 'admin'){
+      window.location.replace('{{ site.baseurl }}/');
+    }
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --bg-alt:#F7F7F7;
+    --bg-alt-2:#F0F0F0;
+    --panel:#FFFFFF;
+    --ink:#222222;
+    --ink-soft:#6A6A6A;
+    --ink-faint:#9A9A9A;
+    --line:#EBEBEB;
+    --line-strong:#DDDDDD;
+    --accent:#0F9D8B;
+    --accent-deep:#0B7A6C;
+    --accent-pale:#E3F5F1;
+    --warn:#B7791F;
+    --warn-pale:#FBF0DC;
+    --danger:#C0392B;
+    --danger-pale:#FBE8E5;
+    --radius-xl:20px;
+    --radius-lg:16px;
+    --radius-md:12px;
+    --radius-full:999px;
+    --shadow-card:0 6px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.06);
+    --shadow-lift:0 14px 34px -8px rgba(0,0,0,0.18);
+    --nav-bg:rgba(255,255,255,0.92);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1115; --bg-alt:#15181D; --bg-alt-2:#1B1F25; --panel:#181B20;
+      --ink:#F2F2F2; --ink-soft:#9BA1A8; --ink-faint:#6E747B;
+      --line:#262B32; --line-strong:#333941;
+      --accent:#22C3AC; --accent-deep:#1AA894; --accent-pale:rgba(34,195,172,0.14);
+      --warn:#E3B04B; --warn-pale:rgba(227,176,75,0.14);
+      --danger:#E0685B; --danger-pale:rgba(224,104,91,0.14);
+      --shadow-card:0 6px 20px rgba(0,0,0,0.5);
+      --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
+      --nav-bg:rgba(15,17,21,0.86);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1115; --bg-alt:#15181D; --bg-alt-2:#1B1F25; --panel:#181B20;
+    --ink:#F2F2F2; --ink-soft:#9BA1A8; --ink-faint:#6E747B;
+    --line:#262B32; --line-strong:#333941;
+    --accent:#22C3AC; --accent-deep:#1AA894; --accent-pale:rgba(34,195,172,0.14);
+    --warn:#E3B04B; --warn-pale:rgba(227,176,75,0.14);
+    --danger:#E0685B; --danger-pale:rgba(224,104,91,0.14);
+    --shadow-card:0 6px 20px rgba(0,0,0,0.5);
+    --shadow-lift:0 16px 40px -8px rgba(0,0,0,0.6);
+    --nav-bg:rgba(15,17,21,0.86);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    transition:background .25s ease, color .25s ease;
+  }
+  h1,h2,h3{font-family:'Plus Jakarta Sans',Inter,sans-serif;font-weight:800;margin:0;color:var(--ink);letter-spacing:-0.02em;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;}
+  img,svg{display:block;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 32px;}
+  .eyebrow-pill{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--accent-pale);color:var(--accent-deep);
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12.5px;
+    padding:8px 14px;border-radius:var(--radius-full);
+  }
+  .eyebrow-pill svg{width:14px;height:14px;}
+
+  header.navbar{
+    position:sticky;top:0;z-index:60;background:var(--nav-bg);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+  }
+  .navbar-inner{max-width:920px;margin:0 auto;padding:0 32px;position:relative;display:flex;align-items:center;justify-content:space-between;height:80px;gap:16px;}
+  .brand{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+  .brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .brand-mark svg{width:19px;height:19px;color:#fff;}
+  .brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;color:var(--ink);white-space:nowrap;}
+  .brand-name-accent{color:var(--accent);}
+  .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .host-link{font-weight:600;font-size:14.5px;padding:10px 14px;border-radius:var(--radius-full);white-space:nowrap;}
+  .host-link:hover{background:var(--bg-alt);}
+  .theme-toggle{
+    display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;
+    border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;flex-shrink:0;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .theme-toggle:hover{background:var(--bg-alt);transform:translateY(-1px);}
+  .theme-toggle svg{width:16px;height:16px;}
+  .theme-toggle .icon-moon{display:none;}
+  :root[data-theme="dark"] .theme-toggle .icon-sun{display:none;}
+  :root[data-theme="dark"] .theme-toggle .icon-moon{display:block;}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .theme-toggle .icon-sun{display:none;}
+    :root:not([data-theme="light"]) .theme-toggle .icon-moon{display:block;}
+  }
+
+  .page-head{padding:48px 0 8px;}
+  .page-head h1{font-size:clamp(26px,3.4vw,36px);margin:16px 0 10px;}
+  .page-head p{color:var(--ink-soft);font-size:15.5px;line-height:1.6;max-width:520px;}
+
+  .dashboard-page{padding:32px 0 96px;}
+  .dash-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .dash-section-head h2{font-size:20px;}
+  .dash-section-count{font-size:13.5px;font-weight:600;color:var(--ink-soft);}
+
+  .request-list{display:flex;flex-direction:column;gap:14px;}
+  .request-item{
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:18px 20px;box-shadow:var(--shadow-card);
+  }
+  .request-avatar{
+    width:44px;height:44px;border-radius:50%;background:var(--accent-pale);color:var(--accent-deep);
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;font-size:16px;flex-shrink:0;
+  }
+  .request-body{flex:1;min-width:180px;}
+  .request-body h3{font-size:15.5px;margin-bottom:2px;}
+  .request-body p{margin:0;font-size:13.5px;color:var(--ink-soft);}
+  .request-actions{display:flex;gap:10px;flex-shrink:0;}
+  .btn-approve, .btn-reject{
+    display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:var(--radius-full);
+    border:none;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13.5px;cursor:pointer;
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .btn-approve{background:var(--accent);color:#fff;}
+  .btn-approve:hover{opacity:.9;transform:translateY(-1px);}
+  .btn-reject{background:var(--danger-pale);color:var(--danger);}
+  .btn-reject:hover{opacity:.85;}
+  .btn-approve:disabled, .btn-reject:disabled{opacity:.5;cursor:default;transform:none;}
+  .request-actions svg{width:14px;height:14px;}
+
+  .empty-state{
+    display:none;flex-direction:column;align-items:center;text-align:center;
+    padding:56px 32px;border:1px dashed var(--line-strong);border-radius:var(--radius-lg);
+    background:var(--bg-alt);
+  }
+  .empty-state.is-visible{display:flex;}
+  .empty-icon{
+    width:56px;height:56px;border-radius:50%;background:var(--accent-pale);
+    display:flex;align-items:center;justify-content:center;margin-bottom:18px;flex-shrink:0;
+  }
+  .empty-icon svg{width:24px;height:24px;color:var(--accent-deep);}
+  .empty-state h3{font-size:17px;margin-bottom:6px;}
+  .empty-state p{margin:0;font-size:14px;line-height:1.6;color:var(--ink-soft);max-width:340px;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);
+    background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:var(--radius-full);
+    font-size:13.5px;font-weight:600;box-shadow:var(--shadow-lift);opacity:0;pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;z-index:200;
+  }
+  .toast.is-visible{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="navbar-inner">
+    <a href="{{ site.baseurl }}/" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2l7 7-7 7-7-7 7-7zM12 9m-2.6 0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z"/><path d="M9 13.2l3 5.2 3-5.2z" opacity="0.92"/></svg>
+      </span>
+      <span class="brand-name">Uzbek <span class="brand-name-accent">Rentals</span></span>
+    </a>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg>
+      </button>
+      <button type="button" class="host-link" id="navLogoutBtn">Log Out</button>
+    </div>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="wrap">
+    <span class="eyebrow-pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+      Admin dashboard
+    </span>
+    <h1>Host verification requests.</h1>
+    <p>Review hosts who've asked to be verified. Approving marks their account — and every listing they host — as verified.</p>
+  </div>
+</section>
+
+<section class="dashboard-page">
+  <div class="wrap">
+    <div class="dash-section-head">
+      <h2>Pending requests</h2>
+      <span class="dash-section-count" id="requestCount">0 pending</span>
+    </div>
+
+    <div class="request-list" id="requestList" aria-live="polite" aria-busy="true"></div>
+
+    <div class="empty-state" id="requestEmpty">
+      <span class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+      </span>
+      <h3>No pending requests</h3>
+      <p>When a host asks to be verified, their request will show up here for you to approve or reject.</p>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const themeToggle = document.getElementById('themeToggle');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+  function currentTheme(){
+    const explicit = document.documentElement.getAttribute('data-theme');
+    if(explicit) return explicit;
+    return prefersDark.matches ? 'dark' : 'light';
+  }
+  themeToggle.setAttribute('aria-pressed', currentTheme() === 'dark');
+  themeToggle.addEventListener('click', () => {
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ur-theme', next);
+    themeToggle.setAttribute('aria-pressed', next === 'dark');
+  });
+
+  document.getElementById('navLogoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('ur-access-token');
+    localStorage.removeItem('ur-refresh-token');
+    localStorage.removeItem('ur-user-name');
+    localStorage.removeItem('ur-user-role');
+    window.location.href = '{{ site.baseurl }}/';
+  });
+
+  function authHeaders(){
+    const token = localStorage.getItem('ur-access-token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  function handleAuthFailure(status){
+    if(status !== 401) return false;
+    localStorage.removeItem('ur-access-token');
+    localStorage.removeItem('ur-refresh-token');
+    localStorage.removeItem('ur-user-name');
+    localStorage.removeItem('ur-user-role');
+    window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+    return true;
+  }
+
+  const toastEl = document.getElementById('toast');
+  let toastTimer = null;
+  function showToast(message){
+    toastEl.textContent = message;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('is-visible'), 3200);
+  }
+
+  const requestList = document.getElementById('requestList');
+  const requestEmpty = document.getElementById('requestEmpty');
+  const requestCount = document.getElementById('requestCount');
+  const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+  const CANCEL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+  function updateRequestCount(){
+    const remaining = requestList.querySelectorAll('.request-item').length;
+    requestCount.textContent = remaining + (remaining === 1 ? ' pending' : ' pending');
+    requestEmpty.classList.toggle('is-visible', remaining === 0);
+  }
+
+  function initials(name){
+    return (name || '').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || '?';
+  }
+
+  function createRequestItem(user){
+    const item = document.createElement('article');
+    item.className = 'request-item';
+    item.dataset.userId = user.id;
+
+    const avatar = document.createElement('span');
+    avatar.className = 'request-avatar';
+    avatar.textContent = initials(user.full_name);
+    item.appendChild(avatar);
+
+    const body = document.createElement('div');
+    body.className = 'request-body';
+    const h3 = document.createElement('h3');
+    h3.textContent = user.full_name;
+    const p = document.createElement('p');
+    p.textContent = user.email;
+    body.appendChild(h3);
+    body.appendChild(p);
+    item.appendChild(body);
+
+    const actions = document.createElement('div');
+    actions.className = 'request-actions';
+
+    const approveBtn = document.createElement('button');
+    approveBtn.type = 'button';
+    approveBtn.className = 'btn-approve';
+    approveBtn.innerHTML = CHECK_ICON + 'Approve';
+
+    const rejectBtn = document.createElement('button');
+    rejectBtn.type = 'button';
+    rejectBtn.className = 'btn-reject';
+    rejectBtn.innerHTML = CANCEL_ICON + 'Reject';
+
+    async function handleDecision(action, btn){
+      approveBtn.disabled = true;
+      rejectBtn.disabled = true;
+      try {
+        const res = await fetch(`/api/admin/verification-requests/${encodeURIComponent(user.id)}/${action}`, {
+          method: 'POST',
+          headers: authHeaders(),
+        });
+        if(handleAuthFailure(res.status)) return;
+        if(!res.ok){
+          const data = await res.json().catch(() => null);
+          throw new Error((data && data.detail) || `Could not ${action} this request (${res.status})`);
+        }
+        item.style.transition = 'opacity .2s ease, transform .2s ease';
+        item.style.opacity = '0';
+        item.style.transform = 'scale(.98)';
+        setTimeout(() => {
+          item.remove();
+          updateRequestCount();
+        }, 180);
+        showToast(action === 'approve' ? `${user.full_name} is now a verified host.` : `Rejected ${user.full_name}'s request.`);
+      } catch(err){
+        showToast(err.message || `Could not ${action} this request.`);
+        approveBtn.disabled = false;
+        rejectBtn.disabled = false;
+      }
+    }
+
+    approveBtn.addEventListener('click', () => handleDecision('approve', approveBtn));
+    rejectBtn.addEventListener('click', () => handleDecision('reject', rejectBtn));
+
+    actions.appendChild(approveBtn);
+    actions.appendChild(rejectBtn);
+    item.appendChild(actions);
+
+    return item;
+  }
+
+  async function loadRequests(){
+    requestList.setAttribute('aria-busy', 'true');
+    let requests = [];
+    try {
+      const res = await fetch('/api/admin/verification-requests', { headers: authHeaders() });
+      if(handleAuthFailure(res.status)) return;
+      if(res.status === 403){
+        window.location.href = '{{ site.baseurl }}/';
+        return;
+      }
+      if(!res.ok) throw new Error('Failed to load verification requests (' + res.status + ')');
+      requests = await res.json();
+    } catch(err){
+      console.error('Could not load verification requests:', err);
+      requests = [];
+    }
+    requestList.setAttribute('aria-busy', 'false');
+    requestList.innerHTML = '';
+    requests.forEach(user => requestList.appendChild(createRequestItem(user)));
+    updateRequestCount();
+  }
+
+  loadRequests();
+</script>
+</body>
+</html>

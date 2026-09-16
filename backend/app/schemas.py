@@ -38,6 +38,13 @@ class SignupRequest(BaseModel):
     def validate_full_name(cls, value: str) -> str:
         return value.strip()
 
+    @field_validator("role")
+    @classmethod
+    def role_not_admin(cls, value: UserRole) -> UserRole:
+        if value == UserRole.admin:
+            raise ValueError("Admin accounts can't be self-assigned")
+        return value
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -51,6 +58,13 @@ class GoogleAuthRequest(BaseModel):
 class RoleUpdateRequest(BaseModel):
     role: UserRole
 
+    @field_validator("role")
+    @classmethod
+    def role_not_admin(cls, value: UserRole) -> UserRole:
+        if value == UserRole.admin:
+            raise ValueError("Admin accounts can't be self-assigned")
+        return value
+
 
 class UserOut(BaseModel):
     id: str
@@ -58,6 +72,8 @@ class UserOut(BaseModel):
     email: EmailStr
     phone: str | None
     role: UserRole
+    verified: bool
+    verification_requested: bool
 
     model_config = {"from_attributes": True}
 
@@ -150,8 +166,10 @@ class ListingOut(ListingBase):
     id: str
     host_id: str
     host_name: str = "Host"
+    host_verified: bool = False
     status: ListingStatus
-    rating: float | None
+    rating_avg: float | None
+    review_count: int
     verified: bool
     guest_favorite: bool
     created_at: datetime
@@ -285,10 +303,25 @@ class ReviewOut(BaseModel):
     id: str
     booking_id: str
     listing_id: str
+    listing_title: str = "Listing"
     author_id: str
     author_name: str
     rating: int
     comment: str | None
+    host_reply: str | None
+    flagged: bool
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ReviewReplyRequest(BaseModel):
+    reply: str = Field(min_length=1, max_length=2000)
+
+    @field_validator("reply")
+    @classmethod
+    def clean_reply(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Reply can't be empty")
+        return value

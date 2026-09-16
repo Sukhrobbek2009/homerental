@@ -150,6 +150,9 @@ def create_booking(
     return _attach_booking_extras(db, [booking])[0]
 
 
+_CANCELLABLE_STATUSES = {models.BookingStatus.pending, models.BookingStatus.confirmed}
+
+
 @router.patch("/{booking_id}/status", response_model=schemas.BookingOut)
 def update_booking_status(
     booking_id: str,
@@ -158,7 +161,33 @@ def update_booking_status(
     db: Session = Depends(get_db),
 ) -> models.Booking:
     booking = _get_accessible_booking(booking_id, current_user, db)
-    booking.status = payload.status
+    is_host = current_user.id == booking.host_id
+    target = payload.status
+
+    if target == models.BookingStatus.cancelled:
+        if booking.status not in _CANCELLABLE_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This booking can no longer be cancelled",
+            )
+    elif target == models.BookingStatus.completed:
+        if not is_host:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only the host can mark a booking as completed",
+            )
+        if booking.status != models.BookingStatus.confirmed:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only a confirmed booking can be marked as completed",
+            )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported status transition",
+        )
+
+    booking.status = target
     db.commit()
     db.refresh(booking)
     return _attach_booking_extras(db, [booking])[0]

@@ -150,3 +150,18 @@ def update_role(
     db.commit()
     db.refresh(current_user)
     return current_user
+
+
+@router.post("/me/request-verification", response_model=schemas.UserOut)
+def request_verification(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> models.User:
+    if current_user.role != models.UserRole.host:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only hosts can request verification")
+    if current_user.verified:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This account is already verified")
+    current_user.verification_requested = True
+    db.commit()
+    db.refresh(current_user)
+    return current_user

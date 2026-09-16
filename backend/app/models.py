@@ -11,6 +11,7 @@ from .database import Base
 class UserRole(str, enum.Enum):
     renter = "renter"
     host = "host"
+    admin = "admin"
 
 
 class ListingType(str, enum.Enum):
@@ -41,6 +42,8 @@ class User(Base):
     google_sub: Mapped[str | None] = mapped_column(String(255), unique=True, index=True, nullable=True)
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.renter, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    verification_requested: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
@@ -62,7 +65,6 @@ class Listing(Base):
     home_type: Mapped[str | None] = mapped_column(String(60), nullable=True)
     vehicle_type: Mapped[str | None] = mapped_column(String(60), nullable=True)
     transmission: Mapped[str | None] = mapped_column(String(30), nullable=True)
-    rating: Mapped[float | None] = mapped_column(Float, nullable=True)
     verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     guest_favorite: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     available_from: Mapped[date | None] = mapped_column(Date, nullable=True)
@@ -116,4 +118,6 @@ class Review(Base):
     author_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False, index=True)
     rating: Mapped[int] = mapped_column(Integer, nullable=False)
     comment: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    host_reply: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    flagged: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
