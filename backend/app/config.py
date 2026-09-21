@@ -1,6 +1,7 @@
 import secrets
 import warnings
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,6 +15,15 @@ class Settings(BaseSettings):
     # won't survive a restart, but nothing forgeable ships in source).
     secret_key: str = ""
     database_url: str = "sqlite:///./app.db"
+
+    @field_validator("database_url")
+    @classmethod
+    def _normalize_database_url(cls, value: str) -> str:
+        # Some Postgres providers hand out the old "postgres://" scheme, which
+        # SQLAlchemy 2.x / psycopg2 no longer accept.
+        if value.startswith("postgres://"):
+            return "postgresql://" + value[len("postgres://") :]
+        return value
 
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 30
@@ -32,6 +42,12 @@ class Settings(BaseSettings):
     # seed.py) so they're all reachable with one login during local dev/demo
     # without a fixed credential baked into source control.
     demo_user_password: str = ""
+
+    # Seeds/reseeds the demo hosts, renters, listings, reviews, and admin
+    # account on every startup. Fine (even desirable) for local dev against
+    # throwaway SQLite; set to false on a persistent deployment (e.g. Railway
+    # Postgres) so a restart doesn't wipe and regenerate real data.
+    seed_demo_data: bool = True
 
     @property
     def cors_origin_list(self) -> list[str]:

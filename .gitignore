@@ -1,0 +1,17 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# OS cruft
+.DS_Store

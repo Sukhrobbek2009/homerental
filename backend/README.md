@@ -13,6 +13,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env   # then edit SECRET_KEY at minimum
+alembic upgrade head   # create the schema (SQLite by default)
 ```
 
 `SECRET_KEY` can be left blank for local dev — a random one is generated per
@@ -28,6 +29,15 @@ uvicorn app.main:app --reload --port 8000
 
 Open `http://localhost:8000/` — that's the homepage now (not `index.html`). API
 docs are at `http://localhost:8000/docs`. Stop the server with `Ctrl+C`.
+
+Verify it's up with:
+
+```bash
+curl http://localhost:8000/health
+# {"status":"ok"}
+```
+
+(`/api/health` is the same check, kept for backwards compatibility with existing callers.)
 
 On first startup the app seeds demo data (starter listings, hosts, renters, and
 an admin account) into the local SQLite database. `DEMO_ADMIN_PASSWORD` and
@@ -166,6 +176,41 @@ renders) if there's no token in `localStorage`. Once loaded, it:
 A `401` from any listings call (expired/invalid token) clears storage and bounces
 back to `/login`, same as an expired session anywhere else on the site.
 
+## Database migrations
+
+Schema is managed entirely by Alembic now — there's no more `Base.metadata.create_all`
+and no hand-rolled column patcher. After pulling changes that touch `app/models.py`:
+
+```bash
+alembic revision --autogenerate -m "describe the change"   # review the generated file
+alembic upgrade head
+```
+
+`alembic/env.py` reads `DATABASE_URL` from the same `app.config.settings` the app
+uses, so migrations always target whatever database your `.env` (or Railway env
+vars) point at — no separate URL to keep in sync.
+
+## Deploying to Railway
+
+1. Create a new Railway project, add a **Postgres** plugin, and add this repo as a
+   service with **Root Directory** set to `backend/` (Railway auto-detects
+   `railway.json` and runs `alembic upgrade head` before starting Uvicorn).
+2. Railway injects `DATABASE_URL` for the Postgres plugin automatically (a legacy
+   `postgres://` URL is normalized to `postgresql://` in `config.py` if you ever
+   need to set one by hand).
+3. Set these environment variables on the service:
+   - `SECRET_KEY` — a real random value (see `.env.example` for how to generate one).
+   - `CORS_ORIGINS` — the exact origin(s) your frontend is served from.
+   - `SEED_DEMO_DATA=false` — **important**: with this unset/true, every restart
+     deletes and re-inserts the 12 demo listings/reviews for the 6 seed accounts,
+     which is fine on throwaway SQLite but will wipe real Postgres data on a
+     redeploy or crash-restart.
+   - `GOOGLE_CLIENT_ID` (optional) — enables Google sign-in.
+   - `DEMO_ADMIN_PASSWORD` / `DEMO_USER_PASSWORD` — only relevant if you do
+     enable seeding.
+4. `psycopg2-binary` is already in `requirements.txt`, so no extra native
+   dependencies are needed on Railway's Nixpacks builder.
+
 ## Notes / production TODOs
 
 - Set a strong random `SECRET_KEY` and never commit `.env`.
@@ -174,8 +219,3 @@ back to `/login`, same as an expired session anywhere else on the site.
   revoked individually — add a token-blacklist table if you need logout-everywhere.
 - No rate limiting is included; put one in front (e.g. via a reverse proxy) before
   going to production to slow down credential-stuffing attempts.
-- Table creation uses `Base.metadata.create_all` for simplicity. Add Alembic
-  migrations before you need to evolve the schema without dropping data.
-- If you have a pre-existing local `app.db` from before Google sign-in was added,
-  delete it (or add the `google_sub` column yourself) — `create_all` only creates
-  missing tables, it won't add columns to one that already exists.

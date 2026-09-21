@@ -1,27 +1,28 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import models
 from .config import settings
-from .database import Base, SessionLocal, engine
-from .migrations import ensure_listing_columns, ensure_review_columns, ensure_user_columns
+from .database import SessionLocal
 from .routers import admin, auth, bookings, listings, messages, pages, reviews, saved
 from .seed import seed_demo_admin, seed_starter_listings, seed_starter_reviews
 
-Base.metadata.create_all(bind=engine)
-ensure_listing_columns(engine)
-ensure_review_columns(engine)
-ensure_user_columns(engine)
 
-db = SessionLocal()
-try:
-    seed_starter_listings(db)
-    seed_starter_reviews(db)
-    seed_demo_admin(db)
-finally:
-    db.close()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if settings.seed_demo_data:
+        db = SessionLocal()
+        try:
+            seed_starter_listings(db)
+            seed_starter_reviews(db)
+            seed_demo_admin(db)
+        finally:
+            db.close()
+    yield
 
-app = FastAPI(title="Uzbek Rentals API", version="1.0.0")
+
+app = FastAPI(title="Uzbek Rentals API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,6 +43,7 @@ app.include_router(pages.router)
 
 
 @app.get("/api/health")
+@app.get("/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
