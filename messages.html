@@ -7,6 +7,8 @@ permalink: /messages/
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Messages — Uzbek Rentals</title>
+<script src="{{ site.baseurl }}/config.js"></script>
+<script src="{{ site.baseurl }}/api.js" data-site-base="{{ site.baseurl }}"></script>
 <script>
   (function(){
     var saved = localStorage.getItem('ur-theme');
@@ -458,9 +460,7 @@ permalink: /messages/
 
   function handleAuthFailure(status){
     if(status !== 401) return false;
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
+    urAuth.clearSession();
     window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
     return true;
   }
@@ -478,7 +478,7 @@ permalink: /messages/
   async function refreshUnreadBadge(){
     if(!navMsgBadge) return;
     try {
-      const res = await fetch('/api/messages/unread-count', { headers: authHeaders() });
+      const res = await apiFetch('/api/messages/unread-count', { headers: authHeaders() });
       if(!res.ok) return;
       const data = await res.json();
       renderUnreadBadge(data.count);
@@ -618,7 +618,7 @@ permalink: /messages/
     const sendBtn = e.target.querySelector('.send-btn');
     sendBtn.disabled = true;
     try {
-      const res = await fetch('/api/messages/threads/' + encodeURIComponent(detail.thread_id) + '/reply', {
+      const res = await apiFetch('/api/messages/threads/' + encodeURIComponent(detail.thread_id) + '/reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ body: bodyText }),
@@ -718,7 +718,7 @@ permalink: /messages/
     activeThreadId = threadId;
     renderThreadList();
     try {
-      const res = await fetch('/api/messages/threads/' + encodeURIComponent(threadId), { headers: authHeaders() });
+      const res = await apiFetch('/api/messages/threads/' + encodeURIComponent(threadId), { headers: authHeaders() });
       if(handleAuthFailure(res.status)) return;
       if(!res.ok) throw new Error('Failed to load conversation (' + res.status + ')');
       const detail = await res.json();
@@ -749,7 +749,7 @@ permalink: /messages/
 
   async function loadCurrentUser(){
     try {
-      const res = await fetch('/api/auth/me', { headers: authHeaders() });
+      const res = await apiFetch('/api/auth/me', { headers: authHeaders() });
       if(handleAuthFailure(res.status)) return;
       if(!res.ok) throw new Error('Failed to load current user');
       const user = await res.json();
@@ -761,7 +761,7 @@ permalink: /messages/
 
   async function loadThreads(){
     try {
-      const res = await fetch('/api/messages/threads', { headers: authHeaders() });
+      const res = await apiFetch('/api/messages/threads', { headers: authHeaders() });
       if(handleAuthFailure(res.status)) return;
       if(!res.ok) throw new Error('Failed to load conversations (' + res.status + ')');
       threads = await res.json();
@@ -807,10 +807,8 @@ permalink: /messages/
 (function(){
   function logOut(e){
     if(e) e.preventDefault();
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
-    window.location.href = '/';
+    urAuth.clearSession();
+    window.location.href = '{{ site.baseurl }}/';
   }
 
   var profileLink = document.getElementById('logoutLink');
@@ -833,8 +831,9 @@ permalink: /messages/
 
   var navUserName = document.getElementById('navUserName');
   if(navUserName){
-    var fullName = (localStorage.getItem('ur-user-name') || '').trim();
-    navUserName.textContent = fullName ? fullName.split(/\s+/)[0] : 'Account';
+    urAuth.getMe().then(function(user){
+      navUserName.textContent = urAuth.firstName(user) || 'Account';
+    });
   }
 })();
 </script>

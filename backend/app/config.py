@@ -25,7 +25,7 @@ class Settings(BaseSettings):
             return "postgresql://" + value[len("postgres://") :]
         return value
 
-    access_token_expire_minutes: int = 30
+    access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 30
 
     cors_origins: str = "http://localhost:8000,http://127.0.0.1:8000,http://localhost:4000,http://127.0.0.1:4000"
@@ -48,6 +48,23 @@ class Settings(BaseSettings):
     # throwaway SQLite; set to false on a persistent deployment (e.g. Railway
     # Postgres) so a restart doesn't wipe and regenerate real data.
     seed_demo_data: bool = True
+
+    # S3-compatible bucket for listing photos (AWS S3, Cloudflare R2, MinIO,
+    # ...). Photo uploads return 503 until endpoint, bucket, key and secret
+    # are all set. The bucket must allow public reads of uploaded objects.
+    s3_endpoint: str = ""
+    s3_bucket: str = ""
+    s3_key: str = ""
+    s3_secret: str = ""
+    # Optional. Most providers accept the default; R2 also accepts "auto".
+    s3_region: str = "us-east-1"
+    # Optional. Base URL photos are publicly served from, if it differs from
+    # "<S3_ENDPOINT>/<S3_BUCKET>" (e.g. an R2 public bucket URL or a CDN).
+    s3_public_url: str = ""
+
+    @property
+    def s3_configured(self) -> bool:
+        return all([self.s3_endpoint, self.s3_bucket, self.s3_key, self.s3_secret])
 
     @property
     def cors_origin_list(self) -> list[str]:

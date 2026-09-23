@@ -7,6 +7,8 @@ permalink: /renter-dashboard/
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Renter Dashboard — Uzbek Rentals</title>
+<script src="{{ site.baseurl }}/config.js"></script>
+<script src="{{ site.baseurl }}/api.js" data-site-base="{{ site.baseurl }}"></script>
 <script>
   (function(){
     var saved = localStorage.getItem('ur-theme');
@@ -597,9 +599,7 @@ permalink: /renter-dashboard/
 
   function handleAuthFailure(status){
     if(status !== 401) return false;
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
+    urAuth.clearSession();
     window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
     return true;
   }
@@ -726,10 +726,12 @@ permalink: /renter-dashboard/
     if(!id) return;
     favBtn.disabled = true;
     try {
-      const res = await fetch('/api/saved/' + encodeURIComponent(id), { method: 'DELETE', headers: authHeaders() });
+      const res = await apiFetch('/api/saved/' + encodeURIComponent(id), { method: 'DELETE', headers: authHeaders() });
       if(handleAuthFailure(res.status)) return;
+      if(!res.ok) throw await urUi.apiError(res, 'Could not remove this listing. Please try again.');
     } catch(err){
       console.error('Could not remove saved listing:', err);
+      urUi.toast(err.message);
       favBtn.disabled = false;
       return;
     }
@@ -744,19 +746,24 @@ permalink: /renter-dashboard/
 
   async function loadSavedListings(){
     savedGrid.setAttribute('aria-busy', 'true');
+    savedCount.textContent = 'Loading…';
     let listings = [];
+    let loadError = null;
     try {
-      const res = await fetch('/api/saved', { headers: authHeaders() });
+      const res = await apiFetch('/api/saved', { headers: authHeaders() });
       if(handleAuthFailure(res.status)) return;
-      if(!res.ok) throw new Error('Failed to load saved listings (' + res.status + ')');
+      if(!res.ok) throw await urUi.apiError(res, 'Could not load your saved listings. Please try again.');
       listings = await res.json();
     } catch(err){
       console.error('Could not load saved listings:', err);
       listings = [];
+      loadError = err;
     }
     savedGrid.setAttribute('aria-busy', 'false');
     savedGrid.innerHTML = '';
     listings.forEach((listing, i) => savedGrid.appendChild(createSavedCard(listing, i)));
+    if(loadError) urUi.showEmptyStateError(savedEmpty, "Couldn't load saved listings", loadError.message);
+    else urUi.resetEmptyState(savedEmpty);
     updateSavedCount();
   }
 
@@ -923,15 +930,18 @@ permalink: /renter-dashboard/
   async function loadBookings(){
     bookingList.setAttribute('aria-busy', 'true');
     completedList.setAttribute('aria-busy', 'true');
+    bookingCount.textContent = 'Loading…';
+    completedCount.textContent = 'Loading…';
     let bookings = [];
     let reviewedIds = new Set();
+    let loadError = null;
     try {
       const [bookingsRes, reviewsRes] = await Promise.all([
-        fetch('/api/bookings/mine', { headers: authHeaders() }),
-        fetch('/api/reviews/mine', { headers: authHeaders() }),
+        apiFetch('/api/bookings/mine', { headers: authHeaders() }),
+        apiFetch('/api/reviews/mine', { headers: authHeaders() }),
       ]);
       if(handleAuthFailure(bookingsRes.status)) return;
-      if(!bookingsRes.ok) throw new Error('Failed to load bookings (' + bookingsRes.status + ')');
+      if(!bookingsRes.ok) throw await urUi.apiError(bookingsRes, 'Could not load your bookings. Please try again.');
       bookings = await bookingsRes.json();
       if(reviewsRes.ok){
         const reviews = await reviewsRes.json();
@@ -940,7 +950,12 @@ permalink: /renter-dashboard/
     } catch(err){
       console.error('Could not load bookings:', err);
       bookings = [];
+      loadError = err;
     }
+    [bookingEmpty, completedEmpty].forEach(el => {
+      if(loadError) urUi.showEmptyStateError(el, "Couldn't load bookings", loadError.message);
+      else urUi.resetEmptyState(el);
+    });
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -1032,7 +1047,7 @@ permalink: /renter-dashboard/
     reviewModalSubmit.disabled = true;
     reviewModalError.hidden = true;
     try {
-      const res = await fetch('/api/reviews', {
+      const res = await apiFetch('/api/reviews', {
         method: 'POST',
         headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
         body: JSON.stringify({
@@ -1042,10 +1057,7 @@ permalink: /renter-dashboard/
         }),
       });
       if(handleAuthFailure(res.status)) return;
-      if(!res.ok){
-        const data = await res.json().catch(() => null);
-        throw new Error((data && data.detail) || 'Could not submit review (' + res.status + ')');
-      }
+      if(!res.ok) throw await urUi.apiError(res, 'Could not submit your review. Please try again.');
       closeReviewModal();
       await loadBookings();
     } catch(err){
@@ -1079,10 +1091,8 @@ permalink: /renter-dashboard/
 (function(){
   function logOut(e){
     if(e) e.preventDefault();
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
-    window.location.href = '/';
+    urAuth.clearSession();
+    window.location.href = '{{ site.baseurl }}/';
   }
 
   var profileLink = document.getElementById('logoutLink');
@@ -1105,8 +1115,9 @@ permalink: /renter-dashboard/
 
   var navUserName = document.getElementById('navUserName');
   if(navUserName){
-    var fullName = (localStorage.getItem('ur-user-name') || '').trim();
-    navUserName.textContent = fullName ? fullName.split(/\s+/)[0] : 'Account';
+    urAuth.getMe().then(function(user){
+      navUserName.textContent = urAuth.firstName(user) || 'Account';
+    });
   }
 
   var navMsgBadge = document.getElementById('navMsgBadge');
@@ -1122,7 +1133,7 @@ permalink: /renter-dashboard/
     var refreshUnreadBadge = function(){
       var t = localStorage.getItem('ur-access-token');
       if(!t) return;
-      fetch('/api/messages/unread-count', { headers: { Authorization: 'Bearer ' + t } })
+      apiFetch('/api/messages/unread-count', { headers: { Authorization: 'Bearer ' + t } })
         .then(function(res){ return res.ok ? res.json() : null; })
         .then(function(data){ if(data) renderUnreadBadge(data.count); })
         .catch(function(err){ console.error('Could not load unread message count:', err); });

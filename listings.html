@@ -7,6 +7,8 @@ permalink: /listings/
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Listings — Uzbek Rentals</title>
+<script src="{{ site.baseurl }}/config.js"></script>
+<script src="{{ site.baseurl }}/api.js" data-site-base="{{ site.baseurl }}"></script>
 <script>
   (function(){
     var saved = localStorage.getItem('ur-theme');
@@ -609,7 +611,7 @@ permalink: /listings/
     const token = localStorage.getItem('ur-access-token');
     if(!token) return;
     try {
-      const res = await fetch('/api/saved/ids', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await apiFetch('/api/saved/ids', { headers: { Authorization: `Bearer ${token}` } });
       if(!res.ok) return;
       savedIds = new Set(await res.json());
     } catch(err){
@@ -735,14 +737,16 @@ permalink: /listings/
       favBtn.classList.toggle('saved', willSave);
       favBtn.disabled = true;
       try {
-        await fetch('/api/saved/' + encodeURIComponent(id), {
+        const res = await apiFetch('/api/saved/' + encodeURIComponent(id), {
           method: willSave ? 'POST' : 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
+        if(!res.ok) throw await urUi.apiError(res, 'Could not update your saved listings. Please try again.');
         if(willSave) savedIds.add(id); else savedIds.delete(id);
       } catch(err){
         console.error('Could not update saved listing:', err);
         favBtn.classList.toggle('saved', !willSave);
+        urUi.toast(err.message);
       } finally {
         favBtn.disabled = false;
       }
@@ -773,16 +777,20 @@ permalink: /listings/
     renderSkeleton(6);
     await loadSavedIds();
     let listings = [];
+    let loadError = null;
     try {
-      const res = await fetch('/api/listings');
-      if(!res.ok) throw new Error('Failed to load listings (' + res.status + ')');
+      const res = await apiFetch('/api/listings');
+      if(!res.ok) throw await urUi.apiError(res, 'Could not load listings. Please try again.');
       listings = await res.json();
     } catch(err){
       console.error('Could not load listings:', err);
       listings = [];
+      loadError = err;
     }
     allListings = listings;
     populateCityOptions(allListings);
+    if(loadError) urUi.showEmptyStateError(emptyState, "Couldn't load listings", loadError.message);
+    else urUi.resetEmptyState(emptyState);
     renderListings(sortListings(allListings, currentSort));
   }
 
@@ -971,10 +979,8 @@ permalink: /listings/
 (function(){
   function logOut(e){
     if(e) e.preventDefault();
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
-    window.location.href = '/';
+    urAuth.clearSession();
+    window.location.href = '{{ site.baseurl }}/';
   }
 
   var profileLink = document.getElementById('logoutLink');
@@ -997,8 +1003,9 @@ permalink: /listings/
 
   var navUserName = document.getElementById('navUserName');
   if(navUserName){
-    var fullName = (localStorage.getItem('ur-user-name') || '').trim();
-    navUserName.textContent = fullName ? fullName.split(/\s+/)[0] : 'Account';
+    urAuth.getMe().then(function(user){
+      navUserName.textContent = urAuth.firstName(user) || 'Account';
+    });
   }
 
   var navMsgBadge = document.getElementById('navMsgBadge');
@@ -1014,7 +1021,7 @@ permalink: /listings/
     var refreshUnreadBadge = function(){
       var t = localStorage.getItem('ur-access-token');
       if(!t) return;
-      fetch('/api/messages/unread-count', { headers: { Authorization: 'Bearer ' + t } })
+      apiFetch('/api/messages/unread-count', { headers: { Authorization: 'Bearer ' + t } })
         .then(function(res){ return res.ok ? res.json() : null; })
         .then(function(data){ if(data) renderUnreadBadge(data.count); })
         .catch(function(err){ console.error('Could not load unread message count:', err); });

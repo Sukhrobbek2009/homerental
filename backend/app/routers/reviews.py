@@ -145,6 +145,8 @@ def reply_to_review(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only the listing's host can reply to this review",
         )
+    if review.host_reply is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You've already replied to this review")
 
     review.host_reply = payload.reply
     db.commit()

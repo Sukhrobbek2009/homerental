@@ -165,6 +165,7 @@ class ListingUpdate(BaseModel):
 class ListingOut(ListingBase):
     id: str
     host_id: str
+    photos: list[str] = []
     host_name: str = "Host"
     host_verified: bool = False
     status: ListingStatus
@@ -280,6 +281,7 @@ class ThreadOut(BaseModel):
     last_message: str
     last_message_at: datetime
     unread: bool
+    unread_count: int
 
 
 class ThreadDetailOut(BaseModel):

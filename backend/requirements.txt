@@ -13,5 +13,7 @@ python-jose==3.3.0
 python-dotenv==1.0.1
 google-auth==2.34.0
 requests==2.32.3
+boto3==1.43.100
+python-multipart==0.0.32
 pytest==8.3.3
 httpx==0.27.2

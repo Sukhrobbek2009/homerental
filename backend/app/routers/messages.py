@@ -28,10 +28,10 @@ def _get_thread_messages(thread_id: str, current_user: models.User, db: Session)
         .order_by(models.Message.created_at.asc())
         .all()
     )
-    if not messages or not any(
-        m.from_id == current_user.id or m.to_id == current_user.id for m in messages
-    ):
+    if not messages:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Thread not found")
+    if not any(m.from_id == current_user.id or m.to_id == current_user.id for m in messages):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have access to this conversation")
     return messages
 
 
@@ -105,6 +105,7 @@ def list_my_threads(
         last = msgs[-1]
         other_id = _other_party(last, current_user.id)
         listing = listings.get(_listing_id_from_thread(thread_id))
+        unread_count = sum(1 for m in msgs if m.to_id == current_user.id and not m.read)
         threads.append(
             schemas.ThreadOut(
                 thread_id=thread_id,
@@ -115,7 +116,8 @@ def list_my_threads(
                 other_user_name=names.get(other_id, "User"),
                 last_message=last.body,
                 last_message_at=last.created_at,
-                unread=any(m.to_id == current_user.id and not m.read for m in msgs),
+                unread=unread_count > 0,
+                unread_count=unread_count,
             )
         )
 

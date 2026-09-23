@@ -7,6 +7,8 @@ permalink: /listings/car/
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2022 Toyota Camry — Seattle, WA · Uzbek Rentals</title>
+<script src="{{ site.baseurl }}/config.js"></script>
+<script src="{{ site.baseurl }}/api.js" data-site-base="{{ site.baseurl }}"></script>
 <script>
   (function(){
     var saved = localStorage.getItem('ur-theme');
@@ -805,13 +807,15 @@ permalink: /listings/car/
     btn.classList.toggle('saved', willSave);
     btn.disabled = true;
     try {
-      await fetch('/api/saved/' + encodeURIComponent(currentListing.id), {
+      const res = await apiFetch('/api/saved/' + encodeURIComponent(currentListing.id), {
         method: willSave ? 'POST' : 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
+      if(!res.ok) throw await urUi.apiError(res, 'Could not update your saved listings. Please try again.');
     } catch(err){
       console.error('Could not update saved listing:', err);
       btn.classList.toggle('saved', !willSave);
+      urUi.toast(err.message);
     } finally {
       btn.disabled = false;
     }
@@ -822,7 +826,7 @@ permalink: /listings/car/
     const token = localStorage.getItem('ur-access-token');
     if(!btn || !token) return;
     try {
-      const res = await fetch('/api/saved/ids', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await apiFetch('/api/saved/ids', { headers: { Authorization: `Bearer ${token}` } });
       if(!res.ok) return;
       const ids = await res.json();
       btn.classList.toggle('saved', ids.includes(listingId));
@@ -977,7 +981,7 @@ permalink: /listings/car/
   async function loadBookedRanges(listingId){
     bookedRanges = [];
     try {
-      const res = await fetch('/api/listings/' + encodeURIComponent(listingId) + '/booked-ranges');
+      const res = await apiFetch('/api/listings/' + encodeURIComponent(listingId) + '/booked-ranges');
       if(res.ok){
         const ranges = await res.json();
         bookedRanges = ranges.map(r => ({ start: parseISODate(r.start_date), end: parseISODate(r.end_date) }));
@@ -1224,7 +1228,7 @@ permalink: /listings/car/
     bookNowBtn.textContent = 'Booking…';
 
     try {
-      const res = await fetch('/api/bookings', {
+      const res = await apiFetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -1234,17 +1238,14 @@ permalink: /listings/car/
           guest_count: 1,
         }),
       });
-      let data = null;
-      try { data = await res.json(); } catch(_) { /* empty body */ }
-      if(!res.ok){
-        const detail = data && data.detail;
-        throw new Error(Array.isArray(detail) ? detail.map(d => d.msg).join(' ') : (detail || 'Could not complete this booking.'));
-      }
+      if(!res.ok) throw await urUi.apiError(res, 'Could not complete this booking. Please try again.');
+      const data = await res.json();
 
       bookNowBtn.textContent = 'Booked!';
       showBookingConfirmation(data);
     } catch(err){
-      if(String(err.message || '').toLowerCase().includes('no longer available')){
+      // 409: someone else booked these dates first; refresh the calendar.
+      if(err.status === 409){
         await loadBookedRanges(currentListing.id);
         selectedStart = null;
         selectedEnd = null;
@@ -1256,20 +1257,54 @@ permalink: /listings/car/
     }
   }
 
+  // The page's markup holds placeholder content, so keep it hidden until the
+  // real listing arrives, and replace it with an error if that fails.
+  const detailHead = document.querySelector('.detail-head');
+  const detailWrap = detailHead.parentElement;
+  const detailBody = document.querySelector('.detail-body');
+
+  function setListingLoading(loading){
+    detailWrap.setAttribute('aria-busy', loading ? 'true' : 'false');
+    detailHead.style.visibility = loading ? 'hidden' : '';
+    detailBody.style.visibility = loading ? 'hidden' : '';
+  }
+
+  function showListingError(message){
+    setListingLoading(false);
+    detailBody.style.display = 'none';
+    detailHead.innerHTML = '';
+    const box = document.createElement('div');
+    const title = document.createElement('h1');
+    title.textContent = "Couldn't load this listing";
+    const text = document.createElement('p');
+    text.className = 'detail-meta';
+    text.textContent = message;
+    box.appendChild(title);
+    box.appendChild(text);
+    detailHead.appendChild(box);
+  }
+
   async function loadListing(){
     const listingId = new URLSearchParams(location.search).get('id');
-    if(!listingId) return;
+    if(!listingId){
+      showListingError('This listing could not be found.');
+      return;
+    }
+    setListingLoading(true);
     try {
-      const res = await fetch('/api/listings/' + encodeURIComponent(listingId));
-      if(!res.ok) throw new Error('Failed to load listing (' + res.status + ')');
+      const res = await apiFetch('/api/listings/' + encodeURIComponent(listingId));
+      if(res.status === 404) throw new Error('This listing could not be found. It may have been removed.');
+      if(!res.ok) throw await urUi.apiError(res, 'Could not load this listing. Please try again.');
       const listing = await res.json();
       if(listing.listing_type !== 'car'){
         location.replace('{{ site.baseurl }}/listings/property?id=' + encodeURIComponent(listing.id));
         return;
       }
       applyListing(listing);
+      setListingLoading(false);
     } catch(err){
       console.error('Could not load listing:', err);
+      showListingError(err.message);
     }
   }
 
@@ -1379,11 +1414,11 @@ permalink: /listings/car/
     btn.disabled = true;
     btn.textContent = 'Reporting…';
     try {
-      const res = await fetch('/api/reviews/' + encodeURIComponent(reviewId) + '/flag', {
+      const res = await apiFetch('/api/reviews/' + encodeURIComponent(reviewId) + '/flag', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if(!res.ok) throw new Error('Failed to report review (' + res.status + ')');
+      if(!res.ok) throw await urUi.apiError(res, 'Could not report this review. Please try again.');
       row.innerHTML = '';
       row.classList.add('is-flagged');
       row.textContent = 'Reported — pending review';
@@ -1391,7 +1426,7 @@ permalink: /listings/car/
       console.error('Could not report review:', err);
       btn.disabled = false;
       btn.textContent = 'Report review';
-      window.alert('Could not report this review. Please try again.');
+      window.alert(err.message);
     }
   }
 
@@ -1437,7 +1472,7 @@ permalink: /listings/car/
     renderReviewSkeleton(list, 3);
     let reviews = [];
     try {
-      const res = await fetch('/api/reviews/listing/' + encodeURIComponent(listingId));
+      const res = await apiFetch('/api/reviews/listing/' + encodeURIComponent(listingId));
       if(!res.ok) throw new Error('Failed to load reviews (' + res.status + ')');
       reviews = await res.json();
     } catch(err){
@@ -1573,17 +1608,12 @@ permalink: /listings/car/
     contactHostSubmit.textContent = 'Sending…';
 
     try {
-      const res = await fetch('/api/messages', {
+      const res = await apiFetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ listing_id: currentListing.id, body }),
       });
-      let data = null;
-      try { data = await res.json(); } catch(_) { /* empty body */ }
-      if(!res.ok){
-        const detail = data && data.detail;
-        throw new Error(Array.isArray(detail) ? detail.map(d => d.msg).join(' ') : (detail || 'Could not send this message.'));
-      }
+      if(!res.ok) throw await urUi.apiError(res, 'Could not send this message. Please try again.');
 
       contactHostForm.hidden = true;
       contactHostSuccess.textContent = 'Message sent to ' + (currentListing.host_name || 'the host') + '.';
@@ -1603,10 +1633,8 @@ permalink: /listings/car/
 (function(){
   function logOut(e){
     if(e) e.preventDefault();
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
-    window.location.href = '/';
+    urAuth.clearSession();
+    window.location.href = '{{ site.baseurl }}/';
   }
 
   var profileLink = document.getElementById('logoutLink');
@@ -1629,8 +1657,9 @@ permalink: /listings/car/
 
   var navUserName = document.getElementById('navUserName');
   if(navUserName){
-    var fullName = (localStorage.getItem('ur-user-name') || '').trim();
-    navUserName.textContent = fullName ? fullName.split(/\s+/)[0] : 'Account';
+    urAuth.getMe().then(function(user){
+      navUserName.textContent = urAuth.firstName(user) || 'Account';
+    });
   }
 
   var navMsgBadge = document.getElementById('navMsgBadge');
@@ -1646,7 +1675,7 @@ permalink: /listings/car/
     var refreshUnreadBadge = function(){
       var t = localStorage.getItem('ur-access-token');
       if(!t) return;
-      fetch('/api/messages/unread-count', { headers: { Authorization: 'Bearer ' + t } })
+      apiFetch('/api/messages/unread-count', { headers: { Authorization: 'Bearer ' + t } })
         .then(function(res){ return res.ok ? res.json() : null; })
         .then(function(data){ if(data) renderUnreadBadge(data.count); })
         .catch(function(err){ console.error('Could not load unread message count:', err); });

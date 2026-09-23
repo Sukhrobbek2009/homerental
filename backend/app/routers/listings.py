@@ -1,10 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import logging
+import secrets
+from typing import Literal
+
+from botocore.exceptions import BotoCoreError, ClientError
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, Response, UploadFile, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from .. import models, schemas
+from .. import models, schemas, storage
+from ..config import settings
 from ..database import get_db
-from ..deps import get_current_user
+from ..deps import get_current_user, require_role
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/listings", tags=["listings"])
 
@@ -61,14 +69,56 @@ def _attach_rating(db: Session, listing: models.Listing) -> models.Listing:
 
 
 @router.get("", response_model=list[schemas.ListingOut])
-def list_active_listings(db: Session = Depends(get_db)) -> list[models.Listing]:
-    listings = (
-        db.query(models.Listing)
-        .filter(models.Listing.status == models.ListingStatus.active)
-        .order_by(models.Listing.created_at.desc())
-        .all()
-    )
-    return _attach_ratings(db, _attach_host_names(db, listings))
+def list_active_listings(
+    response: Response,
+    type: models.ListingType | None = Query(default=None),
+    city: str | None = Query(default=None, max_length=160),
+    min_price: float | None = Query(default=None, ge=0),
+    max_price: float | None = Query(default=None, ge=0),
+    verified_only: bool = Query(default=False),
+    sort: Literal["top_rated", "price"] | None = Query(default=None),
+    page: int | None = Query(default=None, ge=1),
+    page_size: int | None = Query(default=None, ge=1, le=100),
+    db: Session = Depends(get_db),
+) -> list[models.Listing]:
+    query = db.query(models.Listing).filter(models.Listing.status == models.ListingStatus.active)
+
+    if type is not None:
+        query = query.filter(models.Listing.listing_type == type)
+    if city:
+        query = query.filter(models.Listing.location.ilike(f"%{city.strip()}%"))
+    if min_price is not None:
+        query = query.filter(models.Listing.price >= min_price)
+    if max_price is not None:
+        query = query.filter(models.Listing.price <= max_price)
+    if verified_only:
+        query = query.filter(models.Listing.verified.is_(True))
+
+    if sort == "price":
+        query = query.order_by(models.Listing.price.asc())
+    else:
+        query = query.order_by(models.Listing.created_at.desc())
+
+    listings = _attach_ratings(db, _attach_host_names(db, query.all()))
+
+    if sort == "top_rated":
+        listings.sort(
+            key=lambda listing: (
+                listing.rating_avg is None,
+                -(listing.rating_avg or 0),
+                -listing.review_count,
+            )
+        )
+
+    response.headers["X-Total-Count"] = str(len(listings))
+
+    if page is not None or page_size is not None:
+        page = page or 1
+        page_size = page_size or 20
+        start = (page - 1) * page_size
+        listings = listings[start : start + page_size]
+
+    return listings
 
 
 @router.get("/mine", response_model=list[schemas.ListingOut])
@@ -112,7 +162,7 @@ def get_listing_booked_ranges(listing_id: str, db: Session = Depends(get_db)) ->
 @router.post("", response_model=schemas.ListingOut, status_code=status.HTTP_201_CREATED)
 def create_listing(
     payload: schemas.ListingCreate,
-    current_user: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(require_role("host")),
     db: Session = Depends(get_db),
 ) -> models.Listing:
     listing = models.Listing(host_id=current_user.id, **payload.model_dump())
@@ -162,3 +212,105 @@ def delete_listing(
     db.delete(listing)
     db.commit()
     return schemas.ListingDeleteResult(deleted=True, message="Listing deleted.")
+
+
+MAX_PHOTO_BYTES = 5 * 1024 * 1024
+MAX_PHOTOS_PER_LISTING = 8
+# Headroom for the multipart boundary and part headers around the file.
+_MULTIPART_OVERHEAD_BYTES = 64 * 1024
+
+
+def _detect_image_type(data: bytes) -> tuple[str, str] | None:
+    """Return (content_type, extension) from the file's magic bytes.
+
+    The declared Content-Type and filename come from the client and can say
+    anything, so only the bytes themselves decide what's accepted.
+    """
+    if data.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg", "jpg"
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png", "png"
+    if len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "image/webp", "webp"
+    return None
+
+
+def _photo_limit_error() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail=f"This listing already has the maximum of {MAX_PHOTOS_PER_LISTING} photos.",
+    )
+
+
+@router.post("/{listing_id}/photos", response_model=schemas.ListingOut, status_code=status.HTTP_201_CREATED)
+def upload_listing_photo(
+    listing_id: str,
+    request: Request,
+    photo: UploadFile = File(...),
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> models.Listing:
+    # Reject oversized requests up front when the client declares a length,
+    # before reading anything more than we have to.
+    declared_length = request.headers.get("content-length")
+    if declared_length and declared_length.isdigit() and int(declared_length) > MAX_PHOTO_BYTES + _MULTIPART_OVERHEAD_BYTES:
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Photos must be under 5 MB.")
+
+    listing = _get_owned_listing(listing_id, current_user, db)
+    if len(listing.photos) >= MAX_PHOTOS_PER_LISTING:
+        raise _photo_limit_error()
+
+    if not settings.s3_configured:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Photo uploads aren't configured on this server yet.",
+        )
+
+    data = photo.file.read(MAX_PHOTO_BYTES + 1)
+    if len(data) > MAX_PHOTO_BYTES:
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Photos must be under 5 MB.")
+    if not data:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The uploaded photo is empty.")
+
+    detected = _detect_image_type(data)
+    if detected is None:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Photos must be JPEG, PNG or WebP images.",
+        )
+    content_type, extension = detected
+
+    # Random name; the uploaded filename is never used.
+    key = f"listings/{listing.id}/{secrets.token_hex(16)}.{extension}"
+    try:
+        url = storage.upload(key, data, content_type)
+    except (BotoCoreError, ClientError):
+        logger.exception("Uploading listing photo %s failed", key)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not store the photo. Please try again.",
+        )
+
+    # Re-read the listing under a row lock so concurrent uploads can't push it
+    # past the limit (FOR UPDATE on Postgres; SQLite serializes writes anyway).
+    listing = (
+        db.query(models.Listing)
+        .filter(models.Listing.id == listing.id)
+        .populate_existing()
+        .with_for_update()
+        .one()
+    )
+    if len(listing.photos) >= MAX_PHOTOS_PER_LISTING:
+        db.rollback()
+        try:
+            storage.delete(key)
+        except (BotoCoreError, ClientError):
+            logger.exception("Could not delete orphaned listing photo %s", key)
+        raise _photo_limit_error()
+
+    listing.photos = [*listing.photos, url]
+    if not listing.image_url:
+        listing.image_url = url
+    db.commit()
+    db.refresh(listing)
+    return _attach_rating(db, _attach_host_name(db, listing))

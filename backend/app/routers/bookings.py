@@ -57,6 +57,7 @@ def list_my_bookings(
     return _attach_booking_extras(db, bookings)
 
 
+@router.get("/host", response_model=list[schemas.BookingOut])
 @router.get("/hosting", response_model=list[schemas.BookingOut])
 def list_bookings_for_my_listings(
     current_user: models.User = Depends(get_current_user),
@@ -77,6 +78,9 @@ def create_booking(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> models.Booking:
+    if current_user.role != models.UserRole.renter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only renters can make bookings")
+
     listing = db.get(models.Listing, payload.listing_id)
     if listing is None or listing.status != models.ListingStatus.active:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found")
@@ -153,6 +157,29 @@ def create_booking(
 _CANCELLABLE_STATUSES = {models.BookingStatus.pending, models.BookingStatus.confirmed}
 
 
+def _ensure_cancellable(booking: models.Booking) -> None:
+    if booking.status not in _CANCELLABLE_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This booking can no longer be cancelled",
+        )
+
+
+@router.post("/{booking_id}/cancel", response_model=schemas.BookingOut)
+def cancel_booking(
+    booking_id: str,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> models.Booking:
+    # Only the renter or the listing's host get past _get_accessible_booking.
+    booking = _get_accessible_booking(booking_id, current_user, db)
+    _ensure_cancellable(booking)
+    booking.status = models.BookingStatus.cancelled
+    db.commit()
+    db.refresh(booking)
+    return _attach_booking_extras(db, [booking])[0]
+
+
 @router.patch("/{booking_id}/status", response_model=schemas.BookingOut)
 def update_booking_status(
     booking_id: str,
@@ -165,11 +192,7 @@ def update_booking_status(
     target = payload.status
 
     if target == models.BookingStatus.cancelled:
-        if booking.status not in _CANCELLABLE_STATUSES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="This booking can no longer be cancelled",
-            )
+        _ensure_cancellable(booking)
     elif target == models.BookingStatus.completed:
         if not is_host:
             raise HTTPException(

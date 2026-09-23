@@ -6,6 +6,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Uzbek Rentals — Homes & Cars, by the community</title>
+<script src="{{ site.baseurl }}/config.js"></script>
+<script src="{{ site.baseurl }}/api.js" data-site-base="{{ site.baseurl }}"></script>
 <script>
   (function(){
     var saved = localStorage.getItem('ur-theme');
@@ -957,10 +959,8 @@
 (function(){
   function logOut(e){
     if(e) e.preventDefault();
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
-    window.location.href = '/';
+    urAuth.clearSession();
+    window.location.href = '{{ site.baseurl }}/';
   }
 
   var profileLink = document.getElementById('logoutLink');
@@ -983,8 +983,9 @@
 
   var navUserName = document.getElementById('navUserName');
   if(navUserName){
-    var fullName = (localStorage.getItem('ur-user-name') || '').trim();
-    navUserName.textContent = fullName ? fullName.split(/\s+/)[0] : 'Account';
+    urAuth.getMe().then(function(user){
+      navUserName.textContent = urAuth.firstName(user) || 'Account';
+    });
   }
 
   var navMsgBadge = document.getElementById('navMsgBadge');
@@ -1000,7 +1001,7 @@
     var refreshUnreadBadge = function(){
       var t = localStorage.getItem('ur-access-token');
       if(!t) return;
-      fetch('/api/messages/unread-count', { headers: { Authorization: 'Bearer ' + t } })
+      apiFetch('/api/messages/unread-count', { headers: { Authorization: 'Bearer ' + t } })
         .then(function(res){ return res.ok ? res.json() : null; })
         .then(function(data){ if(data) renderUnreadBadge(data.count); })
         .catch(function(err){ console.error('Could not load unread message count:', err); });

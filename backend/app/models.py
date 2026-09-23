@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import date, datetime, timezone
 
-from sqlalchemy import Boolean, Date, DateTime, Enum, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Date, DateTime, Enum, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .database import Base
@@ -59,6 +59,9 @@ class Listing(Base):
     price: Mapped[float] = mapped_column(Float, nullable=False)
     price_unit: Mapped[str] = mapped_column(String(16), nullable=False)
     image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Public URLs of photos uploaded via POST /api/listings/{id}/photos, in
+    # upload order. Reassign (don't mutate) so SQLAlchemy sees the change.
+    photos: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]", nullable=False)
     status: Mapped[ListingStatus] = mapped_column(Enum(ListingStatus), default=ListingStatus.active, nullable=False)
     amenities: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     bedrooms: Mapped[int | None] = mapped_column(Integer, nullable=True)

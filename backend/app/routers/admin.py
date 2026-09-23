@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from .. import models, schemas
 from ..database import get_db
 from ..deps import get_current_admin
+from .bookings import _attach_booking_extras
 from .reviews import _to_review_out
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -122,3 +123,23 @@ def remove_review(
 
     db.delete(review)
     db.commit()
+
+
+@router.post("/bookings/{booking_id}/complete", response_model=schemas.BookingOut)
+def admin_complete_booking(
+    booking_id: str,
+    current_admin: models.User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+) -> models.Booking:
+    """Force a booking straight to completed, bypassing the normal host-driven
+    status flow. For test/demo setup only, so a review-eligible booking can be
+    created without acting out an entire booking lifecycle by hand.
+    """
+    booking = db.get(models.Booking, booking_id)
+    if booking is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+
+    booking.status = models.BookingStatus.completed
+    db.commit()
+    db.refresh(booking)
+    return _attach_booking_extras(db, [booking])[0]

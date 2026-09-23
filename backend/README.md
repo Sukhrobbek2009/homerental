@@ -219,3 +219,15 @@ vars) point at — no separate URL to keep in sync.
   revoked individually — add a token-blacklist table if you need logout-everywhere.
 - No rate limiting is included; put one in front (e.g. via a reverse proxy) before
   going to production to slow down credential-stuffing attempts.
+
+## Frontend API address
+
+Every page loads `config.js` and `api.js` from the repo root. `config.js` holds
+the one deploy-time setting, `apiBaseUrl`: leave it `''` when this backend
+serves the pages (local dev), or set it to the API's origin (e.g.
+`https://your-api.up.railway.app`) when the pages are hosted elsewhere, such as
+GitHub Pages. In that case, also add the pages' origin to `CORS_ORIGINS`.
+
+`api.js` exposes `apiFetch()`, which all pages use for backend calls. It adds the
+stored bearer token and, on any 401 (other than a failed login/signup), clears
+the session and redirects to `/login?redirect=<current page>`.

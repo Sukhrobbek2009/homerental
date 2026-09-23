@@ -7,6 +7,8 @@ permalink: /admin-dashboard/
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Dashboard — Uzbek Rentals</title>
+<script src="{{ site.baseurl }}/config.js"></script>
+<script src="{{ site.baseurl }}/api.js" data-site-base="{{ site.baseurl }}"></script>
 <script>
   (function(){
     var saved = localStorage.getItem('ur-theme');
@@ -22,9 +24,18 @@ permalink: /admin-dashboard/
       window.location.replace('{{ site.baseurl }}/login?redirect=' + encodeURIComponent(dest));
       return;
     }
-    if(localStorage.getItem('ur-user-role') !== 'admin'){
-      window.location.replace('{{ site.baseurl }}/');
-    }
+    // Keep the page hidden until /api/auth/me confirms an admin. A null user
+    // means the request failed (a 401 already redirected to login), so the
+    // page is shown and its own API calls report the error.
+    var root = document.documentElement;
+    root.style.visibility = 'hidden';
+    urAuth.getMe().then(function(user){
+      if(user && user.role !== 'admin'){
+        window.location.replace('{{ site.baseurl }}/');
+        return;
+      }
+      root.style.visibility = '';
+    });
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -259,10 +270,7 @@ permalink: /admin-dashboard/
   });
 
   document.getElementById('navLogoutBtn').addEventListener('click', () => {
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
-    localStorage.removeItem('ur-user-role');
+    urAuth.clearSession();
     window.location.href = '{{ site.baseurl }}/';
   });
 
@@ -273,10 +281,7 @@ permalink: /admin-dashboard/
 
   function handleAuthFailure(status){
     if(status !== 401) return false;
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
-    localStorage.removeItem('ur-user-role');
+    urAuth.clearSession();
     window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
     return true;
   }
@@ -343,7 +348,7 @@ permalink: /admin-dashboard/
       approveBtn.disabled = true;
       rejectBtn.disabled = true;
       try {
-        const res = await fetch(`/api/admin/verification-requests/${encodeURIComponent(user.id)}/${action}`, {
+        const res = await apiFetch(`/api/admin/verification-requests/${encodeURIComponent(user.id)}/${action}`, {
           method: 'POST',
           headers: authHeaders(),
         });
@@ -381,7 +386,7 @@ permalink: /admin-dashboard/
     requestList.setAttribute('aria-busy', 'true');
     let requests = [];
     try {
-      const res = await fetch('/api/admin/verification-requests', { headers: authHeaders() });
+      const res = await apiFetch('/api/admin/verification-requests', { headers: authHeaders() });
       if(handleAuthFailure(res.status)) return;
       if(res.status === 403){
         window.location.href = '{{ site.baseurl }}/';

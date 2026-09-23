@@ -40,9 +40,18 @@ def get_current_user(
     return user
 
 
-def get_current_admin(
-    current_user: models.User = Depends(get_current_user),
-) -> models.User:
-    if current_user.role != models.UserRole.admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
-    return current_user
+def require_role(role: models.UserRole | str):
+    expected_role = models.UserRole(role) if isinstance(role, str) else role
+
+    def dependency(current_user: models.User = Depends(get_current_user)) -> models.User:
+        if current_user.role != expected_role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"{expected_role.value.capitalize()} access required",
+            )
+        return current_user
+
+    return dependency
+
+
+get_current_admin = require_role(models.UserRole.admin)

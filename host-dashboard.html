@@ -7,6 +7,8 @@ permalink: /host-dashboard/
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Host Dashboard — Uzbek Rentals</title>
+<script src="{{ site.baseurl }}/config.js"></script>
+<script src="{{ site.baseurl }}/api.js" data-site-base="{{ site.baseurl }}"></script>
 <script>
   (function(){
     var saved = localStorage.getItem('ur-theme');
@@ -22,9 +24,13 @@ permalink: /host-dashboard/
       window.location.replace('{{ site.baseurl }}/login?redirect=' + encodeURIComponent(dest));
       return;
     }
-    if(localStorage.getItem('ur-user-role') !== 'host'){
-      document.documentElement.classList.add('role-renter');
-    }
+    // Hide host-only controls until /api/auth/me confirms the role.
+    var root = document.documentElement;
+    root.classList.add('role-pending');
+    urAuth.getMe().then(function(user){
+      root.classList.remove('role-pending');
+      if(!user || user.role !== 'host') root.classList.add('role-renter');
+    });
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -158,6 +164,7 @@ permalink: /host-dashboard/
   }
   .add-listing-btn:hover{background:var(--accent-deep);transform:translateY(-1px);box-shadow:var(--shadow-lift);}
   .add-listing-btn svg{width:17px;height:17px;}
+  .role-pending #openAddListing,
   .role-renter #openAddListing{display:none;}
 
   /* ===== DASHBOARD LAYOUT ===== */
@@ -623,12 +630,14 @@ permalink: /host-dashboard/
         <p class="field-hint">Separate each amenity with a comma.</p>
       </div>
       <div class="field">
-        <label for="newPhoto">Photo</label>
+        <label for="newPhoto">Photos</label>
         <div class="current-photo-preview" id="currentPhotoPreview" style="display:none;">
           <img id="currentPhotoImg" alt="Current listing photo">
-          <span>Current photo — choose a new file to replace it.</span>
+          <span id="currentPhotoText">Current cover photo — new photos are added to this listing, and the first one becomes the cover.</span>
         </div>
-        <input id="newPhoto" type="file" accept="image/*">
+        <input id="newPhoto" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+        <p class="field-hint">JPEG, PNG or WebP, under 5 MB each. Up to 8 photos per listing.</p>
+        <p class="field-error" id="newPhotoError"></p>
       </div>
       <p class="form-message form-error" id="addListingError" role="alert"></p>
       <p class="form-message form-success" id="addListingSuccess" role="status"></p>
@@ -901,15 +910,21 @@ permalink: /host-dashboard/
   async function loadMyListings(){
     const token = localStorage.getItem('ur-access-token');
     if(!token) return;
+    listingGrid.setAttribute('aria-busy', 'true');
+    listingsCount.textContent = 'Loading…';
     let listings = [];
+    let loadError = null;
     try {
-      const res = await fetch('/api/listings/mine', { headers: { Authorization: `Bearer ${token}` } });
-      if(!res.ok) throw new Error('Failed to load listings (' + res.status + ')');
+      const res = await apiFetch('/api/listings/mine', { headers: { Authorization: `Bearer ${token}` } });
+      if(!res.ok) throw await urUi.apiError(res, 'Could not load your listings. Please try again.');
       listings = await res.json();
     } catch(err){
       console.error('Could not load your listings:', err);
       listings = [];
+      loadError = err;
     }
+    if(loadError) urUi.showEmptyStateError(listingsEmpty, "Couldn't load your listings", loadError.message);
+    else urUi.resetEmptyState(listingsEmpty);
     renderMyListings(listings);
   }
 
@@ -1009,15 +1024,20 @@ permalink: /host-dashboard/
     const token = localStorage.getItem('ur-access-token');
     if(!token) return;
     hostBookingList.setAttribute('aria-busy', 'true');
+    hostBookingsCount.textContent = 'Loading…';
     let bookings = [];
+    let loadError = null;
     try {
-      const res = await fetch('/api/bookings/hosting', { headers: { Authorization: `Bearer ${token}` } });
-      if(!res.ok) throw new Error('Failed to load bookings (' + res.status + ')');
+      const res = await apiFetch('/api/bookings/hosting', { headers: { Authorization: `Bearer ${token}` } });
+      if(!res.ok) throw await urUi.apiError(res, 'Could not load bookings. Please try again.');
       bookings = await res.json();
     } catch(err){
       console.error('Could not load bookings:', err);
       bookings = [];
+      loadError = err;
     }
+    if(loadError) urUi.showEmptyStateError(hostBookingsEmpty, "Couldn't load bookings", loadError.message);
+    else urUi.resetEmptyState(hostBookingsEmpty);
     bookings.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
 
     hostBookingList.setAttribute('aria-busy', 'false');
@@ -1035,9 +1055,7 @@ permalink: /host-dashboard/
 
   function handleAuthFailure(status){
     if(status !== 401) return false;
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
+    urAuth.clearSession();
     window.location.href = '{{ site.baseurl }}/login?redirect=' + encodeURIComponent(location.pathname + location.search);
     return true;
   }
@@ -1074,16 +1092,13 @@ permalink: /host-dashboard/
       submitBtn.disabled = true;
       submitBtn.textContent = 'Posting…';
       try {
-        const res = await fetch('/api/reviews/' + encodeURIComponent(review.id) + '/reply', {
+        const res = await apiFetch('/api/reviews/' + encodeURIComponent(review.id) + '/reply', {
           method: 'POST',
           headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
           body: JSON.stringify({ reply }),
         });
         if(handleAuthFailure(res.status)) return;
-        if(!res.ok){
-          const data = await res.json().catch(() => null);
-          throw new Error((data && data.detail) || 'Could not post reply (' + res.status + ')');
-        }
+        if(!res.ok) throw await urUi.apiError(res, 'Could not post your reply. Please try again.');
         const updated = await res.json();
         replySlot.replaceWith(buildReplyDisplay(updated, item));
       } catch(err){
@@ -1164,16 +1179,21 @@ permalink: /host-dashboard/
 
   async function loadHostReviews(){
     hostReviewList.setAttribute('aria-busy', 'true');
+    hostReviewsCount.textContent = 'Loading…';
     let reviews = [];
+    let loadError = null;
     try {
-      const res = await fetch('/api/reviews/hosted', { headers: authHeaders() });
+      const res = await apiFetch('/api/reviews/hosted', { headers: authHeaders() });
       if(handleAuthFailure(res.status)) return;
-      if(!res.ok) throw new Error('Failed to load reviews (' + res.status + ')');
+      if(!res.ok) throw await urUi.apiError(res, 'Could not load reviews. Please try again.');
       reviews = await res.json();
     } catch(err){
       console.error('Could not load reviews:', err);
       reviews = [];
+      loadError = err;
     }
+    if(loadError) urUi.showEmptyStateError(hostReviewsEmpty, "Couldn't load reviews", loadError.message);
+    else urUi.resetEmptyState(hostReviewsEmpty);
     hostReviewList.setAttribute('aria-busy', 'false');
     hostReviewList.innerHTML = '';
     reviews.forEach(review => hostReviewList.appendChild(createHostReviewItem(review)));
@@ -1220,6 +1240,7 @@ permalink: /host-dashboard/
     newCity: 'newCityError',
     newDescription: 'newDescriptionError',
     newPrice: 'newPriceError',
+    newPhoto: 'newPhotoError',
   };
 
   function setFieldError(inputEl, message){
@@ -1304,48 +1325,52 @@ permalink: /host-dashboard/
     const headers = { 'Content-Type': 'application/json' };
     if(token) headers.Authorization = `Bearer ${token}`;
 
-    let res;
-    try {
-      res = await fetch(path, { method, headers, body });
-    } catch(_) {
-      throw new Error('Could not reach the server. Please try again.');
-    }
+    const res = await apiFetch(path, { method, headers, body });
+    if(!res.ok) throw await urUi.apiError(res);
 
     let data = null;
     try { data = await res.json(); } catch(_) { /* empty body */ }
-
-    if(!res.ok){
-      const detail = data && data.detail;
-      const message = Array.isArray(detail) ? detail.map(d => d.msg).join(' ') : detail;
-      throw new Error(message || 'Something went wrong. Please try again.');
-    }
     return data;
   }
 
-  function readImageAsCompressedDataUrl(file, maxDimension, quality){
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error('Could not read the selected photo.'));
-      reader.onload = () => {
-        const img = new Image();
-        img.onerror = () => reject(new Error('That file is not a valid image.'));
-        img.onload = () => {
-          let { width, height } = img;
-          if(width > maxDimension || height > maxDimension){
-            const scale = maxDimension / Math.max(width, height);
-            width = Math.round(width * scale);
-            height = Math.round(height * scale);
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    });
+  // Mirrors the server's checks in POST /api/listings/{id}/photos, so most
+  // problems are caught before anything is uploaded.
+  const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+  const MAX_PHOTOS_PER_LISTING = 8;
+
+  function photoSelectionError(files, existingCount){
+    const remaining = MAX_PHOTOS_PER_LISTING - existingCount;
+    if(files.length > remaining){
+      return remaining <= 0
+        ? 'This listing already has the maximum of ' + MAX_PHOTOS_PER_LISTING + ' photos.'
+        : 'You can add ' + remaining + ' more photo' + (remaining === 1 ? '' : 's') + ' to this listing (' + MAX_PHOTOS_PER_LISTING + ' max).';
+    }
+    for(const file of files){
+      if(!PHOTO_TYPES.includes(file.type)) return '"' + file.name + '" isn\'t a JPEG, PNG or WebP image.';
+      if(file.size >= MAX_PHOTO_BYTES) return '"' + file.name + '" is 5 MB or larger.';
+    }
+    return '';
+  }
+
+  // Uploads one photo; resolves to the updated listing.
+  async function uploadListingPhoto(listingId, file){
+    const form = new FormData();
+    form.append('photo', file);
+    // No Content-Type header: the browser sets the multipart boundary itself.
+    const res = await apiFetch('/api/listings/' + encodeURIComponent(listingId) + '/photos', { method: 'POST', body: form });
+    if(!res.ok) throw await urUi.apiError(res, 'Could not upload "' + file.name + '". Please try again.');
+    return res.json();
+  }
+
+  async function uploadListingPhotos(listingId, files, isEditing){
+    let listing = null;
+    for(let i = 0; i < files.length; i++){
+      submitBtn.textContent = 'Uploading photo ' + (i + 1) + ' of ' + files.length + '…';
+      listing = await uploadListingPhoto(listingId, files[i]);
+    }
+    submitBtn.textContent = isEditing ? 'Saving…' : 'Publishing…';
+    return listing;
   }
 
   addForm.addEventListener('submit', async (e) => {
@@ -1380,6 +1405,11 @@ permalink: /host-dashboard/
       hasFieldErrors = true;
     }
 
+    const photoFiles = Array.from(photoEl.files || []);
+    const existingListing = editingListingId ? myListingsCache.get(editingListingId) : null;
+    const photoError = photoSelectionError(photoFiles, existingListing ? (existingListing.photos || []).length : 0);
+    if(photoError){ setFieldError(photoEl, photoError); hasFieldErrors = true; }
+
     if(hasFieldErrors){
       showAddListingError('Please fix the highlighted fields.');
       return;
@@ -1395,18 +1425,8 @@ permalink: /host-dashboard/
     submitBtn.disabled = true;
     submitBtn.textContent = isEditing ? 'Saving…' : 'Publishing…';
 
+    let createdListing = null;
     try {
-      let imageUrl; // undefined = leave unchanged (only meaningful when editing)
-      const file = photoEl.files && photoEl.files[0];
-      if(file){
-        if(!file.type.startsWith('image/')){
-          throw new Error('Please choose an image file for the photo.');
-        }
-        imageUrl = await readImageAsCompressedDataUrl(file, 1400, 0.75);
-      } else if(!isEditing){
-        imageUrl = null;
-      }
-
       const payload = {
         listing_type: type,
         title,
@@ -1416,15 +1436,27 @@ permalink: /host-dashboard/
         price_unit: type === 'car' ? 'day' : 'night',
         amenities: amenities || null,
       };
-      if(imageUrl !== undefined) payload.image_url = imageUrl;
 
-      const listing = isEditing
-        ? await apiRequest('/api/listings/' + encodeURIComponent(editingListingId), {
-            method: 'PATCH',
-            token,
-            body: JSON.stringify(payload),
-          })
-        : await apiRequest('/api/listings', { token, body: JSON.stringify(payload) });
+      let listing;
+      if(isEditing){
+        // Upload first so the first new photo can become the cover in the
+        // same save (the server only sets a cover when there is none).
+        if(photoFiles.length){
+          const withPhotos = await uploadListingPhotos(editingListingId, photoFiles, true);
+          photoEl.value = '';
+          payload.image_url = withPhotos.photos[withPhotos.photos.length - photoFiles.length];
+        }
+        listing = await apiRequest('/api/listings/' + encodeURIComponent(editingListingId), {
+          method: 'PATCH',
+          token,
+          body: JSON.stringify(payload),
+        });
+      } else {
+        listing = createdListing = await apiRequest('/api/listings', { token, body: JSON.stringify(payload) });
+        if(photoFiles.length){
+          listing = await uploadListingPhotos(listing.id, photoFiles, false);
+        }
+      }
 
       if(isEditing){
         myListingsCache.set(listing.id, listing);
@@ -1444,6 +1476,20 @@ permalink: /host-dashboard/
         }, 900);
       }
     } catch(err){
+      if(createdListing){
+        // The listing exists but a photo upload failed. Switch the form to
+        // editing it, so resubmitting retries the photos instead of creating
+        // a duplicate listing.
+        editingListingId = createdListing.id;
+        myListingsCache.set(createdListing.id, createdListing);
+        addListingHeading.textContent = 'Edit listing';
+        showAddListingError('Your listing was published, but a photo couldn\'t be uploaded: ' + err.message + ' Choose the photos again and save to retry.');
+        loadMyListings();
+        photoEl.value = '';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save changes';
+        return;
+      }
       showAddListingError(err.message);
       submitBtn.disabled = false;
       submitBtn.textContent = isEditing ? 'Save changes' : 'Publish listing';
@@ -1472,15 +1518,8 @@ permalink: /host-dashboard/
   }
 
   async function loadVerificationStatus(){
-    const token = localStorage.getItem('ur-access-token');
-    if(!token) return;
-    try {
-      const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
-      if(!res.ok) throw new Error('Failed to load account status (' + res.status + ')');
-      renderVerificationStatus(await res.json());
-    } catch(err){
-      console.error('Could not load verification status:', err);
-    }
+    const user = await urAuth.getMe();
+    if(user) renderVerificationStatus(user);
   }
 
   requestVerificationBtn.addEventListener('click', async () => {
@@ -1488,14 +1527,11 @@ permalink: /host-dashboard/
     if(!token) return;
     requestVerificationBtn.disabled = true;
     try {
-      const res = await fetch('/api/auth/me/request-verification', {
+      const res = await apiFetch('/api/auth/me/request-verification', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if(!res.ok){
-        const data = await res.json().catch(() => null);
-        throw new Error((data && data.detail) || 'Could not send your request. Please try again.');
-      }
+      if(!res.ok) throw await urUi.apiError(res, 'Could not send your request. Please try again.');
       renderVerificationStatus(await res.json());
     } catch(err){
       window.alert(err.message || 'Could not send your request. Please try again.');
@@ -1513,10 +1549,8 @@ permalink: /host-dashboard/
 (function(){
   function logOut(e){
     if(e) e.preventDefault();
-    localStorage.removeItem('ur-access-token');
-    localStorage.removeItem('ur-refresh-token');
-    localStorage.removeItem('ur-user-name');
-    window.location.href = '/';
+    urAuth.clearSession();
+    window.location.href = '{{ site.baseurl }}/';
   }
 
   var navLogoutBtn = document.getElementById('navLogoutBtn');
@@ -1533,15 +1567,16 @@ permalink: /host-dashboard/
   if(navUser) navUser.style.display = 'flex';
 
   var navUserName = document.getElementById('navUserName');
-  var fullName = (localStorage.getItem('ur-user-name') || '').trim();
-  if(navUserName){
-    navUserName.textContent = fullName ? fullName.split(/\s+/)[0] : 'Account';
-  }
-
   var hostWelcomeHeading = document.getElementById('hostWelcomeHeading');
-  if(hostWelcomeHeading){
-    hostWelcomeHeading.textContent = fullName ? 'Welcome back, ' + fullName.split(/\s+/)[0] + '.' : 'Welcome back.';
-  }
+  urAuth.getMe().then(function(user){
+    var first = urAuth.firstName(user);
+    if(navUserName){
+      navUserName.textContent = first || 'Account';
+    }
+    if(hostWelcomeHeading){
+      hostWelcomeHeading.textContent = first ? 'Welcome back, ' + first + '.' : 'Welcome back.';
+    }
+  });
 })();
 </script>
 

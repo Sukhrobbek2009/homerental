@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 
 router = APIRouter(tags=["pages"])
 
@@ -91,3 +91,16 @@ def profile_page() -> HTMLResponse:
 @router.get("/admin-dashboard", include_in_schema=False)
 def admin_dashboard_page() -> HTMLResponse:
     return _page("admin-dashboard")
+
+
+# Shared frontend scripts every page loads: config.js (deploy-time API base
+# URL) and api.js (fetch wrapper that adds the auth header and handles 401s).
+SCRIPT_FILES = {"config.js", "api.js"}
+
+
+@router.get("/{name}.js", include_in_schema=False)
+def frontend_script(name: str) -> FileResponse:
+    filename = f"{name}.js"
+    if filename not in SCRIPT_FILES:
+        raise HTTPException(status_code=404)
+    return FileResponse(FRONTEND_DIR / filename, media_type="text/javascript")

@@ -7,6 +7,8 @@ permalink: /login/
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Log In or Sign Up — Uzbek Rentals</title>
+<script src="{{ site.baseurl }}/config.js"></script>
+<script src="{{ site.baseurl }}/api.js" data-site-base="{{ site.baseurl }}"></script>
 <script>
   (function(){
     var saved = localStorage.getItem('ur-theme');
@@ -582,7 +584,7 @@ permalink: /login/
 
     let res;
     try {
-      res = await fetch(path, { method, headers, body });
+      res = await apiFetch(path, { method, headers, body });
     } catch(_) {
       throw new Error('Could not reach the server. Please try again.');
     }
@@ -618,8 +620,6 @@ permalink: /login/
         });
         localStorage.setItem('ur-access-token', data.access_token);
         localStorage.setItem('ur-refresh-token', data.refresh_token);
-        localStorage.setItem('ur-user-name', data.user.full_name);
-        localStorage.setItem('ur-user-role', data.user.role);
 
         authStep.style.display = 'none';
         roleStep.style.display = 'flex';
@@ -630,8 +630,6 @@ permalink: /login/
         });
         localStorage.setItem('ur-access-token', data.access_token);
         localStorage.setItem('ur-refresh-token', data.refresh_token);
-        localStorage.setItem('ur-user-name', data.user.full_name);
-        localStorage.setItem('ur-user-role', data.user.role);
 
         window.location.href = redirectTarget || (data.user.role === 'host' ? '{{ site.baseurl }}/host-dashboard' : '{{ site.baseurl }}/renter-dashboard');
       }
@@ -660,8 +658,6 @@ permalink: /login/
       });
       localStorage.setItem('ur-access-token', data.access_token);
       localStorage.setItem('ur-refresh-token', data.refresh_token);
-      localStorage.setItem('ur-user-name', data.user.full_name);
-      localStorage.setItem('ur-user-role', data.user.role);
       window.location.href = redirectTarget || (data.user.role === 'host' ? '{{ site.baseurl }}/host-dashboard' : '{{ site.baseurl }}/renter-dashboard');
     } catch(err){
       showAuthError(err.message);
@@ -671,7 +667,7 @@ permalink: /login/
   async function initGoogleAuth(){
     let clientId = '';
     try {
-      const config = await fetch('/api/config').then(r => r.json());
+      const config = await apiFetch('/api/config').then(r => r.json());
       clientId = config.google_client_id || '';
     } catch(_) { /* config endpoint unreachable; leave Google sign-in disabled */ }
 
@@ -707,7 +703,6 @@ permalink: /login/
     if(token){
       try {
         await apiRequest('/api/auth/me/role', { method: 'PATCH', token, body: JSON.stringify({ role: 'host' }) });
-        localStorage.setItem('ur-user-role', 'host');
       } catch(_) {
         // Account was already created; let them into the host dashboard even if the role update failed.
       }
