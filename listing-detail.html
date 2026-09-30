@@ -515,19 +515,19 @@ permalink: /listings/property/
 
   <div class="gallery reveal" id="gallery">
     <div class="gallery-main" style="--a:#C9A66B;--b:#9C7B3E;">
-      <img id="galleryMainImg" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=70" alt="Exterior of the 3-bedroom house in Sacramento" loading="lazy">
+      <img id="galleryMainImg" alt="" loading="lazy">
     </div>
     <div class="gallery-thumb" style="--a:#E3C089;--b:#B98C4C;">
-      <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=60" alt="Private backyard patio" loading="lazy">
+      <img alt="" loading="lazy">
     </div>
     <div class="gallery-thumb" style="--a:#D8AE72;--b:#A97D3F;">
-      <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=60" alt="Bedroom" loading="lazy">
+      <img alt="" loading="lazy">
     </div>
     <div class="gallery-thumb" style="--a:#B98F5C;--b:#8A6535;">
-      <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=60" alt="Living room" loading="lazy">
+      <img alt="" loading="lazy">
     </div>
     <div class="gallery-thumb" style="--a:#EAC79A;--b:#C79957;">
-      <img src="https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=800&q=60" alt="Kitchen and dining area" loading="lazy">
+      <img alt="" loading="lazy">
     </div>
     <button class="show-all-photos" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
@@ -1262,16 +1262,22 @@ permalink: /listings/property/
   const detailHead = document.querySelector('.detail-head');
   const detailWrap = detailHead.parentElement;
   const detailBody = document.querySelector('.detail-body');
+  const detailGallery = document.getElementById('gallery');
+  const detailMobileBar = document.getElementById('mobileBookBar');
 
   function setListingLoading(loading){
     detailWrap.setAttribute('aria-busy', loading ? 'true' : 'false');
     detailHead.style.visibility = loading ? 'hidden' : '';
     detailBody.style.visibility = loading ? 'hidden' : '';
+    detailGallery.style.visibility = loading ? 'hidden' : '';
+    detailMobileBar.style.visibility = loading ? 'hidden' : '';
   }
 
   function showListingError(message){
     setListingLoading(false);
     detailBody.style.display = 'none';
+    detailGallery.style.display = 'none';
+    detailMobileBar.style.visibility = 'hidden';
     detailHead.innerHTML = '';
     const box = document.createElement('div');
     const title = document.createElement('h1');

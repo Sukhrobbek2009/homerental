@@ -32,6 +32,14 @@ def public_url(key: str) -> str:
     return f"{base.rstrip('/')}/{key}"
 
 
+def key_from_url(url: str) -> str | None:
+    """The object key behind a URL from public_url(), or None if it isn't ours."""
+    prefix = public_url("")
+    if not settings.s3_configured or not url.startswith(prefix):
+        return None
+    return url[len(prefix):] or None
+
+
 def upload(key: str, data: bytes, content_type: str) -> str:
     """Store `data` under `key` and return its public URL."""
     if not settings.s3_configured:

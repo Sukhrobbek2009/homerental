@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import and_, or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
@@ -7,8 +8,22 @@ from ..database import get_db
 from ..deps import get_current_user
 
 DATES_TAKEN_MESSAGE = "Those dates are no longer available for this listing. Please choose different dates."
+# Added by the c7e4a1d9b2f5 migration (Postgres only).
+OVERLAP_CONSTRAINT = "bookings_no_overlapping_dates"
+_EXCLUSION_VIOLATION = "23P01"
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
+
+
+def _is_overlap_violation(exc: IntegrityError) -> bool:
+    orig = exc.orig
+    diag = getattr(orig, "diag", None)
+    # psycopg2 calls the SQLSTATE `pgcode`; psycopg 3 calls it `sqlstate`.
+    sqlstate = getattr(orig, "pgcode", None) or getattr(orig, "sqlstate", None)
+    return (
+        sqlstate == _EXCLUSION_VIOLATION
+        and getattr(diag, "constraint_name", None) == OVERLAP_CONSTRAINT
+    )
 
 
 def _get_accessible_booking(booking_id: str, current_user: models.User, db: Session) -> models.Booking:
@@ -126,14 +141,23 @@ def create_booking(
         status=models.BookingStatus.confirmed,
     )
     db.add(booking)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        # On Postgres, the bookings_no_overlapping_dates exclusion constraint
+        # rejects a concurrent request that slipped past the check above.
+        db.rollback()
+        if _is_overlap_violation(exc):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=DATES_TAKEN_MESSAGE)
+        raise
     db.refresh(booking)
 
-    # A concurrent request may have booked the same dates in the gap between our
-    # check and our insert above. Re-check now that we're committed, and if another
-    # booking beat us to it, cancel the one we just made instead of leaving two
-    # confirmed bookings for the same dates. Priority goes to whichever booking was
-    # created first, tie-broken by id so exactly one of the two ever wins.
+    # SQLite has no exclusion constraints, so there a concurrent request may still
+    # have booked the same dates in the gap between our check and our insert above.
+    # Re-check now that we're committed, and if another booking beat us to it,
+    # cancel the one we just made instead of leaving two confirmed bookings for the
+    # same dates. Priority goes to whichever booking was created first, tie-broken
+    # by id so exactly one of the two ever wins.
     beat_us_to_it = (
         db.query(models.Booking)
         .filter(

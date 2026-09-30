@@ -86,7 +86,9 @@ def list_active_listings(
     if type is not None:
         query = query.filter(models.Listing.listing_type == type)
     if city:
-        query = query.filter(models.Listing.location.ilike(f"%{city.strip()}%"))
+        # Escape LIKE wildcards so "%" or "_" in the search match literally.
+        term = city.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        query = query.filter(models.Listing.location.ilike(f"%{term}%", escape="\\"))
     if min_price is not None:
         query = query.filter(models.Listing.price >= min_price)
     if max_price is not None:
@@ -172,6 +174,7 @@ def create_listing(
     return _attach_rating(db, _attach_host_name(db, listing))
 
 
+@router.put("/{listing_id}", response_model=schemas.ListingOut)
 @router.patch("/{listing_id}", response_model=schemas.ListingOut)
 def update_listing(
     listing_id: str,
@@ -209,8 +212,19 @@ def delete_listing(
             ),
             listing=schemas.ListingOut.model_validate(_attach_rating(db, _attach_host_name(db, listing))),
         )
+    photo_urls = list(listing.photos)
     db.delete(listing)
     db.commit()
+    # The photos are publicly readable, so don't leave them behind. Best
+    # effort: the listing is already gone, so a storage error only gets logged.
+    for url in photo_urls:
+        key = storage.key_from_url(url)
+        if key is None:
+            continue
+        try:
+            storage.delete(key)
+        except (BotoCoreError, ClientError):
+            logger.exception("Could not delete photo %s of deleted listing %s", key, listing_id)
     return schemas.ListingDeleteResult(deleted=True, message="Listing deleted.")
 
 

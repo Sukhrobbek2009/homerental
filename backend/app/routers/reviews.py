@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
@@ -121,7 +122,13 @@ def create_review(
         comment=payload.comment,
     )
     db.add(review)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Two concurrent submissions can both pass the check above; the unique
+        # index on reviews.booking_id makes sure only one of them lands.
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This booking already has a review")
     db.refresh(review)
 
     listing = db.get(models.Listing, review.listing_id)
@@ -145,16 +152,22 @@ def reply_to_review(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only the listing's host can reply to this review",
         )
-    if review.host_reply is not None:
+    # Conditional update so two concurrent replies can't both succeed.
+    updated = (
+        db.query(models.Review)
+        .filter(models.Review.id == review.id, models.Review.host_reply.is_(None))
+        .update({models.Review.host_reply: payload.reply}, synchronize_session=False)
+    )
+    if updated == 0:
+        db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You've already replied to this review")
-
-    review.host_reply = payload.reply
     db.commit()
     db.refresh(review)
     return _to_review_out(review, db.get(models.User, review.author_id), listing.title)
 
 
-@router.post("/{review_id}/flag", response_model=schemas.ReviewOut)
+@router.post("/{review_id}/report", response_model=schemas.ReviewOut)
+@router.post("/{review_id}/flag", response_model=schemas.ReviewOut, include_in_schema=False)
 def flag_review(
     review_id: str,
     current_user: models.User = Depends(get_current_user),

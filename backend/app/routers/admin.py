@@ -7,7 +7,9 @@ from ..deps import get_current_admin
 from .bookings import _attach_booking_extras
 from .reviews import _to_review_out
 
-router = APIRouter(prefix="/api/admin", tags=["admin"])
+# Router-level guard: every route here requires require_role("admin"), including
+# any added later. The per-route Depends below is kept for access to the admin user.
+router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(get_current_admin)])
 
 
 @router.get("/verification-requests", response_model=list[schemas.UserOut])
@@ -34,6 +36,7 @@ def _get_pending_host(user_id: str, db: Session) -> models.User:
     return user
 
 
+@router.post("/hosts/{user_id}/verify", response_model=schemas.UserOut)
 @router.post("/verification-requests/{user_id}/approve", response_model=schemas.UserOut)
 def approve_verification_request(
     user_id: str,
@@ -48,6 +51,7 @@ def approve_verification_request(
     return user
 
 
+@router.post("/hosts/{user_id}/reject", response_model=schemas.UserOut)
 @router.post("/verification-requests/{user_id}/reject", response_model=schemas.UserOut)
 def reject_verification_request(
     user_id: str,
@@ -61,6 +65,7 @@ def reject_verification_request(
     return user
 
 
+@router.get("/reported-reviews", response_model=list[schemas.ReviewOut])
 @router.get("/reviews/flagged", response_model=list[schemas.ReviewOut])
 def list_flagged_reviews(
     current_admin: models.User = Depends(get_current_admin),
@@ -111,6 +116,7 @@ def clear_flagged_review(
     return _to_review_out(review, author, listing.title if listing is not None else "Listing")
 
 
+@router.post("/reviews/{review_id}/remove", status_code=status.HTTP_204_NO_CONTENT)
 @router.delete("/reviews/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
 def remove_review(
     review_id: str,

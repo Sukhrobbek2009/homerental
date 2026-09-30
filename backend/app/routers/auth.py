@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..config import settings
 from ..database import get_db
 from ..deps import get_current_user
+from ..ratelimit import rate_limit
 from ..security import (
     GoogleTokenError,
     InvalidTokenError,
@@ -28,7 +30,12 @@ def _issue_tokens(user: models.User) -> schemas.TokenResponse:
     )
 
 
-@router.post("/signup", response_model=schemas.TokenResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/signup",
+    response_model=schemas.TokenResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit("signup"))],
+)
 def signup(payload: schemas.SignupRequest, db: Session = Depends(get_db)) -> schemas.TokenResponse:
     email = payload.email.lower()
 
@@ -50,13 +57,19 @@ def signup(payload: schemas.SignupRequest, db: Session = Depends(get_db)) -> sch
         role=payload.role,
     )
     db.add(user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Another signup with the same email or phone got in between the check
+        # above and this insert; the unique index caught it.
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An account with this email or phone number already exists")
     db.refresh(user)
 
     return _issue_tokens(user)
 
 
-@router.post("/login", response_model=schemas.TokenResponse)
+@router.post("/login", response_model=schemas.TokenResponse, dependencies=[Depends(rate_limit("login"))])
 def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)) -> schemas.TokenResponse:
     user = db.query(models.User).filter(models.User.email == payload.email.lower()).first()
 

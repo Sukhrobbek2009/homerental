@@ -1,5 +1,5 @@
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -8,6 +8,9 @@ from .models import BookingStatus, ListingStatus, ListingType, UserRole
 
 PHONE_RE = re.compile(r"^\+?[0-9\s\-()]{7,20}$")
 MESSAGE_BODY_MAX_LENGTH = 2000
+
+
+MAX_PASSWORD_BYTES = 72
 
 
 class SignupRequest(BaseModel):
@@ -31,6 +34,10 @@ class SignupRequest(BaseModel):
     def validate_password(cls, value: str) -> str:
         if not re.search(r"[A-Za-z]", value) or not re.search(r"[0-9]", value):
             raise ValueError("Password must contain at least one letter and one number")
+        # bcrypt only uses the first 72 bytes, so anything longer would be
+        # silently ignored. Non-ASCII characters take several bytes each.
+        if len(value.encode("utf-8")) > MAX_PASSWORD_BYTES:
+            raise ValueError(f"Password is too long (max {MAX_PASSWORD_BYTES} bytes)")
         return value
 
     @field_validator("full_name")
@@ -48,7 +55,7 @@ class SignupRequest(BaseModel):
 
 class LoginRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(max_length=1024)
 
 
 class GoogleAuthRequest(BaseModel):
@@ -132,8 +139,28 @@ class ListingBase(BaseModel):
         return value
 
 
+IMAGE_URL_MAX_LENGTH = 2048
+
+
+def _check_image_url(value: str | None) -> str | None:
+    """New cover images must be ordinary web URLs (normally our own upload).
+
+    Only applied to input: ListingOut keeps ListingBase's looser rule so
+    listings saved before this check still load.
+    """
+    if value is None or value.strip() == "":
+        return None
+    value = value.strip()
+    if not re.fullmatch(r"https?://\S+", value):
+        raise ValueError("Image URL must start with http:// or https://")
+    return value
+
+
 class ListingCreate(ListingBase):
+    image_url: str | None = Field(default=None, max_length=IMAGE_URL_MAX_LENGTH)
     status: ListingStatus = ListingStatus.active
+
+    _image_url = field_validator("image_url")(_check_image_url)
 
 
 class ListingUpdate(BaseModel):
@@ -143,9 +170,11 @@ class ListingUpdate(BaseModel):
     location: str | None = Field(default=None, min_length=2, max_length=160)
     price: float | None = Field(default=None, gt=0, le=1_000_000)
     price_unit: Literal["night", "day"] | None = None
-    image_url: str | None = Field(default=None, max_length=3_000_000)
+    image_url: str | None = Field(default=None, max_length=IMAGE_URL_MAX_LENGTH)
     amenities: str | None = Field(default=None, max_length=1000)
     status: ListingStatus | None = None
+
+    _image_url = field_validator("image_url")(_check_image_url)
     bedrooms: int | None = Field(default=None, ge=0, le=50)
     home_type: str | None = Field(default=None, max_length=60)
     vehicle_type: str | None = Field(default=None, max_length=60)
@@ -194,6 +223,15 @@ class BookingCreate(BaseModel):
     start_date: date
     end_date: date
     guest_count: int = Field(default=1, ge=1, le=50)
+
+    @field_validator("start_date")
+    @classmethod
+    def start_not_in_past(cls, value: date) -> date:
+        # A day of slack for guests whose local date is behind the server's (UTC).
+        earliest = datetime.now(timezone.utc).date() - timedelta(days=1)
+        if value < earliest:
+            raise ValueError("Start date can't be in the past")
+        return value
 
     @field_validator("end_date")
     @classmethod

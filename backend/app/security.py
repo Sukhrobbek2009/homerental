@@ -12,12 +12,22 @@ ALGORITHM = "HS256"
 _google_request = google_requests.Request()
 
 
+# bcrypt only uses the first 72 bytes. Signup rejects longer passwords;
+# truncating here too keeps accounts created before that check working, and
+# avoids the ValueError newer bcrypt versions raise instead of truncating.
+_BCRYPT_MAX_BYTES = 72
+
+
+def _bcrypt_input(password: str) -> bytes:
+    return password.encode("utf-8")[:_BCRYPT_MAX_BYTES]
+
+
 def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    return bcrypt.hashpw(_bcrypt_input(password), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+    return bcrypt.checkpw(_bcrypt_input(password), password_hash.encode("utf-8"))
 
 
 class GoogleTokenError(Exception):

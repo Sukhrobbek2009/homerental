@@ -1,8 +1,19 @@
 import os
+import shutil
+import tempfile
+import uuid
 
+# Always a fresh SQLite file in its own temp directory, set before the app is
+# imported. This is deliberately not setdefault: a DATABASE_URL left in the
+# shell (e.g. production, for a migration) must never be where the tests
+# create and drop their tables, and two runs at once must not share a file.
+_TEST_DB_DIR = tempfile.mkdtemp(prefix="homerental-tests-")
+os.environ["DATABASE_URL"] = f"sqlite:///{os.path.join(_TEST_DB_DIR, 'test.db')}"
 os.environ.setdefault("SECRET_KEY", "test-secret-key-not-for-production-use")
-os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
-os.environ.setdefault("SEED_DEMO_DATA", "false")
+os.environ["SEED_DEMO_DATA"] = "false"
+# Tests sign up many users from one client address; test_hardening.py turns
+# the limit back on where it is being tested.
+os.environ["AUTH_RATE_LIMIT_PER_MINUTE"] = "0"
 
 import pytest
 from fastapi import Depends
@@ -30,9 +41,7 @@ def _test_database():
     yield
     Base.metadata.drop_all(bind=engine)
     engine.dispose()
-    db_path = "test.db"
-    if os.path.exists(db_path):
-        os.remove(db_path)
+    shutil.rmtree(_TEST_DB_DIR, ignore_errors=True)
 
 
 @pytest.fixture()
@@ -75,3 +84,28 @@ def make_admin(client):
         return response.json()["access_token"]
 
     return _make_admin
+
+
+def _unique_email(role: str) -> str:
+    return f"{role}-{uuid.uuid4().hex[:10]}@example.com"
+
+
+@pytest.fixture()
+def renter(signup) -> dict:
+    """A fresh renter: {"token", "user", "headers"}."""
+    tokens = signup(_unique_email("renter"), role="renter", full_name="Rita Renter")
+    return {"token": tokens["access_token"], "user": tokens["user"], "headers": {"Authorization": f"Bearer {tokens['access_token']}"}}
+
+
+@pytest.fixture()
+def host(signup) -> dict:
+    """A fresh host: {"token", "user", "headers"}."""
+    tokens = signup(_unique_email("host"), role="host", full_name="Hank Host")
+    return {"token": tokens["access_token"], "user": tokens["user"], "headers": {"Authorization": f"Bearer {tokens['access_token']}"}}
+
+
+@pytest.fixture()
+def admin(make_admin) -> dict:
+    """A fresh admin: {"token", "headers"}."""
+    token = make_admin(_unique_email("admin"))
+    return {"token": token, "headers": {"Authorization": f"Bearer {token}"}}

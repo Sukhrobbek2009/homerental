@@ -1,5 +1,4 @@
-import secrets
-import warnings
+import re
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -11,8 +10,8 @@ class Settings(BaseSettings):
     # No fixed fallback on purpose: a hardcoded default would be a known
     # secret baked into source control, letting anyone who has read this repo
     # forge tokens against any deployment that forgets to set SECRET_KEY.
-    # Leave unset and one is generated per-process instead (existing tokens
-    # won't survive a restart, but nothing forgeable ships in source).
+    # Required: startup fails below if it's missing, short or a known public
+    # value.
     secret_key: str = ""
     database_url: str = "sqlite:///./app.db"
 
@@ -28,7 +27,35 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 30
 
+    # Comma-separated browser origins allowed to call the API, e.g.
+    # "https://example.github.io". "*" is refused: list every origin.
     cors_origins: str = "http://localhost:8000,http://127.0.0.1:8000,http://localhost:4000,http://127.0.0.1:4000"
+
+    @field_validator("cors_origins")
+    @classmethod
+    def _check_cors_origins(cls, value: str) -> str:
+        origins = []
+        for origin in (o.strip() for o in value.split(",")):
+            if not origin:
+                continue
+            if "*" in origin:
+                raise ValueError("CORS_ORIGINS must list exact origins; '*' wildcards are not allowed")
+            # Browsers send the origin without a trailing slash, so
+            # "https://site.com/" would silently never match.
+            origin = origin.rstrip("/")
+            if not re.fullmatch(r"https?://[^/\s]+", origin):
+                raise ValueError(f"CORS_ORIGINS entry {origin!r} must look like https://host[:port], with no path")
+            origins.append(origin)
+        return ",".join(origins)
+
+    # Login and signup attempts allowed per client IP per minute (each
+    # counted separately). 0 turns the limit off.
+    auth_rate_limit_per_minute: int = 5
+
+    # How many reverse proxies in front of the app append to X-Forwarded-For
+    # (1 on Railway). With 0, the direct connection's address is the client
+    # IP and X-Forwarded-For is ignored, since clients can set it to anything.
+    trusted_proxy_count: int = 0
 
     # Leave blank to keep "Continue with Google" disabled until you add a real OAuth client ID.
     google_client_id: str = ""
@@ -44,10 +71,10 @@ class Settings(BaseSettings):
     demo_user_password: str = ""
 
     # Seeds/reseeds the demo hosts, renters, listings, reviews, and admin
-    # account on every startup. Fine (even desirable) for local dev against
-    # throwaway SQLite; set to false on a persistent deployment (e.g. Railway
-    # Postgres) so a restart doesn't wipe and regenerate real data.
-    seed_demo_data: bool = True
+    # account on every startup, printing any generated passwords to the log.
+    # Off unless SEED_DEMO_DATA=true, so a deployment that forgets the setting
+    # doesn't get an admin account whose password is in its logs.
+    seed_demo_data: bool = False
 
     # S3-compatible bucket for listing photos (AWS S3, Cloudflare R2, MinIO,
     # ...). Photo uploads return 503 until endpoint, bucket, key and secret
@@ -71,13 +98,17 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
+# Values that have been public in this repo (the .env.example placeholder and
+# an old hardcoded default). A server using one would accept tokens anyone can
+# forge, so they're refused like a missing key.
+_PUBLIC_SECRET_KEYS = {"change-this-to-a-long-random-secret", "dev-only-secret-change-me"}
+_MIN_SECRET_KEY_LENGTH = 32
+
 settings = Settings()
 
-if not settings.secret_key:
-    settings.secret_key = secrets.token_urlsafe(64)
-    warnings.warn(
-        "SECRET_KEY is not set; generated a random one for this process. "
-        "Tokens will stop validating on restart. Set SECRET_KEY in your .env "
-        "for a stable, production-ready deployment.",
-        stacklevel=1,
+if not settings.secret_key or settings.secret_key in _PUBLIC_SECRET_KEYS or len(settings.secret_key) < _MIN_SECRET_KEY_LENGTH:
+    raise RuntimeError(
+        f"SECRET_KEY must be set to a private random value of at least {_MIN_SECRET_KEY_LENGTH} characters "
+        "(not the .env.example placeholder). Generate one with:\n"
+        '  python -c "import secrets; print(secrets.token_urlsafe(64))"'
     )

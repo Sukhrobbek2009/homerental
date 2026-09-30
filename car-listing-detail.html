@@ -515,19 +515,19 @@ permalink: /listings/car/
 
   <div class="gallery reveal" id="gallery">
     <div class="gallery-main" style="--a:#A9B4BD;--b:#6E7A85;">
-      <img id="galleryMainImg" src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=70" alt="2022 Toyota Camry parked, front three-quarter view" loading="lazy">
+      <img id="galleryMainImg" alt="" loading="lazy">
     </div>
     <div class="gallery-thumb" style="--a:#C3CBD1;--b:#8A96A0;">
-      <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&q=60" alt="Toyota Camry side exterior" loading="lazy">
+      <img alt="" loading="lazy">
     </div>
     <div class="gallery-thumb" style="--a:#B7BFC6;--b:#7C8790;">
-      <img src="https://images.unsplash.com/photo-1550355291-bbee04a92027?w=800&q=60" alt="Interior dashboard view" loading="lazy">
+      <img alt="" loading="lazy">
     </div>
     <div class="gallery-thumb" style="--a:#AEB7BF;--b:#75818B;">
-      <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&q=60" alt="Steering wheel and center console" loading="lazy">
+      <img alt="" loading="lazy">
     </div>
     <div class="gallery-thumb" style="--a:#9FA9B2;--b:#69747E;">
-      <img src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&q=60" alt="Trunk cargo space" loading="lazy">
+      <img alt="" loading="lazy">
     </div>
     <button class="show-all-photos" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
@@ -769,8 +769,8 @@ permalink: /listings/car/
 
 <div class="mobile-book-bar" id="mobileBookBar">
   <div class="price">
-    <strong>$45</strong> day
-    <small>4.95 · 86 reviews</small>
+    <strong id="mobileAmount">$45</strong> <span id="mobileUnit">day</span>
+    <small id="mobileMeta">4.95 · 86 reviews</small>
   </div>
   <button class="book-now-btn" type="button" id="mobileBookNowBtn">Book Now</button>
 </div>
@@ -1262,16 +1262,22 @@ permalink: /listings/car/
   const detailHead = document.querySelector('.detail-head');
   const detailWrap = detailHead.parentElement;
   const detailBody = document.querySelector('.detail-body');
+  const detailGallery = document.getElementById('gallery');
+  const detailMobileBar = document.getElementById('mobileBookBar');
 
   function setListingLoading(loading){
     detailWrap.setAttribute('aria-busy', loading ? 'true' : 'false');
     detailHead.style.visibility = loading ? 'hidden' : '';
     detailBody.style.visibility = loading ? 'hidden' : '';
+    detailGallery.style.visibility = loading ? 'hidden' : '';
+    detailMobileBar.style.visibility = loading ? 'hidden' : '';
   }
 
   function showListingError(message){
     setListingLoading(false);
     detailBody.style.display = 'none';
+    detailGallery.style.display = 'none';
+    detailMobileBar.style.visibility = 'hidden';
     detailHead.innerHTML = '';
     const box = document.createElement('div');
     const title = document.createElement('h1');
